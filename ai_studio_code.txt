@@ -1,0 +1,54 @@
+# 🎵 Project Context: Immersive Audio-3D Scrollytelling Experience
+
+## 1. Vision globale
+Nous construisons une application web immersive (type Awwwards / FWA / Tenbin Labs) pour démontrer des interactions sonores avancées. 
+L'expérience repose sur du **Scrollytelling avec "Pinning"** : l'utilisateur scrolle, ce qui épingle les sections textuelles à l'écran, tandis qu'une forme 3D centrale et un mixage audio dynamique évoluent en fonction de la progression du scroll (`sectionProgress`).
+
+## 2. Tech Stack
+- **Framework :** React 18 + Vite
+- **Styling :** Tailwind CSS
+- **3D :** Three.js + React Three Fiber (R3F) + @react-three/drei
+- **Animation & Scroll :** GSAP (ScrollTrigger) + Lenis (Smooth Scroll)
+- **Audio :** Howler.js (pour une synchro et des fondus parfaits)
+- **IA/Webcam (Plus tard) :** face-api.js ou MediaPipe (Détection de sourire)
+- **State Management :** Zustand (recommandé pour lier GSAP, R3F et l'Audio sans re-renders de composants React)
+
+## 3. Architecture Fondamentale (Règles strictes)
+
+### A. Le Layout (HTML vs Canvas)
+- Un `<canvas>` R3F unique en `position: fixed` avec `z-index: -1` qui occupe `100vw` et `100vh`.
+- Une surcouche HTML (`z-index: 10`) contenant l'UI fixe et les sections scrollables.
+- **IMPORTANT :** N'utilise PAS `<ScrollControls>` de Drei. Nous utilisons **GSAP ScrollTrigger** pour épingler (`pin: true`) les sections HTML et piloter la 3D.
+
+### B. Le flux de données (Data Flow)
+1. L'utilisateur scrolle via Lenis.
+2. GSAP ScrollTrigger épingle la section HTML active.
+3. Pendant l'épinglage, GSAP met à jour un Store global (Zustand) avec :
+   - `activeSection` (int: 1 à 5)
+   - `sectionProgress` (float: 0.0 à 1.0)
+4. La boucle `useFrame` de R3F lit ces valeurs depuis le Store (sans déclencher de rendu React) et anime la forme 3D via `maath/easing` (Lerp).
+5. Le composant `AudioEngine` écoute ces valeurs et ajuste les volumes de Howler.js.
+
+### C. Le Moteur Audio (Layering)
+- **Règle d'or :** L'AudioContext du navigateur nécessite une interaction. Le site DOIT commencer par un écran d'accueil avec un bouton "Lancer l'expérience".
+- Au clic, TOUTES les pistes audio démarrent en même temps, en boucle (`loop: true`).
+- Les pistes "silencieuses" ont simplement un `volume: 0`. L'interaction se fait UNIQUEMENT en modifiant les volumes (Fade in/out), jamais en faisant play/pause (pour garder la synchro rythmique parfaite).
+
+## 4. La Forme 3D (L'Acteur Principal)
+- Un seul objet 3D reste toujours visible au centre de l'écran.
+- Il s'agit d'une géométrie riche (ex: `IcosahedronGeometry` avec beaucoup de détails).
+- Son matériau (`MeshPhysicalMaterial` ou Custom Shader) et sa forme (Displacement) subissent un morphing/des altérations pilotées par le `sectionProgress` de chaque section.
+
+## 5. Roadmap des Sections (Pour contexte IA)
+- **Intro :** Écran "Start", débloque l'audio, lance le `base_drone` (vol: 0.5).
+- **Section 1 (Layering) :** Scroll (0 -> 1) divise en 4 paliers. Fade in successif de 4 pistes harmoniques. L'objet 3D change de couleur 4 fois.
+- **Section 2 (Isolation) :** Texte avec un UI Toggle. Piste 'Foule' à fond. Au clic du toggle, volume chute à 5% et l'objet 3D arrête de s'agiter pour devenir lisse.
+- **Section 3 (Crossfade) :** Scroll (0 -> 1) crossfade entre 3 environnements (Jungle -> Storm -> Sea). L'objet 3D modifie sa rugosité/transmission.
+- **Section 4 (Webcam) :** Activation caméra optionnelle. Détection de sourire. Si Smile > 0.6 = Piste Happy + Objet lumineux. Si < 0.4 = Piste Sad + Objet sombre.
+- **Section 5 (Accumulation) :** Scroll (0 -> 1). Apparition orbitale de 5 petites géométries autour de l'objet principal, déclenchant 5 nouvelles pistes rythmiques.
+
+## 6. Consignes Spécifiques pour l'Agent de Codage (Vibecoding Rules)
+1. **Performance R3F :** Ne place JAMAIS de `setState` React dans un `useFrame`. Utilise des `ref` pour muter directement les objets Three.js.
+2. **Smoothness :** Utilise systématiquement le Lerp (via `maath` ou `THREE.MathUtils.lerp`) pour adoucir les transitions de caméra, de couleur et de morphing 3D. Aucune transition abrupte n'est tolérée.
+3. **Nettoyage (Cleanup) :** Assure-toi que les ScrollTriggers de GSAP et les instances Howler sont correctement détruits (`return () => {...}`) lors du démontage des composants pour éviter les fuites de mémoire.
+4. **Développement Itératif :** Ne code pas toute la logique audio ou 3D d'un coup. Mets d'abord en place l'architecture (Lenis + GSAP Pinning + R3F fixe), valide-la, puis ajoute l'AudioEngine, puis la logique par section.
