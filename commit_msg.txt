@@ -1,0 +1,1 @@
+Fix paths for GitHub Pages

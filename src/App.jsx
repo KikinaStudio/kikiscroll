@@ -18,32 +18,37 @@ gsap.registerPlugin(ScrollTrigger);
 const sectionsData = [
     {
         id: 0,
-        title: "L'expérience sonore commence ici",
-        paragraphe: "Découvrez comment le design sonore transforme la perception de vos espaces. Scrollez pour explorer nos technologies — chaque section révèle une dimension unique de notre expertise.",
+        title: "Le son change tout",
+        paragraphe:
+            "Fermez les yeux une seconde. Ce que vous entendez autour de vous façonne ce que vous ressentez — votre humeur, votre concentration, votre envie de rester. Pourtant, le son reste le grand oublié du design d'expérience. Scrollez pour comprendre pourquoi.",
         isIntro: true,
     },
     {
         id: 1,
-        title: "L'Art de l'Isolation Directionnelle",
-        paragraphe: "Dans le chaos d'un salon professionnel, captez l'attention. Expérimentez nos dispositifs de diffusion sonore directionnelle qui créent des bulles de concentration.",
+        title: "Dans la foule, le silence peut exister",
+        paragraphe:
+            "Un salon professionnel, c'est 80 décibels en continu. Des conversations qui se noient, des visiteurs qui repartent fatigués, un message de marque qui ne passe jamais vraiment. Et si on pouvait créer, au milieu du chaos, une bulle sonore où tout devient clair ? Pas en isolant la pièce. Juste en dirigeant le son.",
         hasIsolationToggle: true,
     },
     {
         id: 2,
-        title: "Scénographie Sonore Fluide",
-        paragraphe: "Transformez radicalement la perception de vos espaces sans changer un seul mur. Nos soundscapes évoluent en douceur pour transporter votre audience d'une atmosphère à l'autre.",
+        title: "Un espace peut changer d'âme en quelques secondes",
+        paragraphe:
+            "Forêt tropicale. Tempête. Océan. Trois atmosphères radicalement différentes — sans toucher à un seul mur, sans changer l'éclairage, sans déplacer un meuble. Le son seul suffit à transformer la perception d'un lieu. Ce n'est pas de la décoration. C'est de l'architecture invisible.",
         hasEnvironmentLabels: true,
     },
     {
         id: 3,
-        title: "Musique Neuro-Adaptative",
-        paragraphe: "Le son qui réagit à l'humain. Grâce à l'analyse faciale en temps réel, notre moteur génère une musique qui s'adapte instantanément à l'état émotionnel de votre audience.",
+        title: "Et si la musique vous écoutait, vous ?",
+        paragraphe:
+            "On a toujours pensé la musique comme quelque chose qu'on reçoit. Et si elle pouvait percevoir ce que vous vivez et s'y adapter en temps réel ? Pas de façon approximative — de façon mesurable, neuroscientifique. Une musique qui change parce que vous changez. Une expérience qui ne ressemble à aucune autre, parce qu'elle est la vôtre.",
         hasWebcamButton: true,
     },
     {
         id: 4,
-        title: "Densité Interactive",
-        paragraphe: "Un paysage sonore qui s'enrichit organiquement. Plus il y a de participants qui entrent dans une zone définie, plus l'œuvre musicale gagne en épaisseur et en rythme, créant une expérience collective unique.",
+        title: "Plus vous êtes nombreux, plus la musique vit",
+        paragraphe:
+            "Une personne entre dans l'espace. Une mélodie s'éveille. Deux, trois, quatre — chaque présence ajoute une couche, un rythme, une épaisseur. L'œuvre se compose en direct, nourrie par ceux qui la vivent. Ce n'est plus de la diffusion sonore. C'est une partition collective, écrite par le public, pour le public. C'est ça, le son vivant.",
         hasDensityLabels: true,
     },
 ];
@@ -101,7 +106,7 @@ function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationAc
 
 // --- Face detection using face-api.js for real expression recognition ---
 
-const FACE_API_MODELS_URL = '/models';
+const FACE_API_MODELS_URL = import.meta.env.BASE_URL + 'models';
 let faceApiModelsLoaded = false;
 let faceApiModelsLoading = false;
 
@@ -396,7 +401,7 @@ function App() {
 
             {/* Header */}
             <header className="fixed top-8 left-8 md:top-10 md:left-10 z-50 pointer-events-auto">
-                <img src="/logo-kikina.png" alt="Kikina Lab" className="h-6 md:h-8 w-auto" />
+                <img src="logo-kikina.png" alt="Kikina Lab" className="h-6 md:h-8 w-auto" />
             </header>
 
             {/* Sections */}

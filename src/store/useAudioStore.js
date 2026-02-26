@@ -3,17 +3,17 @@ import { Howl } from 'howler';
 
 // Track list exact match with /public/MUSIC/
 const TRACKS = {
-    drone: { src: '/MUSIC/0 Drone.mp3', initialVolume: 0.5 },
-    strings: { src: '/MUSIC/1 Strings.mp3', initialVolume: 0 },
-    bass: { src: '/MUSIC/2 Bass.mp3', initialVolume: 0 },
-    drums: { src: '/MUSIC/3 Drums.mp3', initialVolume: 0 },
-    keyboard: { src: '/MUSIC/4 Keyboard.mp3', initialVolume: 0 },
-    crowd: { src: '/MUSIC/Crowd.mp3', initialVolume: 0 },
-    jungle: { src: '/MUSIC/Jungle.mp3', initialVolume: 0 },
-    sea: { src: '/MUSIC/Sea.mp3', initialVolume: 0 },
-    thunderstorm: { src: '/MUSIC/Thunderstorm.mp3', initialVolume: 0 },
-    happy: { src: '/MUSIC/HAPPY.mp3', initialVolume: 0 },
-    sad: { src: '/MUSIC/SAD.mp3', initialVolume: 0 },
+    drone: { src: 'MUSIC/0 Drone.mp3', initialVolume: 0.5 },
+    strings: { src: 'MUSIC/1 Strings.mp3', initialVolume: 0 },
+    bass: { src: 'MUSIC/2 Bass.mp3', initialVolume: 0 },
+    drums: { src: 'MUSIC/3 Drums.mp3', initialVolume: 0 },
+    keyboard: { src: 'MUSIC/4 Keyboard.mp3', initialVolume: 0 },
+    crowd: { src: 'MUSIC/Crowd.mp3', initialVolume: 0 },
+    jungle: { src: 'MUSIC/Jungle.mp3', initialVolume: 0 },
+    sea: { src: 'MUSIC/Sea.mp3', initialVolume: 0 },
+    thunderstorm: { src: 'MUSIC/Thunderstorm.mp3', initialVolume: 0 },
+    happy: { src: 'MUSIC/HAPPY.mp3', initialVolume: 0 },
+    sad: { src: 'MUSIC/SAD.mp3', initialVolume: 0 },
 };
 
 export const useAudioStore = create((set, get) => {
