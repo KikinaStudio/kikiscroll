@@ -11,5 +11,24 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <!-- Diagnostic: if root still empty after 4s, show why (only in built index; Vite keeps this) -->
+    <script>
+      (function() {
+        setTimeout(function() {
+          var root = document.getElementById('root');
+          if (!root || !root.innerHTML.trim()) {
+            var script = document.querySelector('script[type="module"][src]');
+            var msg = document.createElement('div');
+            msg.id = 'debug-white-screen';
+            msg.style.cssText = 'position:fixed;inset:0;background:#111;color:#eee;padding:2rem;font-family:monospace;font-size:12px;z-index:99999;overflow:auto;';
+            msg.innerHTML = '<p><strong>App did not load.</strong></p>' +
+              '<p>URL: ' + document.location.href + '</p>' +
+              '<p>Script src: ' + (script ? script.src : 'none') + '</p>' +
+              '<p>If script is from origin root (e.g. /assets/...) instead of /kikiscroll/assets/..., set Pages source to <strong>GitHub Actions</strong> in repo Settings → Pages.</p>';
+            document.body.appendChild(msg);
+          }
+        }, 4000);
+      })();
+    </script>
   </body>
 </html>
