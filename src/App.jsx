@@ -20,7 +20,7 @@ const sectionsData = [
         id: 0,
         title: "Le son change tout",
         paragraphe:
-            "Fermez les yeux une seconde. Ce que vous entendez autour de vous façonne ce que vous ressentez — votre humeur, votre concentration, votre envie de rester. Pourtant, le son reste le grand oublié du design d'expérience. Scrollez pour comprendre pourquoi.",
+            "Fermez les yeux une seconde. Ce que vous entendez autour de vous façonne votre humeur, votre concentration, votre envie de rester. Pourtant, le son reste le grand oublié du design d'expérience. Scrollez pour comprendre pourquoi.",
         isIntro: true,
     },
     {
@@ -34,21 +34,21 @@ const sectionsData = [
         id: 2,
         title: "Un espace peut changer d'âme en quelques secondes",
         paragraphe:
-            "Pour la première fois, la composition peut agir directement sur le cerveau sans sacrifier la qualité musicale. Là où il fallait un compositeur et un neuroscientifique, nous orchestrons aujourd'hui les leviers neurophysiologiques dans un seul geste créatif. Le son module l'amygdale, régule le système autonome, oriente l'attention. Il devient un outil d'action mesurable sur le comportement. L'utilisateur expérimentera ainsi relaxation, régulation autonome et focus cognitif, activés par l'architecture même du son.",
+            "Pour la première fois, la composition agit directement sur le cerveau sans sacrifier la qualité musicale. Le son module l'amygdale, régule le système autonome et oriente l'attention. L'utilisateur expérimente relaxation, régulation autonome et focus cognitif, activés par l'architecture même du son.",
         hasEnvironmentLabels: true,
     },
     {
         id: 3,
         title: "Et si la musique vous écoutait, vous ?",
         paragraphe:
-            "On a toujours pensé la musique comme quelque chose qu'on reçoit. Et si elle pouvait percevoir ce que vous vivez et s'y adapter en temps réel ? Pas de façon approximative — de façon mesurable, neuroscientifique. Une musique qui change parce que vous changez. Une expérience qui ne ressemble à aucune autre, parce qu'elle est la vôtre.",
+            "On a toujours pensé la musique comme quelque chose qu'on reçoit. Et si elle pouvait percevoir ce que vous vivez et s'y adapter en temps réel ? Pas de façon approximative, mais de façon mesurable et neuroscientifique. Une musique qui change parce que vous changez. Une expérience qui ne ressemble à aucune autre, parce qu'elle est la vôtre.",
         hasWebcamButton: true,
     },
     {
         id: 4,
         title: "Plus vous êtes nombreux, plus la musique vit",
         paragraphe:
-            "Une personne entre dans l'espace. Une mélodie s'éveille. Deux, trois, quatre — chaque présence ajoute une couche, un rythme, une épaisseur. L'œuvre se compose en direct, nourrie par ceux qui la vivent. Ce n'est plus de la diffusion sonore. C'est une partition collective, écrite par le public, pour le public. C'est ça, le son vivant.",
+            "Une personne entre dans l'espace. Une mélodie s'éveille. Deux, trois, quatre, chaque présence ajoute une couche, un rythme, une épaisseur. L'œuvre se compose en direct, nourrie par ceux qui la vivent. Ce n'est plus de la diffusion sonore. C'est une partition collective, écrite par le public, pour le public. C'est ça, le son vivant.",
         hasDensityLabels: true,
     },
 ];
@@ -413,7 +413,7 @@ function App() {
                 <img src="logo-kikina.png" alt="Kikina Lab" className="h-6 md:h-8 w-auto" />
             </header>
 
-            {/* Scroll encouragement — fixed bottom center */}
+            {/* Scroll encouragement - fixed bottom center */}
             {hasStarted && activeSection < sectionsData.length - 1 && (
                 <div className="fixed bottom-8 left-0 right-0 z-40 flex justify-center pointer-events-none">
                     <div className="flex items-center gap-3 text-tenbin-gray text-xs animate-pulse">
@@ -482,11 +482,11 @@ function App() {
                                 </div>
                             )}
 
-                            {/* Section 4: Density — musical layers counter */}
+                            {/* Section 4: Density - musical layers counter */}
                             {section.hasDensityLabels && activeSection === index && (
                                 <div className="mt-8 border-t border-tenbin-gray/20 pt-8">
                                     <p className="text-sm md:text-base font-semibold uppercase tracking-widest text-white transition-all duration-500">
-                                        {densityBlobCount} / 4 couches musicales
+                                        Couches : {densityBlobCount}
                                     </p>
                                 </div>
                             )}

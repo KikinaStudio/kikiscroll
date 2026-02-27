@@ -99,7 +99,7 @@ const DENSITY_SCALES = [0.7, 0.5, 0.45, 0.4];
 // --- Components ---
 
 /**
- * CameraController — smoothly transitions camera based on active section.
+ * CameraController - smoothly transitions camera based on active section.
  * Section 4 (Density): moves to a high, almost top-down orbit to see the 4 blobs in circle.
  */
 function CameraController({ activeSection, sectionProgress }) {
@@ -116,7 +116,7 @@ function CameraController({ activeSection, sectionProgress }) {
             targetPos = new THREE.Vector3(0, height, 0.01);
             targetLookAt = new THREE.Vector3(0, 0, 0);
         } else {
-            // Default camera — far enough to see the whole blob
+            // Default camera - far enough to see the whole blob
             targetPos = new THREE.Vector3(0, 0, 12);
             targetLookAt = new THREE.Vector3(0, 0, 0);
         }
@@ -134,7 +134,7 @@ function CameraController({ activeSection, sectionProgress }) {
 }
 
 /**
- * OrganicBlob — single blob instance.
+ * OrganicBlob - single blob instance.
  */
 function OrganicBlob({ scrollProgress, activeSection, sectionProgress, isIsolationActive, position: pos, scale, blobIndex = 0, isDensityClone = false }) {
     const meshRef = useRef();
@@ -319,7 +319,7 @@ export default function Scene({ scrollProgress, activeSection, sectionProgress, 
             {/* Dynamic Camera */}
             <CameraController activeSection={activeSection} sectionProgress={sectionProgress} />
 
-            {/* Monochrome lighting — soft key + rim, no coloured fills */}
+            {/* Monochrome lighting - soft key + rim, no coloured fills */}
             <ambientLight intensity={0.8} />
             <directionalLight position={[8, 12, 10]} intensity={2.5} color="#e8e8e8" />
             <directionalLight position={[-6, -8, -6]} intensity={0.6} color="#c0c0c0" />
@@ -377,10 +377,10 @@ export default function Scene({ scrollProgress, activeSection, sectionProgress, 
             {/* Space Dust */}
             <SpaceDust scrollProgress={scrollProgress} />
 
-            {/* Monochrome reflections — neutral environment */}
+            {/* Monochrome reflections - neutral environment */}
             <Environment preset="night" />
 
-            {/* Post-Processing — safe: no Noise effect, custom grain+vignette instead */}
+            {/* Post-Processing - safe: no Noise effect, custom grain+vignette instead */}
             <EffectComposer multisampling={0}>
                 <Bloom
                     luminanceThreshold={0.9}
