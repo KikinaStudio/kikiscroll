@@ -10,8 +10,8 @@ const TRACKS = {
     keyboard: { src: 'MUSIC/4 Keyboard.mp3', initialVolume: 0 },
     crowd: { src: 'MUSIC/Crowd.mp3', initialVolume: 0 },
     jungle: { src: 'MUSIC/Jungle.mp3', initialVolume: 0 },
-    sea: { src: 'MUSIC/Sea.mp3', initialVolume: 0 },
-    thunderstorm: { src: 'MUSIC/Thunderstorm.mp3', initialVolume: 0 },
+    pulsatingWave: { src: 'MUSIC/Pulsating Wave.mp3', initialVolume: 0 },
+    focusCognitif: { src: 'MUSIC/Focus Cognitif.mp3', initialVolume: 0 },
     happy: { src: 'MUSIC/HAPPY.mp3', initialVolume: 0 },
     sad: { src: 'MUSIC/SAD.mp3', initialVolume: 0 },
 };

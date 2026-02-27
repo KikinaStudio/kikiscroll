@@ -11,7 +11,7 @@ gsap.registerPlugin(ScrollTrigger);
 // SECTION ORDER:
 // 0 = Intro (drone only, near-round blob)
 // 1 = Isolation Directionnelle (crowd → toggle at ~50% progress)
-// 2 = Scénographie Sonore Fluide (jungle → thunderstorm → sea)
+// 2 = Neuro-Sonore (jungle/relaxation → pulsatingWave/régulation → focusCognitif/focus)
 // 3 = Musique Neuro-Adaptative (cut all non-drone, webcam → HAPPY/SAD)
 // 4 = Densité Interactive (1→4 blobs + stems accumulate, quasi-spherical)
 
@@ -34,7 +34,7 @@ const sectionsData = [
         id: 2,
         title: "Un espace peut changer d'âme en quelques secondes",
         paragraphe:
-            "Forêt tropicale. Tempête. Océan. Trois atmosphères radicalement différentes — sans toucher à un seul mur, sans changer l'éclairage, sans déplacer un meuble. Le son seul suffit à transformer la perception d'un lieu. Ce n'est pas de la décoration. C'est de l'architecture invisible.",
+            "Pour la première fois, la composition peut agir directement sur le cerveau sans sacrifier la qualité musicale. Là où il fallait un compositeur et un neuroscientifique, nous orchestrons aujourd'hui les leviers neurophysiologiques dans un seul geste créatif. Le son module l'amygdale, régule le système autonome, oriente l'attention. Il devient un outil d'action mesurable sur le comportement. L'utilisateur expérimentera ainsi relaxation, régulation autonome et focus cognitif, activés par l'architecture même du son.",
         hasEnvironmentLabels: true,
     },
     {
@@ -65,25 +65,25 @@ function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationAc
             // Isolation: crowd is controlled by auto-toggle logic based on progress
             prevPalierRef.current = -1;
         } else if (activeSection === 2) {
-            // Scénographie: Crossfade jungle → thunderstorm → sea
+            // Neuro-sonore: Crossfade jungle (relaxation) → pulsatingWave (régulation) → focusCognitif (focus)
             prevPalierRef.current = -1;
-            let jungleVol = 0, thunderstormVol = 0, seaVol = 0;
+            let jungleVol = 0, pulsatingVol = 0, focusVol = 0;
 
             if (sectionProgress < 0.33) {
                 jungleVol = 0.6;
             } else if (sectionProgress < 0.66) {
                 const t = (sectionProgress - 0.33) / 0.33;
                 jungleVol = 0.6 * (1 - t);
-                thunderstormVol = 0.6 * t;
+                pulsatingVol = 0.6 * t;
             } else {
                 const t = (sectionProgress - 0.66) / 0.34;
-                thunderstormVol = 0.6 * (1 - t);
-                seaVol = 0.6 * t;
+                pulsatingVol = 0.6 * (1 - t);
+                focusVol = 0.6 * t;
             }
 
             fadeTrack('jungle', jungleVol, 150);
-            fadeTrack('thunderstorm', thunderstormVol, 150);
-            fadeTrack('sea', seaVol, 150);
+            fadeTrack('pulsatingWave', pulsatingVol, 150);
+            fadeTrack('focusCognitif', focusVol, 150);
         } else if (activeSection === 3) {
             // Neuro-Adaptative: happy/sad controlled by webcam state, handled in App
             prevPalierRef.current = -1;
@@ -211,11 +211,20 @@ function App() {
         'keyboard',
         'crowd',
         'jungle',
-        'thunderstorm',
-        'sea',
+        'pulsatingWave',
+        'focusCognitif',
         'happy',
         'sad',
     ];
+
+    // Hard-reset all non-drone tracks on every section change
+    const prevSectionRef = useRef(activeSection);
+    useEffect(() => {
+        if (prevSectionRef.current !== activeSection) {
+            NON_DRONE_TRACKS.forEach(t => fadeTrack(t, 0, 300));
+            prevSectionRef.current = activeSection;
+        }
+    }, [activeSection, fadeTrack, NON_DRONE_TRACKS]);
 
     // Continuous scroll-driven audio
     useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationActive);
@@ -400,9 +409,19 @@ function App() {
             </div>
 
             {/* Header */}
-            <header className="fixed top-8 left-8 md:top-10 md:left-10 z-50 pointer-events-auto">
+            <header className="fixed top-8 left-8 md:top-10 md:left-[8vw] z-50 pointer-events-auto">
                 <img src="logo-kikina.png" alt="Kikina Lab" className="h-6 md:h-8 w-auto" />
             </header>
+
+            {/* Scroll encouragement — fixed bottom center */}
+            {hasStarted && activeSection < sectionsData.length - 1 && (
+                <div className="fixed bottom-8 left-0 right-0 z-40 flex justify-center pointer-events-none">
+                    <div className="flex items-center gap-3 text-tenbin-gray text-xs animate-pulse">
+                        <span>↓</span>
+                        <span className="uppercase tracking-widest">Continuez de scroller pour vivre l'expérience</span>
+                    </div>
+                </div>
+            )}
 
             {/* Sections */}
             <main className="relative z-10 w-full flex flex-col items-start px-8 md:px-[8vw]">
@@ -463,47 +482,36 @@ function App() {
                                 </div>
                             )}
 
-                            {/* Section 4: Density Labels */}
+                            {/* Section 4: Density — musical layers counter */}
                             {section.hasDensityLabels && activeSection === index && (
-                                <div className="flex gap-6 mt-8 border-t border-tenbin-gray/20 pt-8">
-                                    {[1, 2, 3, 4].map((n) => {
-                                        const isActive = densityBlobCount >= n;
-                                        return (
-                                            <div key={n} className={`flex items-center gap-2 text-xs md:text-sm font-semibold uppercase tracking-widest transition-all duration-500 ${isActive ? 'text-white opacity-100' : 'text-tenbin-gray opacity-30'}`}>
-                                                <span className={`w-2 h-2 rounded-full transition-all duration-500 ${isActive ? 'bg-white scale-125' : 'bg-tenbin-gray/50 scale-100'}`} />
-                                                Participant {n}
-                                            </div>
-                                        );
-                                    })}
+                                <div className="mt-8 border-t border-tenbin-gray/20 pt-8">
+                                    <p className="text-sm md:text-base font-semibold uppercase tracking-widest text-white transition-all duration-500">
+                                        {densityBlobCount} / 4 couches musicales
+                                    </p>
                                 </div>
                             )}
 
-                            {/* Section 2: Environment Icons */}
+                            {/* Section 2: Neuro-sonore Icons */}
                             {section.hasEnvironmentLabels && activeSection === index && (
                                 <div className="flex gap-10 mt-8 border-t border-tenbin-gray/20 pt-8">
                                     {[
-                                        { key: 'bird', label: 'Jungle', icon: (
+                                        { key: 'relaxation', label: 'Relaxation', icon: (
                                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M16 7h.01"/>
-                                                <path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/>
-                                                <path d="m20 7 2 .5-2 .5"/>
-                                                <path d="M10 18v3"/>
-                                                <path d="M14 17.75V21"/>
-                                                <path d="M7 18a6 6 0 0 0 3.84-10.61"/>
+                                                <path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 17 3.5s1.5 2 2.1 7.7A7 7 0 0 1 11 20z"/>
+                                                <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 12 13"/>
                                             </svg>
                                         )},
-                                        { key: 'wind', label: 'Tempête', icon: (
+                                        { key: 'regulation', label: 'Régulation émotionnelle', icon: (
                                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/>
-                                                <path d="M9.6 4.6A2 2 0 1 1 11 8H2"/>
-                                                <path d="M12.6 19.4A2 2 0 1 0 14 16H2"/>
+                                                <path d="M19.5 12.572l-7.5 7.428l-7.5-7.428A5 5 0 1 1 12 6.006a5 5 0 1 1 7.5 6.572"/>
+                                                <path d="M12 6v15"/>
                                             </svg>
                                         )},
-                                        { key: 'waves', label: 'Océan', icon: (
+                                        { key: 'focus', label: 'Focus cognitif', icon: (
                                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
-                                                <path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
-                                                <path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+                                                <circle cx="12" cy="12" r="10"/>
+                                                <circle cx="12" cy="12" r="6"/>
+                                                <circle cx="12" cy="12" r="2"/>
                                             </svg>
                                         )},
                                     ].map((env, i) => {
