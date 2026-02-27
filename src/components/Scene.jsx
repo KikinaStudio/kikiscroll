@@ -86,21 +86,22 @@ const SEC2_ENVS = [
     { roughness: 0.1, transmission: 0.6, color: new THREE.Color('#0a2a3a') },
 ];
 
-// Density blob positions: 4 blobs on a circle (top-down view)
+// Density blob positions: 5 blobs on a circle (top-down, pentagonal layout)
 const DENSITY_POSITIONS = [
-    [3, 0, 0],    // East
-    [0, 0, 3],    // South
-    [-3, 0, 0],   // West
-    [0, 0, -3],   // North
+    [3, 0, 0],                                          // 0° (East)
+    [3 * Math.cos(2 * Math.PI / 5), 0, 3 * Math.sin(2 * Math.PI / 5)],   // 72°
+    [3 * Math.cos(4 * Math.PI / 5), 0, 3 * Math.sin(4 * Math.PI / 5)],   // 144°
+    [3 * Math.cos(6 * Math.PI / 5), 0, 3 * Math.sin(6 * Math.PI / 5)],   // 216°
+    [3 * Math.cos(8 * Math.PI / 5), 0, 3 * Math.sin(8 * Math.PI / 5)],   // 288°
 ];
 
-const DENSITY_SCALES = [0.7, 0.5, 0.45, 0.4];
+const DENSITY_SCALES = [0.65, 0.5, 0.45, 0.4, 0.38];
 
 // --- Components ---
 
 /**
  * CameraController - smoothly transitions camera based on active section.
- * Section 4 (Density): moves to a high, almost top-down orbit to see the 4 blobs in circle.
+ * Section 4 (Density): moves to a high, almost top-down orbit to see the 5 blobs in pentagon.
  */
 function CameraController({ activeSection, sectionProgress }) {
     useFrame((state, delta) => {
@@ -370,6 +371,18 @@ export default function Scene({ scrollProgress, activeSection, sectionProgress, 
                     position={DENSITY_POSITIONS[3]}
                     scale={DENSITY_SCALES[3]}
                     blobIndex={3}
+                    isDensityClone={true}
+                />
+            )}
+            {activeSection === 4 && densityBlobCount >= 5 && (
+                <OrganicBlob
+                    scrollProgress={scrollProgress}
+                    activeSection={activeSection}
+                    sectionProgress={sectionProgress}
+                    isIsolationActive={isIsolationActive}
+                    position={DENSITY_POSITIONS[4]}
+                    scale={DENSITY_SCALES[4]}
+                    blobIndex={4}
                     isDensityClone={true}
                 />
             )}

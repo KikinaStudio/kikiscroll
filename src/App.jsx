@@ -13,42 +13,57 @@ gsap.registerPlugin(ScrollTrigger);
 // 1 = Isolation Directionnelle (crowd → toggle at ~50% progress)
 // 2 = Neuro-Sonore (jungle/relaxation → pulsatingWave/régulation → focusCognitif/focus)
 // 3 = Musique Neuro-Adaptative (cut all non-drone, webcam → HAPPY/SAD)
-// 4 = Densité Interactive (1→4 blobs + stems accumulate, quasi-spherical)
+// 4 = Densité Interactive (1→5 blobs + stems accumulate, quasi-spherical)
 
 const sectionsData = [
     {
         id: 0,
         title: "Le son change tout",
-        paragraphe:
-            "Fermez les yeux une seconde. Ce que vous entendez autour de vous façonne votre humeur, votre concentration, votre envie de rester. Pourtant, le son reste le grand oublié du design d'expérience. Scrollez pour comprendre pourquoi.",
+        paragrapheParts: [
+            "Fermez les yeux une seconde.",
+            "Ce que vous entendez autour de vous façonne votre humeur, votre concentration, votre envie de rester.",
+            "Pourtant, le son reste le grand oublié du design d'expérience. Scrollez pour comprendre pourquoi.",
+        ],
         isIntro: true,
     },
     {
         id: 1,
         title: "Dans la foule, le silence peut exister",
-        paragraphe:
-            "Un salon professionnel, c'est 80 décibels en continu. Des conversations qui se noient, des visiteurs qui repartent fatigués, un message de marque qui ne passe jamais vraiment. Et si on pouvait créer, au milieu du chaos, une bulle sonore où tout devient clair ? Pas en isolant la pièce. Juste en dirigeant le son.",
+        paragrapheParts: [
+            "Un salon professionnel, c'est 80 décibels en continu. Des conversations qui se noient, des visiteurs qui repartent fatigués, un message de marque qui ne passe jamais vraiment.",
+            "Et si on pouvait créer, au milieu du chaos, une bulle sonore où tout devient clair ?",
+            "Pas en isolant la pièce. Juste en dirigeant le son.",
+        ],
         hasIsolationToggle: true,
     },
     {
         id: 2,
         title: "Un espace peut changer d'âme en quelques secondes",
-        paragraphe:
-            "Pour la première fois, la composition agit directement sur le cerveau sans sacrifier la qualité musicale. Le son module l'amygdale, régule le système autonome et oriente l'attention. L'utilisateur expérimente relaxation, régulation autonome et focus cognitif, activés par l'architecture même du son.",
+        paragrapheParts: [
+            "Pour la première fois, la composition agit directement sur le cerveau sans sacrifier la qualité musicale.",
+            "Le son module l'amygdale, régule le système autonome et oriente l'attention.",
+            "L'utilisateur expérimente relaxation, régulation autonome et focus cognitif, activés par l'architecture même du son.",
+        ],
         hasEnvironmentLabels: true,
     },
     {
         id: 3,
         title: "Et si la musique vous écoutait, vous ?",
-        paragraphe:
-            "On a toujours pensé la musique comme quelque chose qu'on reçoit. Et si elle pouvait percevoir ce que vous vivez et s'y adapter en temps réel ? Pas de façon approximative, mais de façon mesurable et neuroscientifique. Une musique qui change parce que vous changez. Une expérience qui ne ressemble à aucune autre, parce qu'elle est la vôtre.",
+        paragrapheParts: [
+            "On a toujours pensé la musique comme quelque chose qu'on reçoit.",
+            "Et si elle pouvait percevoir ce que vous vivez et s'y adapter en temps réel ? Pas de façon approximative, mais de façon mesurable et neuroscientifique.",
+            "Une musique qui change parce que vous changez. Une expérience qui ne ressemble à aucune autre, parce qu'elle est la vôtre.",
+        ],
         hasWebcamButton: true,
     },
     {
         id: 4,
         title: "Plus vous êtes nombreux, plus la musique vit",
-        paragraphe:
-            "Une personne entre dans l'espace. Une mélodie s'éveille. Deux, trois, quatre, chaque présence ajoute une couche, un rythme, une épaisseur. L'œuvre se compose en direct, nourrie par ceux qui la vivent. Ce n'est plus de la diffusion sonore. C'est une partition collective, écrite par le public, pour le public. C'est ça, le son vivant.",
+        paragrapheParts: [
+            "Une personne entre dans l'espace. Une mélodie s'éveille.",
+            "Deux, trois, quatre, chaque présence ajoute une couche, un rythme, une épaisseur. L'œuvre se compose en direct, nourrie par ceux qui la vivent.",
+            "Ce n'est plus de la diffusion sonore. C'est une partition collective, écrite par le public, pour le public. C'est ça, le son vivant.",
+        ],
         hasDensityLabels: true,
     },
 ];
@@ -88,14 +103,16 @@ function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationAc
             // Neuro-Adaptative: happy/sad controlled by webcam state, handled in App
             prevPalierRef.current = -1;
         } else if (activeSection === 4) {
-            // Density: progressive stem accumulation (1→4 layers)
+            // Density: progressive stem accumulation (1→5 layers, couche 1 = drone already playing)
             prevPalierRef.current = -1;
             const stems = ['strings', 'bass', 'drums', 'keyboard'];
-            const blobCount = Math.min(Math.floor(sectionProgress * 4) + 1, 4);
-            for (let s = 0; s < blobCount; s++) {
+            const blobCount = Math.min(Math.floor(sectionProgress * 5) + 1, 5);
+            // blobCount 1 = drone only, 2 = +strings, 3 = +bass, 4 = +drums, 5 = +keyboard
+            const stemsActive = Math.max(0, blobCount - 1);
+            for (let s = 0; s < stemsActive; s++) {
                 fadeTrack(stems[s], 0.4, 300);
             }
-            for (let s = blobCount; s < stems.length; s++) {
+            for (let s = stemsActive; s < stems.length; s++) {
                 fadeTrack(stems[s], 0, 300);
             }
         } else {
@@ -190,9 +207,10 @@ function App() {
     // Isolation: auto-driven by scroll progress in section 1
     const [isIsolationActive, setIsIsolationActive] = useState(false);
 
-    // Density: how many blobs (1-4), driven by scroll in section 4
+    // Density: how many blobs (1-5), driven by scroll in section 4
+    // Couche 1 = drone (always on), couches 2-5 = strings, bass, drums, keyboard
     const densityBlobCount = activeSection === 4
-        ? Math.min(Math.floor(sectionProgress * 4) + 1, 4)
+        ? Math.min(Math.floor(sectionProgress * 5) + 1, 5)
         : 1;
 
     // Webcam state for Neuro-Adaptative section (section 3)
@@ -413,12 +431,16 @@ function App() {
                 <img src="logo-kikina.png" alt="Kikina Lab" className="h-6 md:h-8 w-auto" />
             </header>
 
-            {/* Scroll encouragement - fixed bottom center */}
+            {/* Scroll encouragement - double chevron */}
             {hasStarted && activeSection < sectionsData.length - 1 && (
                 <div className="fixed bottom-8 left-0 right-0 z-40 flex justify-center pointer-events-none">
-                    <div className="flex items-center gap-3 text-tenbin-gray text-xs animate-pulse">
-                        <span>↓</span>
-                        <span className="uppercase tracking-widest">Continuez de scroller pour vivre l'expérience</span>
+                    <div className="flex flex-col items-center gap-0">
+                        <svg width="20" height="12" viewBox="0 0 20 12" fill="none" className="text-tenbin-gray animate-chevron-top">
+                            <path d="M2 2L10 10L18 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <svg width="20" height="12" viewBox="0 0 20 12" fill="none" className="text-tenbin-gray animate-chevron-bottom -mt-1">
+                            <path d="M2 2L10 10L18 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
                     </div>
                 </div>
             )}
@@ -437,33 +459,58 @@ function App() {
                                     <h2 className="text-4xl md:text-6xl font-heading font-medium tracking-tight text-white mb-8 leading-tight">
                                         {section.title}
                                     </h2>
-                                    <p className="text-lg md:text-xl font-sans text-tenbin-gray tracking-wide leading-relaxed font-light mb-8">
-                                        {section.paragraphe}
-                                    </p>
                                     {!hasStarted ? (
                                         <button
                                             onClick={handleStartExperience}
-                                            className="group relative px-10 py-5 overflow-hidden rounded-full bg-tenbin-dark border border-tenbin-gray/30 hover:border-white/60 transition-all duration-500 cursor-pointer"
+                                            className="px-8 py-4 border border-white bg-transparent text-white hover:bg-white hover:text-black transition-all duration-500 font-sans text-xs uppercase tracking-widest rounded-full cursor-pointer mb-8"
                                         >
-                                            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                            <span className="relative z-10 font-sans text-sm md:text-base font-semibold tracking-widest text-tenbin-offwhite group-hover:text-white transition-colors uppercase">
-                                                Lancer l'expérience sonore
-                                            </span>
+                                            Lancer l'expérience sonore
                                         </button>
                                     ) : (
-                                        <div className="flex items-center gap-3 text-tenbin-gray text-sm animate-pulse">
+                                        <div className="flex items-center gap-3 text-tenbin-gray text-sm animate-pulse mb-8">
                                             <span>↓</span>
                                             <span className="uppercase tracking-widest">Scrollez pour explorer</span>
                                         </div>
                                     )}
+                                    <p className="text-base md:text-lg font-sans text-tenbin-gray tracking-wide leading-relaxed font-light">
+                                        {section.paragrapheParts.map((part, pi) => {
+                                            const partThreshold = pi * 0.33;
+                                            const partProgress = activeSection === index
+                                                ? Math.min(1, Math.max(0, (sectionProgress - partThreshold) / 0.15))
+                                                : 0;
+                                            return (
+                                                <span
+                                                    key={pi}
+                                                    className="transition-opacity duration-500"
+                                                    style={{ opacity: partProgress }}
+                                                >
+                                                    {pi > 0 ? ' ' : ''}{part}
+                                                </span>
+                                            );
+                                        })}
+                                    </p>
                                 </div>
                             ) : (
                                 <>
                                     <h2 className="text-4xl md:text-6xl font-heading font-medium tracking-tight text-white mb-8">
                                         {section.title}
                                     </h2>
-                                    <p className="text-lg md:text-xl font-sans text-tenbin-gray tracking-wide leading-relaxed font-light mb-12">
-                                        {section.paragraphe}
+                                    <p className="text-base md:text-lg font-sans text-tenbin-gray tracking-wide leading-relaxed font-light mb-12">
+                                        {section.paragrapheParts.map((part, pi) => {
+                                            const partThreshold = pi * 0.33;
+                                            const partProgress = activeSection === index
+                                                ? Math.min(1, Math.max(0, (sectionProgress - partThreshold) / 0.15))
+                                                : 0;
+                                            return (
+                                                <span
+                                                    key={pi}
+                                                    className="transition-opacity duration-500"
+                                                    style={{ opacity: partProgress }}
+                                                >
+                                                    {pi > 0 ? ' ' : ''}{part}
+                                                </span>
+                                            );
+                                        })}
                                     </p>
                                 </>
                             )}
@@ -561,6 +608,65 @@ function App() {
                     </section>
                 ))}
             </main>
+
+            {/* Dawn transition + Footer */}
+            <div className="relative z-20">
+                {/* Evanescent black-to-white transition */}
+                <div className="h-[60vh] relative" style={{
+                    background: 'linear-gradient(to bottom, #000000 0%, rgba(0,0,0,0.8) 20%, rgba(0,0,0,0.3) 50%, rgba(245,243,240,0.6) 75%, #f5f3f0 100%)',
+                }}>
+                    <div className="absolute inset-0 animate-aurora opacity-30" style={{
+                        background: 'radial-gradient(ellipse 80% 50% at 50% 60%, rgba(200,180,160,0.4) 0%, transparent 70%)',
+                    }} />
+                </div>
+
+                {/* Footer content */}
+                <footer className="bg-[#f5f3f0] text-[#1a1a1a] px-8 md:px-[8vw] pt-16 pb-12">
+                    <div className="flex flex-col md:flex-row justify-between gap-12 mb-16">
+                        <div className="flex-shrink-0">
+                            <img src="logo-kikina.png" alt="Kikina Lab" className="h-6 md:h-8 w-auto invert" />
+                        </div>
+                        <div className="flex flex-col md:flex-row gap-8 md:gap-12 text-sm flex-1">
+                            <div className="flex flex-col gap-3 flex-shrink-0 md:w-36">
+                                <a href="https://kikinalab.com" target="_blank" rel="noopener noreferrer" className="text-[#555] hover:text-[#1a1a1a] transition-colors">Qui sommes-nous</a>
+                                <a href="#" className="text-[#555] hover:text-[#1a1a1a] transition-colors">Mentions légales</a>
+                                <a href="#" className="text-[#555] hover:text-[#1a1a1a] transition-colors">LinkedIn</a>
+                            </div>
+                            <div className="flex flex-col gap-3 flex-1 max-w-lg">
+                                <span className="font-semibold uppercase tracking-widest text-xs mb-1">Nous contacter</span>
+                                <form className="flex flex-col gap-3" onSubmit={(e) => e.preventDefault()}>
+                                    <input
+                                        type="email"
+                                        placeholder="Votre email"
+                                        className="bg-transparent border-b border-[#ccc] focus:border-[#1a1a1a] outline-none py-2 text-sm text-[#1a1a1a] placeholder-[#999] transition-colors"
+                                    />
+                                    <textarea
+                                        placeholder="Votre message"
+                                        rows={3}
+                                        className="bg-transparent border-b border-[#ccc] focus:border-[#1a1a1a] outline-none py-2 text-sm text-[#1a1a1a] placeholder-[#999] transition-colors resize-none"
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="self-start mt-2 px-6 py-2 text-xs uppercase tracking-widest font-semibold border border-[#1a1a1a] text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-[#f5f3f0] transition-colors rounded-full"
+                                    >
+                                        Envoyer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="border-t border-[#d0d0d0] pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <span className="text-xs text-[#999]">© 2026 Kikina Lab. Tous droits réservés.</span>
+                    </div>
+
+                    {/* Large brand name */}
+                    <div className="mt-8 overflow-hidden">
+                        <p className="text-[15vw] md:text-[12vw] font-heading font-medium leading-none tracking-tighter text-[#1a1a1a] select-none">
+                            Kikina
+                        </p>
+                    </div>
+                </footer>
+            </div>
         </div>
     );
 }
