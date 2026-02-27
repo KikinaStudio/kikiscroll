@@ -182,11 +182,6 @@ function useFaceDetection(isActive, videoRef) {
 }
 
 function App() {
-    // #region agent log
-    if (typeof fetch !== 'undefined') {
-        fetch('http://127.0.0.1:7273/ingest/ed4bcb7f-0c12-400b-b188-136e8b883c18', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'd84d59' }, body: JSON.stringify({ sessionId: 'd84d59', location: 'App.jsx:render', message: 'App rendering', data: { baseUrl: import.meta.env.BASE_URL }, timestamp: Date.now(), hypothesisId: 'H2' }) }).catch(() => {});
-    }
-    // #endregion
     const [scrollProgress, setScrollProgress] = useState(0);
     const [activeSection, setActiveSection] = useState(0);
     const [sectionProgress, setSectionProgress] = useState(0);

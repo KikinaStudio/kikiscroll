@@ -1,0 +1,12 @@
+{"sessionId":"d84d59","location":"main.jsx:entry","message":"main.jsx loaded","data":{"baseUrl":"/kikiscroll/","href":"https://kikinastudio.github.io/kikiscroll/","hasRoot":true},"hypothesisId":"H1","timestamp":1772129153092}
+{"sessionId":"d84d59","location":"main.jsx:beforeRender","message":"before createRoot","data":{"hasRoot":true},"hypothesisId":"H4","timestamp":1772129153093}
+{"sessionId":"d84d59","location":"main.jsx:afterRender","message":"createRoot.render succeeded","data":{},"hypothesisId":"H3","timestamp":1772129153094}
+{"sessionId":"d84d59","location":"App.jsx:render","message":"App rendering","data":{"baseUrl":"/kikiscroll/"},"timestamp":1772129153098,"hypothesisId":"H2"}
+{"sessionId":"d84d59","location":"main.jsx:entry","message":"main.jsx loaded","data":{"baseUrl":"/kikiscroll/","href":"https://kikinastudio.github.io/kikiscroll/","hasRoot":true},"hypothesisId":"H1","timestamp":1772129167683}
+{"sessionId":"d84d59","location":"main.jsx:beforeRender","message":"before createRoot","data":{"hasRoot":true},"hypothesisId":"H4","timestamp":1772129167685}
+{"sessionId":"d84d59","location":"App.jsx:render","message":"App rendering","data":{"baseUrl":"/kikiscroll/"},"timestamp":1772129167699,"hypothesisId":"H2"}
+{"sessionId":"d84d59","location":"main.jsx:afterRender","message":"createRoot.render succeeded","data":{},"hypothesisId":"H3","timestamp":1772129167688}
+{"sessionId":"d84d59","location":"main.jsx:entry","message":"main.jsx loaded","data":{"baseUrl":"/kikiscroll/","href":"https://kikinastudio.github.io/kikiscroll/","hasRoot":true},"hypothesisId":"H1","timestamp":1772129640260}
+{"sessionId":"d84d59","location":"main.jsx:beforeRender","message":"before createRoot","data":{"hasRoot":true},"hypothesisId":"H4","timestamp":1772129640261}
+{"sessionId":"d84d59","location":"main.jsx:afterRender","message":"createRoot.render succeeded","data":{},"hypothesisId":"H3","timestamp":1772129640264}
+{"sessionId":"d84d59","location":"App.jsx:render","message":"App rendering","data":{"baseUrl":"/kikiscroll/"},"timestamp":1772129640315,"hypothesisId":"H2"}
