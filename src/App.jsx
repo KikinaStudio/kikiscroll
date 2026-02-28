@@ -431,10 +431,10 @@ function App() {
             </div>
 
             {/* Header */}
-            <header className="fixed top-8 left-8 md:top-10 md:left-[8vw] z-50 pointer-events-auto mix-blend-difference">
+            <header className="fixed top-8 right-8 md:top-10 md:right-[8vw] z-50 pointer-events-auto mix-blend-difference">
                 <svg 
-                    width="140" 
-                    height="30" 
+                    width="110" 
+                    height="24" 
                     viewBox="0 0 1096 237" 
                     fill="none" 
                     xmlns="http://www.w3.org/2000/svg"
@@ -458,7 +458,7 @@ function App() {
             {hasStarted && (
                 <button
                     onClick={toggleMute}
-                    className={`fixed top-8 right-8 md:top-10 md:right-[8vw] z-50 pointer-events-auto transition-all duration-500 ${isMuted ? 'text-tenbin-gray opacity-50' : 'text-white opacity-80 hover:opacity-100'}`}
+                    className={`fixed bottom-8 right-8 md:bottom-10 md:right-[8vw] z-50 pointer-events-auto transition-all duration-500 ${isMuted ? 'text-tenbin-gray opacity-50' : 'text-white opacity-80 hover:opacity-100'}`}
                     aria-label={isMuted ? 'Activer le son' : 'Couper le son'}
                 >
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
