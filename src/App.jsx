@@ -20,9 +20,9 @@ const sectionsData = [
         id: 0,
         title: "Un lieu a une âme.",
         paragrapheParts: [
-            "«La musique, c'est 50% d'un film.» Francis Ford Coppola. Dans nos boutiques et nos événements pourtant, cette magie disparaît. Le son y est subi : une playlist en boucle, aveugle à qui est là, à ce qu'ils ressentent, à l'histoire qu'on voudrait raconter.",
-            "Au cinéma, la musique désigne le personnage principal : elle le suit, réagit à ses émotions, l'élève.",
-            "Nous faisons la même chose, mais pour vos visiteurs.",
+            "«La musique, c'est 50% d'un film.» Francis Ford Coppola.",
+            "Dans nos boutiques et nos événements pourtant, cette magie disparaît. Le son y est subi : une playlist en boucle, aveugle à qui est là, à ce qu'ils ressentent, à l'histoire qu'on voudrait raconter.",
+            "Au cinéma, la musique désigne le personnage principal : elle le suit, réagit à ses émotions, l'élève. Nous faisons la même chose, mais pour vos visiteurs.",
         ],
         isIntro: true,
     },
