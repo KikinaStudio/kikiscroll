@@ -14,14 +14,14 @@
     margin: 0;
     padding: 0;
     overflow-x: hidden;
-    background-color: theme('colors.tenbin.black');
+    background-color: #0a0a0a;
     color: theme('colors.tenbin.offwhite');
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
   }
 }
 
-/* Grain Noise Overlay */
+/* Grain Noise Overlay - visible grain over sphere gray #0a0a0a */
 .grain-overlay {
   position: fixed;
   top: 0;
@@ -30,7 +30,7 @@
   height: 100%;
   z-index: 9999;
   pointer-events: none;
-  opacity: 0.05;
+  opacity: 0.12;
   background-image: url('https://grainy-gradients.vercel.app/noise.svg');
 }
 

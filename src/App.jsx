@@ -415,7 +415,9 @@ function App() {
     }, [startAllTracks]);
 
     return (
-        <div className="bg-tenbin-black min-h-screen text-tenbin-offwhite font-sans selection:bg-white/20">
+        <div className="bg-[#0a0a0a] min-h-screen text-tenbin-offwhite font-sans selection:bg-white/20">
+            {/* Grain overlay */}
+            <div className="grain-overlay" aria-hidden="true" />
             {/* Hidden video element for webcam */}
             <video ref={videoRef} className="hidden" playsInline muted />
 
@@ -431,7 +433,7 @@ function App() {
             </div>
 
             {/* Header */}
-            <header className="fixed top-8 right-8 md:top-10 md:right-[8vw] z-50 pointer-events-auto mix-blend-difference">
+            <header className="fixed top-8 left-8 md:top-10 md:left-[8vw] z-50 pointer-events-auto mix-blend-difference">
                 <svg 
                     width="110" 
                     height="24" 
@@ -458,7 +460,7 @@ function App() {
             {hasStarted && (
                 <button
                     onClick={toggleMute}
-                    className={`fixed bottom-8 right-8 md:bottom-10 md:right-[8vw] z-50 pointer-events-auto transition-all duration-500 ${isMuted ? 'text-tenbin-gray opacity-50' : 'text-white opacity-80 hover:opacity-100'}`}
+                    className={`fixed top-8 right-8 md:top-10 md:right-[8vw] z-50 pointer-events-auto transition-all duration-500 ${isMuted ? 'text-tenbin-gray opacity-50' : 'text-white opacity-80 hover:opacity-100'}`}
                     aria-label={isMuted ? 'Activer le son' : 'Couper le son'}
                 >
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
@@ -568,11 +570,11 @@ function App() {
 
                             {/* Section 4: Density - musical layers counter */}
                             {section.hasDensityLabels && activeSection === index && (
-                                <div className="mt-8 border-t border-tenbin-gray/20 pt-8 flex flex-col items-start gap-1">
-                                    <span className="text-3xl md:text-4xl font-heading font-medium text-white transition-all duration-500">
+                                <div className="mt-8 border-t border-tenbin-gray/20 pt-8 flex flex-col items-center gap-2 w-fit">
+                                    <span className="text-3xl md:text-4xl font-heading font-medium text-white transition-all duration-500 scale-110">
                                         {densityBlobCount}
                                     </span>
-                                    <span className="text-[10px] uppercase tracking-widest text-white transition-all duration-500">
+                                    <span className="text-[10px] uppercase tracking-widest text-white transition-all duration-500 opacity-100">
                                         couches sonores
                                     </span>
                                 </div>
