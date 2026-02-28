@@ -33,6 +33,7 @@ export const useAudioStore = create((set, get) => {
     return {
         tracks: instances,
         isPlaying: false,
+        isMuted: false,
 
         startAllTracks: () => {
             const { tracks, isPlaying } = get();
@@ -59,6 +60,13 @@ export const useAudioStore = create((set, get) => {
             } else {
                 console.warn(`Track ${trackName} not found in audio store.`);
             }
+        },
+
+        toggleMute: () => {
+            const { tracks, isMuted } = get();
+            const newMuted = !isMuted;
+            Object.values(tracks).forEach(howl => howl.mute(newMuted));
+            set({ isMuted: newMuted });
         },
 
         stopAllTracks: () => {

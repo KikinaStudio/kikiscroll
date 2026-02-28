@@ -18,51 +18,51 @@ gsap.registerPlugin(ScrollTrigger);
 const sectionsData = [
     {
         id: 0,
-        title: "Le son change tout",
+        title: "Un lieu a une âme.",
         paragrapheParts: [
-            "Fermez les yeux une seconde.",
-            "Ce que vous entendez autour de vous façonne votre humeur, votre concentration, votre envie de rester.",
-            "Pourtant, le son reste le grand oublié du design d'expérience. Scrollez pour comprendre pourquoi.",
+            "«La musique, c'est 50% d'un film.» Francis Ford Coppola. Dans nos boutiques et nos événements pourtant, cette magie disparaît. Le son y est subi : une playlist en boucle, aveugle à qui est là, à ce qu'ils ressentent, à l'histoire qu'on voudrait raconter.",
+            "Au cinéma, la musique désigne le personnage principal : elle le suit, réagit à ses émotions, l'élève.",
+            "Nous faisons la même chose, mais pour vos visiteurs.",
         ],
         isIntro: true,
     },
     {
         id: 1,
-        title: "Dans la foule, le silence peut exister",
+        title: "Elle s'entend.",
         paragrapheParts: [
-            "Un salon professionnel, c'est 80 décibels en continu. Des conversations qui se noient, des visiteurs qui repartent fatigués, un message de marque qui ne passe jamais vraiment.",
-            "Et si on pouvait créer, au milieu du chaos, une bulle sonore où tout devient clair ?",
-            "Pas en isolant la pièce. Juste en dirigeant le son.",
+            "Un salon bondé, une boutique un vendredi soir : le brouhaha s'accumule, fatigue, et pousse doucement vers la sortie.",
+            "Au cinéma, le réalisateur sait isoler un personnage dans le chaos. Le monde s'efface, et il ne reste qu'une bulle d'intimité, le temps d'une scène.",
+            "Nous faisons exactement cela dans le monde physique. Une bulle de clarté, invisible, au milieu du vacarme.",
         ],
         hasIsolationToggle: true,
     },
     {
         id: 2,
-        title: "Un espace peut changer d'âme en quelques secondes",
+        title: "Elle se ressent.",
         paragrapheParts: [
-            "Pour la première fois, la composition agit directement sur le cerveau sans sacrifier la qualité musicale.",
-            "Le son module l'amygdale, régule le système autonome et oriente l'attention.",
-            "L'utilisateur expérimente relaxation, régulation autonome et focus cognitif, activés par l'architecture même du son.",
+            "Un simple changement d'accord transforme une scène de joie en nostalgie. La musique modifie notre rythme cardiaque, notre respiration, souvent avant même qu'on s'en rende compte.",
+            "Près de 80% de la recherche sur les effets du son sur le cerveau a été publiée ces dix dernières années. Nous pouvons désormais l'utiliser avec une précision inédite.",
+            "Concentration, apaisement, énergie : nous pouvons aujourd'hui composer l'état émotionnel d'un lieu comme un réalisateur compose sa bande originale.",
         ],
         hasEnvironmentLabels: true,
     },
     {
         id: 3,
-        title: "Et si la musique vous écoutait, vous ?",
+        title: "Elle vit avec vous.",
         paragrapheParts: [
-            "On a toujours pensé la musique comme quelque chose qu'on reçoit.",
-            "Et si elle pouvait percevoir ce que vous vivez et s'y adapter en temps réel ? Pas de façon approximative, mais de façon mesurable et neuroscientifique.",
-            "Une musique qui change parce que vous changez. Une expérience qui ne ressemble à aucune autre, parce qu'elle est la vôtre.",
+            "La musique ne joue plus pour remplir le silence. Grâce aux travaux de notre équipe en neurosciences, elle active en temps réel des paramètres émotionnels et comportementaux précis, propres à chaque moment, chaque intention, chaque client.",
+            "Pour en faire l'expérience : activez votre caméra. Souriez, ou non. La musique vous lira.",
+            "C'est ce que chacun de vos visiteurs peut vivre, sans le savoir, simplement en étant là.",
         ],
         hasWebcamButton: true,
     },
     {
         id: 4,
-        title: "Plus vous êtes nombreux, plus la musique vit",
+        title: "Et grandit avec vous.",
         paragrapheParts: [
-            "Une personne entre dans l'espace. Une mélodie s'éveille.",
-            "Deux, trois, quatre, chaque présence ajoute une couche, un rythme, une épaisseur. L'œuvre se compose en direct, nourrie par ceux qui la vivent.",
-            "Ce n'est plus de la diffusion sonore. C'est une partition collective, écrite par le public, pour le public. C'est ça, le son vivant.",
+            "Imaginez une pièce avec un simple drone sonore. Une personne entre et un violon s'éveille. Une deuxième s'approche et un rythme apparaît, doucement.",
+            "La musique ne remplit plus l'espace : elle lui répond. Plus riche, plus dense, au rythme de ceux qui arrivent.",
+            "Elle attire ceux qui passent. Elle accueille ceux qui entrent, et récompense ceux qui restent.",
         ],
         hasDensityLabels: true,
     },
@@ -203,6 +203,7 @@ function App() {
     const [activeSection, setActiveSection] = useState(0);
     const [sectionProgress, setSectionProgress] = useState(0);
     const [hasStarted, setHasStarted] = useState(false);
+    const [showMentions, setShowMentions] = useState(false);
 
     // Isolation: auto-driven by scroll progress in section 1
     const [isIsolationActive, setIsIsolationActive] = useState(false);
@@ -360,10 +361,11 @@ function App() {
         const sections = gsap.utils.toArray('.pin-section');
 
         sections.forEach((section, i) => {
+            const scrollLength = i === 4 ? window.innerHeight * 3.5 : window.innerHeight * 1.5;
             ScrollTrigger.create({
                 trigger: section,
                 start: 'top top',
-                end: `+=${window.innerHeight * 1.5}`,
+                end: `+=${scrollLength}`,
                 pin: true,
                 pinSpacing: true,
                 onUpdate: (self) => {
@@ -404,6 +406,8 @@ function App() {
     }, [hasStarted, fadeTrack]);
 
     const startAllTracks = useAudioStore((state) => state.startAllTracks);
+    const toggleMute = useAudioStore((state) => state.toggleMute);
+    const isMuted = useAudioStore((state) => state.isMuted);
 
     const handleStartExperience = useCallback(() => {
         startAllTracks();
@@ -431,6 +435,20 @@ function App() {
                 <img src="logo-kikina.png" alt="Kikina Lab" className="h-6 md:h-8 w-auto" />
             </header>
 
+            {/* Mute toggle */}
+            {hasStarted && (
+                <button
+                    onClick={toggleMute}
+                    className={`fixed top-8 right-8 md:top-10 md:right-[8vw] z-50 pointer-events-auto transition-all duration-500 ${isMuted ? 'text-tenbin-gray opacity-50' : 'text-white opacity-80 hover:opacity-100'}`}
+                    aria-label={isMuted ? 'Activer le son' : 'Couper le son'}
+                >
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                        {isMuted && <line x1="3" y1="3" x2="21" y2="21" />}
+                    </svg>
+                </button>
+            )}
+
             {/* Scroll encouragement - double chevron */}
             {hasStarted && activeSection < sectionsData.length - 1 && (
                 <div className="fixed bottom-8 left-0 right-0 z-40 flex justify-center pointer-events-none">
@@ -454,7 +472,7 @@ function App() {
                             {section.isIntro ? (
                                 <div className="flex flex-col items-start">
                                     <p className="text-xs md:text-sm font-semibold uppercase tracking-[0.3em] text-tenbin-gray mb-6">
-                                        AI · Neuroscience · Storytelling
+                                        Rendre le son vivant.
                                     </p>
                                     <h2 className="text-4xl md:text-6xl font-heading font-medium tracking-tight text-white mb-8 leading-tight">
                                         {section.title}
@@ -532,9 +550,9 @@ function App() {
                             {/* Section 4: Density - musical layers counter */}
                             {section.hasDensityLabels && activeSection === index && (
                                 <div className="mt-8 border-t border-tenbin-gray/20 pt-8">
-                                    <p className="text-sm md:text-base font-semibold uppercase tracking-widest text-white transition-all duration-500">
-                                        Couches : {densityBlobCount}
-                                    </p>
+                                    <span className="text-[10px] uppercase tracking-widest text-white transition-all duration-500">
+                                        couches sonores : {densityBlobCount}
+                                    </span>
                                 </div>
                             )}
 
@@ -629,18 +647,33 @@ function App() {
                         <div className="flex flex-col md:flex-row gap-8 md:gap-12 text-sm flex-1">
                             <div className="flex flex-col gap-3 flex-shrink-0 md:w-36">
                                 <a href="https://kikinalab.com" target="_blank" rel="noopener noreferrer" className="text-[#555] hover:text-[#1a1a1a] transition-colors">Qui sommes-nous</a>
-                                <a href="#" className="text-[#555] hover:text-[#1a1a1a] transition-colors">Mentions légales</a>
-                                <a href="#" className="text-[#555] hover:text-[#1a1a1a] transition-colors">LinkedIn</a>
+                                <button 
+                                    onClick={() => setShowMentions(!showMentions)} 
+                                    className="text-left text-[#555] hover:text-[#1a1a1a] transition-colors focus:outline-none"
+                                >
+                                    Mentions légales
+                                </button>
+                                <a href="https://www.linkedin.com/company/kikinastudio/" target="_blank" rel="noopener noreferrer" className="text-[#555] hover:text-[#1a1a1a] transition-colors">LinkedIn</a>
                             </div>
                             <div className="flex flex-col gap-3 flex-1 max-w-lg">
                                 <span className="font-semibold uppercase tracking-widest text-xs mb-1">Nous contacter</span>
-                                <form className="flex flex-col gap-3" onSubmit={(e) => e.preventDefault()}>
+                                <form className="flex flex-col gap-3" onSubmit={(e) => {
+                                    e.preventDefault();
+                                    const form = e.target;
+                                    const email = form.email.value;
+                                    const message = form.message.value;
+                                    window.location.href = `mailto:bianca@kikinastudio.com?subject=Contact depuis Kikiscroll&body=${encodeURIComponent(message + '\n\nDe : ' + email)}`;
+                                }}>
                                     <input
+                                        name="email"
                                         type="email"
+                                        required
                                         placeholder="Votre email"
                                         className="bg-transparent border-b border-[#ccc] focus:border-[#1a1a1a] outline-none py-2 text-sm text-[#1a1a1a] placeholder-[#999] transition-colors"
                                     />
                                     <textarea
+                                        name="message"
+                                        required
                                         placeholder="Votre message"
                                         rows={3}
                                         className="bg-transparent border-b border-[#ccc] focus:border-[#1a1a1a] outline-none py-2 text-sm text-[#1a1a1a] placeholder-[#999] transition-colors resize-none"
@@ -666,6 +699,30 @@ function App() {
                         </p>
                     </div>
                 </footer>
+
+                {/* Quick Mentions Légales section */}
+                {showMentions && (
+                    <div className="bg-[#f5f3f0] text-[#1a1a1a] px-8 md:px-[8vw] py-16 text-[10px] leading-relaxed border-t border-[#d0d0d0]">
+                        <div className="max-w-2xl">
+                            <h3 className="font-bold uppercase mb-4 text-xs">Mentions Légales</h3>
+                            <p className="mb-2"><strong>Éditeur du site :</strong> Kikina Lab / Kikina Studio</p>
+                            <p className="mb-2"><strong>Siège social :</strong> Paris, France</p>
+                            <p className="mb-2"><strong>Contact :</strong> bianca@kikinastudio.com</p>
+                            <p className="mb-2"><strong>Hébergement :</strong> Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723</p>
+                            <p className="mt-6 italic opacity-60">
+                                Ce site utilise des technologies de détection d'expressions faciales (face-api.js). 
+                                Aucune donnée d'image n'est enregistrée ou transmise à des serveurs tiers ; 
+                                l'Analyse est effectuée localement dans votre navigateur en temps réel.
+                            </p>
+                            <button 
+                                onClick={() => setShowMentions(false)}
+                                className="mt-8 text-[#555] hover:text-[#1a1a1a] underline uppercase tracking-widest font-bold"
+                            >
+                                Fermer
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
