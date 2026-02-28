@@ -491,7 +491,12 @@ function App() {
                         <div className="max-w-2xl w-full pointer-events-auto filter drop-shadow-2xl z-10">
                             {/* Intro section */}
                             {section.isIntro ? (
-                                <div className="flex flex-col items-start">
+                                <div 
+                                    className="flex flex-col items-start transition-transform duration-700 ease-out"
+                                    style={{
+                                        transform: `translateY(${Math.max(0, (1 - sectionProgress * 5)) * 15}vh)`,
+                                    }}
+                                >
                                     <p className="text-xs md:text-sm font-semibold uppercase tracking-[0.3em] text-tenbin-gray mb-6">
                                         Rendre le son vivant.
                                     </p>
