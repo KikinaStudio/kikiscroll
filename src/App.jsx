@@ -568,9 +568,12 @@ function App() {
 
                             {/* Section 4: Density - musical layers counter */}
                             {section.hasDensityLabels && activeSection === index && (
-                                <div className="mt-8 border-t border-tenbin-gray/20 pt-8">
+                                <div className="mt-8 border-t border-tenbin-gray/20 pt-8 flex flex-col items-start gap-1">
+                                    <span className="text-3xl md:text-4xl font-heading font-medium text-white transition-all duration-500">
+                                        {densityBlobCount}
+                                    </span>
                                     <span className="text-[10px] uppercase tracking-widest text-white transition-all duration-500">
-                                        couches sonores : {densityBlobCount}
+                                        couches sonores
                                     </span>
                                 </div>
                             )}
