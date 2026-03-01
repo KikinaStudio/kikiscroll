@@ -643,8 +643,8 @@ function App() {
                                                         'bg-tenbin-gray/50'
                                                 }`} />
                                             <span className="text-sm uppercase tracking-widest text-tenbin-gray">
-                                                {isSmiling === true ? 'Détecté : Joyeux → Piste HAPPY' :
-                                                    isSmiling === false ? 'Détecté : Neutre → Piste SAD' :
+                                                {isSmiling === true ? 'Joyeux' :
+                                                    isSmiling === false ? 'Neutre' :
                                                         'Analyse en cours...'}
                                             </span>
                                         </div>
