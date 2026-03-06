@@ -11,9 +11,10 @@ gsap.registerPlugin(ScrollTrigger);
 // SECTION ORDER:
 // 0 = Intro (drone only, near-round blob)
 // 1 = Isolation Directionnelle (crowd → toggle at ~50% progress)
-// 2 = Neuro-Sonore (jungle/relaxation → pulsatingWave/régulation → focusCognitif/focus)
-// 3 = Musique Neuro-Adaptative (cut all non-drone, webcam → HAPPY/SAD)
-// 4 = Densité Interactive (1→5 blobs + stems accumulate, quasi-spherical)
+// 2 = Zones (panorama + 3 zones: Entrée/Rayon/Espace équipe)
+// 3 = Neuro-Sonore (jungle/relaxation → pulsatingWave/régulation → focusCognitif/focus)
+// 4 = Musique Neuro-Adaptative (cut all non-drone, webcam → HAPPY/SAD)
+// 5 = Densité Interactive (1→5 blobs + stems accumulate, quasi-spherical)
 
 const sectionsData = [
     {
@@ -38,6 +39,16 @@ const sectionsData = [
     },
     {
         id: 2,
+        title: "Chaque zone a son propre rôle",
+        paragrapheParts: [
+            "Un visiteur n'est pas dans le même état d'esprit à l'entrée, devant un rayon, ou dans un espace dédié aux équipes.",
+            "Le son peut accompagner chacun de ces moments, pour les visiteurs comme pour les collaborateurs, sans que personne ne le remarque consciemment.",
+            "Trois intentions sonores. Un seul système. Pour l'expérience client comme pour le bien-être des équipes.",
+        ],
+        hasZonesPanorama: true,
+    },
+    {
+        id: 3,
         title: "Elle se ressent.",
         paragrapheParts: [
             "Un simple changement d'accord transforme une scène de joie en nostalgie. La musique modifie notre rythme cardiaque, notre respiration, souvent avant même qu'on s'en rende compte.",
@@ -47,7 +58,7 @@ const sectionsData = [
         hasEnvironmentLabels: true,
     },
     {
-        id: 3,
+        id: 4,
         title: "Elle vit avec vous.",
         paragrapheParts: [
             "La musique ne joue plus pour remplir le silence. Grâce aux travaux de notre équipe en neurosciences, elle active en temps réel des paramètres émotionnels et comportementaux précis, propres à chaque moment, chaque intention, chaque client.",
@@ -57,7 +68,7 @@ const sectionsData = [
         hasWebcamButton: true,
     },
     {
-        id: 4,
+        id: 5,
         title: "Et grandit avec vous.",
         paragrapheParts: [
             "Imaginez une pièce avec un simple drone sonore. Une personne entre et un violon s'éveille. Une deuxième s'approche et un rythme apparaît, doucement.",
@@ -80,6 +91,24 @@ function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationAc
             // Isolation: crowd is controlled by auto-toggle logic based on progress
             prevPalierRef.current = -1;
         } else if (activeSection === 2) {
+            // Zones: Crossfade entrance → rayon → espace équipe
+            prevPalierRef.current = -1;
+            let entranceVol = 0, rayonVol = 0, cabineVol = 0;
+            if (sectionProgress < 0.33) {
+                entranceVol = 0.6;
+            } else if (sectionProgress < 0.66) {
+                const t = (sectionProgress - 0.33) / 0.33;
+                entranceVol = 0.6 * (1 - t);
+                rayonVol = 0.6 * t;
+            } else {
+                const t = (sectionProgress - 0.66) / 0.34;
+                rayonVol = 0.6 * (1 - t);
+                cabineVol = 0.6 * t;
+            }
+            fadeTrack('entrance', entranceVol, 150);
+            fadeTrack('rayon', rayonVol, 150);
+            fadeTrack('cabine', cabineVol, 150);
+        } else if (activeSection === 3) {
             // Neuro-sonore: Crossfade jungle (relaxation) → pulsatingWave (régulation) → focusCognitif (focus)
             prevPalierRef.current = -1;
             let jungleVol = 0, pulsatingVol = 0, focusVol = 0;
@@ -99,10 +128,10 @@ function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationAc
             fadeTrack('jungle', jungleVol, 150);
             fadeTrack('pulsatingWave', pulsatingVol, 150);
             fadeTrack('focusCognitif', focusVol, 150);
-        } else if (activeSection === 3) {
+        } else if (activeSection === 4) {
             // Neuro-Adaptative: happy/sad controlled by webcam state, handled in App
             prevPalierRef.current = -1;
-        } else if (activeSection === 4) {
+        } else if (activeSection === 5) {
             // Density: progressive stem accumulation (1→5 layers, couche 1 = drone already playing)
             prevPalierRef.current = -1;
             const stems = ['strings', 'bass', 'drums', 'keyboard'];
@@ -208,13 +237,13 @@ function App() {
     // Isolation: auto-driven by scroll progress in section 1
     const [isIsolationActive, setIsIsolationActive] = useState(false);
 
-    // Density: how many blobs (1-5), driven by scroll in section 4
+    // Density: how many blobs (1-5), driven by scroll in section 5
     // Couche 1 = drone (always on), couches 2-5 = strings, bass, drums, keyboard
-    const densityBlobCount = activeSection === 4
+    const densityBlobCount = activeSection === 5
         ? Math.min(Math.floor(sectionProgress * 5) + 1, 5)
         : 1;
 
-    // Webcam state for Neuro-Adaptative section (section 3)
+    // Webcam state for Neuro-Adaptative section (section 4)
     const [isCameraActive, setIsCameraActive] = useState(false);
     const videoRef = useRef(null);
     const streamRef = useRef(null);
@@ -234,6 +263,9 @@ function App() {
         'focusCognitif',
         'happy',
         'sad',
+        'entrance',
+        'rayon',
+        'cabine',
     ];
 
     // Hard-reset all non-drone tracks on every section change
@@ -263,7 +295,7 @@ function App() {
 
     // Neuro-Adaptative: react to smile detection
     useEffect(() => {
-        if (activeSection !== 3 || !isCameraActive) return;
+        if (activeSection !== 4 || !isCameraActive) return;
 
         if (isSmiling === true) {
             fadeTrack('happy', 0.5, 600);
@@ -306,7 +338,7 @@ function App() {
 
     // Cleanup camera on unmount or section change
     useEffect(() => {
-        if (activeSection !== 3 && isCameraActive) {
+        if (activeSection !== 4 && isCameraActive) {
             if (streamRef.current) {
                 streamRef.current.getTracks().forEach(t => t.stop());
                 streamRef.current = null;
@@ -361,7 +393,7 @@ function App() {
         const sections = gsap.utils.toArray('.pin-section');
 
         sections.forEach((section, i) => {
-            const scrollLength = i === 4 ? window.innerHeight * 3.5 : window.innerHeight * 1.5;
+            const scrollLength = i === 2 ? window.innerHeight * 3 : (i === 5 ? window.innerHeight * 3.5 : window.innerHeight * 1.5);
             ScrollTrigger.create({
                 trigger: section,
                 start: 'top top',
@@ -376,10 +408,11 @@ function App() {
                     setActiveSection(i);
                     // Section 1 (Isolation): start crowd
                     if (i === 1) fadeTrack('crowd', 0.6, 500);
-                    // Section 2 (Scénographie): start jungle
-                    if (i === 2) fadeTrack('jungle', 0.6, 500);
-                    // Section 3 (Neuro): all non-drone tracks are reset just before via onLeave
-                    // Section 4 (Density): stems will be handled by useScrollAudio
+                    // Section 2 (Zones): entrance will be faded in by useScrollAudio
+                    // Section 3 (Scénographie): start jungle
+                    if (i === 3) fadeTrack('jungle', 0.6, 500);
+                    // Section 4 (Neuro): all non-drone tracks are reset just before via onLeave
+                    // Section 5 (Density): stems will be handled by useScrollAudio
                 },
                 onLeave: () => {
                     // When leaving any section forward, fade all non-drone tracks to zero
@@ -421,8 +454,35 @@ function App() {
             {/* Hidden video element for webcam */}
             <video ref={videoRef} className="hidden" playsInline muted />
 
-            {/* 3D Background */}
-            <div className="fixed top-0 left-0 w-full h-full z-0 pointer-events-none">
+            {/* Zones panorama (fond, derrière le blob) - uniquement en section 2 */}
+            {(activeSection === 2) && (() => {
+                // Map sectionProgress → backgroundPositionX
+                // Zone 1 (0–0.33) : 0% → 20%, Zone 2 (0.33–0.66) : 20% → 55%, Zone 3 (0.66–1) : 55% → 85%
+                let bgX;
+                if (sectionProgress < 0.33) {
+                    bgX = (sectionProgress / 0.33) * 20;
+                } else if (sectionProgress < 0.66) {
+                    bgX = 20 + ((sectionProgress - 0.33) / 0.33) * 35;
+                } else {
+                    bgX = 55 + ((sectionProgress - 0.66) / 0.34) * 30;
+                }
+                return (
+                    <div
+                        className="fixed inset-0 z-0 w-full h-full pointer-events-none"
+                        style={{
+                            backgroundImage: "url(/kikiscroll/IMAGES/retail_panorama.jpg)",
+                            backgroundSize: 'auto 100%',
+                            backgroundPositionX: `${bgX}%`,
+                            backgroundPositionY: 'center',
+                            backgroundRepeat: 'no-repeat',
+                            opacity: 0.5,
+                        }}
+                    />
+                );
+            })()}
+
+            {/* 3D Blob (devant le panorama, opaque) */}
+            <div className="fixed top-0 left-0 w-full h-full z-[5] pointer-events-none">
                 <Scene
                     scrollProgress={scrollProgress}
                     activeSection={activeSection}
@@ -539,7 +599,7 @@ function App() {
                                     <h2 className="text-4xl md:text-6xl font-heading font-medium tracking-tight text-white mb-8">
                                         {section.title}
                                     </h2>
-                                    <p className="text-base md:text-lg font-sans text-tenbin-gray tracking-wide leading-relaxed font-light mb-12">
+                                    <p className={"text-base md:text-lg font-sans tracking-wide leading-relaxed font-light mb-12 " + (section.hasZonesPanorama ? "text-white" : "text-tenbin-gray")}>
                                         {section.paragrapheParts.map((part, pi) => {
                                             const partThreshold = pi * 0.33;
                                             const partProgress = activeSection === index
@@ -585,7 +645,78 @@ function App() {
                                 </div>
                             )}
 
-                            {/* Section 2: Neuro-sonore Icons */}
+                            {/* Section 2 (Zones): Icônes zones (Entrée / Rayon / Espace équipe) */}
+                            {section.hasZonesPanorama && activeSection === index && (
+                                <div className="flex gap-10 mt-8 border-t border-tenbin-gray/20 pt-8">
+                                    {[
+                                        {
+                                            key: 'entree',
+                                            label: "Entrée",
+                                            subtitle: "Créer l'envie de rester",
+                                            start: 0.0,
+                                            end: 0.33,
+                                            icon: (
+                                                // Porte stylisée
+                                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <rect x="6" y="3" width="12" height="18" rx="1.5" />
+                                                    <circle cx="14" cy="12" r="0.8" />
+                                                </svg>
+                                            ),
+                                        },
+                                        {
+                                            key: 'rayon',
+                                            label: 'Rayon',
+                                            subtitle: "Stimuler l'exploration",
+                                            start: 0.33,
+                                            end: 0.66,
+                                            icon: (
+                                                // Loupe
+                                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <circle cx="11" cy="11" r="5" />
+                                                    <line x1="15" y1="15" x2="20" y2="20" />
+                                                </svg>
+                                            ),
+                                        },
+                                        {
+                                            key: 'equipe',
+                                            label: 'Espace équipe',
+                                            subtitle: 'Soutenir le bien-être',
+                                            start: 0.66,
+                                            end: 1.0,
+                                            icon: (
+                                                // Collaborateurs
+                                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <circle cx="9" cy="8" r="2.5" />
+                                                    <circle cx="15" cy="9" r="2" />
+                                                    <path d="M4.5 18c.8-2.7 2.8-4 4.5-4s3.7 1.3 4.5 4" />
+                                                    <path d="M13 18c.5-1.8 1.8-2.8 3.5-2.8c1.3 0 2.4.6 3 1.8" />
+                                                </svg>
+                                            ),
+                                        },
+                                    ].map((zone, idx) => {
+                                        const zoneLen = zone.end - zone.start;
+                                        const localP = sectionProgress <= zone.start
+                                            ? 0
+                                            : sectionProgress >= zone.end
+                                                ? 1
+                                                : (sectionProgress - zone.start) / zoneLen;
+                                        const isActive = sectionProgress >= zone.start && sectionProgress < zone.end;
+                                        const opacity = Math.max(0.2, Math.min(localP / 0.2, 1, (1 - localP) / 0.2));
+                                        return (
+                                            <div
+                                                key={zone.key}
+                                                className={`flex flex-col items-center gap-2 transition-all duration-500 ${isActive ? 'text-white opacity-100 scale-110' : 'text-tenbin-gray opacity-30 scale-100'}`}
+                                            >
+                                                {zone.icon}
+                                                <span className="text-[10px] uppercase tracking-widest">{zone.label}</span>
+                                                <span className="text-[10px] uppercase tracking-widest opacity-70">{zone.subtitle}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            {/* Section 3: Neuro-sonore Icons */}
                             {section.hasEnvironmentLabels && activeSection === index && (
                                 <div className="flex gap-10 mt-8 border-t border-tenbin-gray/20 pt-8">
                                     {[

@@ -14,6 +14,9 @@ const TRACKS = {
     focusCognitif: { src: 'MUSIC/Focus Cognitif.mp3', initialVolume: 0 },
     happy: { src: 'MUSIC/HAPPY.mp3', initialVolume: 0 },
     sad: { src: 'MUSIC/SAD.mp3', initialVolume: 0 },
+    entrance: { src: 'MUSIC/Synthwave_1.mp3', initialVolume: 0 },
+    rayon: { src: 'MUSIC/Rap_1.mp3', initialVolume: 0 },
+    cabine: { src: 'MUSIC/Bossa.mp3', initialVolume: 0 },
 };
 
 export const useAudioStore = create((set, get) => {

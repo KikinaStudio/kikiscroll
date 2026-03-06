@@ -79,7 +79,14 @@ const vertexShader = `
   }
 `;
 
-// Section 2 (Scénographie) environment configs: jungle, thunderstorm, sea
+// Section 2 (Zones) - 3 zones: Entrée, Rayon, Cabine
+const ZONES_ENVS = [
+    { scale: 1.2, roughness: 0.8, transmission: 0.0, color: new THREE.Color('#a0b8c8'), rotSpeed: 0.02 },
+    { scale: 1.0, roughness: 0.4, transmission: 0.0, color: new THREE.Color('#c8a060'), rotSpeed: 0.08 },
+    { scale: 0.8, roughness: 0.1, transmission: 0.6, color: new THREE.Color('#c0a0b8'), rotSpeed: 0.03 },
+];
+
+// Section 3 (Scénographie) environment configs: jungle, thunderstorm, sea
 const SEC2_ENVS = [
     { roughness: 0.8, transmission: 0.0, color: new THREE.Color('#1a3a1a') },
     { roughness: 0.5, transmission: 0.2, color: new THREE.Color('#2a1a3a') },
@@ -110,7 +117,7 @@ function CameraController({ activeSection, sectionProgress }) {
 
         let targetPos, targetLookAt;
 
-        if (activeSection === 4) {
+        if (activeSection === 5) {
             // Density: almost top-down view on the circle
             const t = Math.min(sectionProgress, 1);
             const height = THREE.MathUtils.lerp(6, 9, t);
@@ -164,7 +171,7 @@ function OrganicBlob({ scrollProgress, activeSection, sectionProgress, isIsolati
 
         // Make Density section calmer by removing global scroll influence on the shader
         let shaderScroll = scrollProgress || 0;
-        if (activeSection === 4) {
+        if (activeSection === 5) {
             shaderScroll = 0;
         }
         uniforms.uScroll.value = THREE.MathUtils.lerp(uniforms.uScroll.value, shaderScroll, 0.1);
@@ -182,13 +189,37 @@ function OrganicBlob({ scrollProgress, activeSection, sectionProgress, isIsolati
             targetRoughness = 0.15;
             targetRotSpeed = 0.04 + blobIndex * 0.015;
         } else {
-            // SECTION INDICES: 0=Intro, 1=Isolation, 2=Scénographie, 3=Neuro, 4=Density
+            // SECTION INDICES: 0=Intro, 1=Isolation, 2=Zones, 3=Scénographie, 4=Neuro, 5=Density
             if (activeSection === 0) {
                 // Intro: near-round, dark, slow rotation
                 targetColor.set('#0a0a0a');
                 targetDeform = -0.3;
                 targetRoughness = 0.15;
                 targetRotSpeed = 0.05;
+            } else if (activeSection === 2) {
+                // Zones: 3 zones with interpolated env
+                if (sectionProgress < 0.33) {
+                    const t = sectionProgress / 0.33;
+                    targetColor = ZONES_ENVS[0].color.clone();
+                    targetRoughness = ZONES_ENVS[0].roughness;
+                    targetTransmission = ZONES_ENVS[0].transmission;
+                    targetRotSpeed = ZONES_ENVS[0].rotSpeed;
+                    targetDeform = 0.2;
+                } else if (sectionProgress < 0.66) {
+                    const t = (sectionProgress - 0.33) / 0.33;
+                    targetColor = ZONES_ENVS[0].color.clone().lerp(ZONES_ENVS[1].color, t);
+                    targetRoughness = THREE.MathUtils.lerp(ZONES_ENVS[0].roughness, ZONES_ENVS[1].roughness, t);
+                    targetTransmission = THREE.MathUtils.lerp(ZONES_ENVS[0].transmission, ZONES_ENVS[1].transmission, t);
+                    targetRotSpeed = THREE.MathUtils.lerp(ZONES_ENVS[0].rotSpeed, ZONES_ENVS[1].rotSpeed, t);
+                    targetDeform = 0.2 + t * 0.2;
+                } else {
+                    const t = (sectionProgress - 0.66) / 0.34;
+                    targetColor = ZONES_ENVS[1].color.clone().lerp(ZONES_ENVS[2].color, t);
+                    targetRoughness = THREE.MathUtils.lerp(ZONES_ENVS[1].roughness, ZONES_ENVS[2].roughness, t);
+                    targetTransmission = THREE.MathUtils.lerp(ZONES_ENVS[1].transmission, ZONES_ENVS[2].transmission, t);
+                    targetRotSpeed = THREE.MathUtils.lerp(ZONES_ENVS[1].rotSpeed, ZONES_ENVS[2].rotSpeed, t);
+                    targetDeform = 0.4 + t * 0.3;
+                }
             } else if (activeSection === 1) {
                 // Isolation: blob changes behavior when isolation activates
                 if (isIsolationActive) {
@@ -203,7 +234,7 @@ function OrganicBlob({ scrollProgress, activeSection, sectionProgress, isIsolati
                     targetRoughness = 0.4;
                     targetRotSpeed = 0.4;
                 }
-            } else if (activeSection === 2) {
+            } else if (activeSection === 3) {
                 // Scénographie: interpolate 3 environments
                 if (sectionProgress < 0.33) {
                     targetColor = SEC2_ENVS[0].color.clone();
@@ -223,14 +254,14 @@ function OrganicBlob({ scrollProgress, activeSection, sectionProgress, isIsolati
                     targetTransmission = THREE.MathUtils.lerp(SEC2_ENVS[1].transmission, SEC2_ENVS[2].transmission, t);
                     targetDeform = 1.2 + t * 0.8;
                 }
-            } else if (activeSection === 3) {
+            } else if (activeSection === 4) {
                 // Neuro: calm, deep, meditative
                 targetColor.set('#0a0a1a');
                 targetDeform = 0.1;
                 targetRoughness = 0.1;
                 targetTransmission = 0.4;
                 targetRotSpeed = 0.03;
-            } else if (activeSection === 4) {
+            } else if (activeSection === 5) {
                 // Density: quasi-spherical, smooth
                 targetColor.set('#0a0a0a');
                 targetDeform = -0.25;
@@ -316,7 +347,12 @@ function SpaceDust({ scrollProgress }) {
 
 export default function Scene({ scrollProgress, activeSection, sectionProgress, densityBlobCount = 1, isIsolationActive = false }) {
     return (
-        <Canvas camera={{ position: [0, 0, 12], fov: 45 }} dpr={[1, 1.5]}>
+        <Canvas
+                camera={{ position: [0, 0, 12], fov: 45 }}
+                dpr={[1, 1.5]}
+                gl={{ alpha: true, antialias: true }}
+                style={{ background: 'transparent' }}
+            >
             {/* Dynamic Camera */}
             <CameraController activeSection={activeSection} sectionProgress={sectionProgress} />
 
@@ -333,12 +369,16 @@ export default function Scene({ scrollProgress, activeSection, sectionProgress, 
                 sectionProgress={sectionProgress}
                 isIsolationActive={isIsolationActive}
                 position={DENSITY_POSITIONS[0]}
-                scale={activeSection === 4 ? DENSITY_SCALES[0] : 1.0}
+                scale={
+                    activeSection === 2
+                        ? (sectionProgress < 0.33 ? 1.2 : sectionProgress < 0.66 ? 1.0 : 0.8)
+                        : (activeSection === 5 ? DENSITY_SCALES[0] : 1.0)
+                }
                 blobIndex={0}
             />
 
-            {/* Density Clones (section 4 only) */}
-            {activeSection === 4 && densityBlobCount >= 2 && (
+            {/* Density Clones (section 5 only) */}
+            {activeSection === 5 && densityBlobCount >= 2 && (
                 <OrganicBlob
                     scrollProgress={scrollProgress}
                     activeSection={activeSection}
@@ -350,7 +390,7 @@ export default function Scene({ scrollProgress, activeSection, sectionProgress, 
                     isDensityClone={true}
                 />
             )}
-            {activeSection === 4 && densityBlobCount >= 3 && (
+            {activeSection === 5 && densityBlobCount >= 3 && (
                 <OrganicBlob
                     scrollProgress={scrollProgress}
                     activeSection={activeSection}
@@ -362,7 +402,7 @@ export default function Scene({ scrollProgress, activeSection, sectionProgress, 
                     isDensityClone={true}
                 />
             )}
-            {activeSection === 4 && densityBlobCount >= 4 && (
+            {activeSection === 5 && densityBlobCount >= 4 && (
                 <OrganicBlob
                     scrollProgress={scrollProgress}
                     activeSection={activeSection}
@@ -374,7 +414,7 @@ export default function Scene({ scrollProgress, activeSection, sectionProgress, 
                     isDensityClone={true}
                 />
             )}
-            {activeSection === 4 && densityBlobCount >= 5 && (
+            {activeSection === 5 && densityBlobCount >= 5 && (
                 <OrganicBlob
                     scrollProgress={scrollProgress}
                     activeSection={activeSection}
