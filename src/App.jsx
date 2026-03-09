@@ -82,6 +82,7 @@ const sectionsData = [
 // --- Continuous audio logic driven by sectionProgress ---
 function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationActive) {
     const prevPalierRef = useRef(-1);
+    const densityIntroCutoff = 0.82;
 
     useEffect(() => {
         if (activeSection === 0) {
@@ -134,8 +135,12 @@ function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationAc
         } else if (activeSection === 5) {
             // Density: progressive stem accumulation (1→5 layers, couche 1 = drone already playing)
             prevPalierRef.current = -1;
+            const densityProgress = Math.max(
+                0,
+                Math.min(1, (sectionProgress - densityIntroCutoff) / (1 - densityIntroCutoff))
+            );
             const stems = ['strings', 'bass', 'drums', 'keyboard'];
-            const blobCount = Math.min(Math.floor(sectionProgress * 5) + 1, 5);
+            const blobCount = Math.min(Math.floor(densityProgress * 5) + 1, 5);
             // blobCount 1 = drone only, 2 = +strings, 3 = +bass, 4 = +drums, 5 = +keyboard
             const stemsActive = Math.max(0, blobCount - 1);
             for (let s = 0; s < stemsActive; s++) {
@@ -239,8 +244,12 @@ function App() {
 
     // Density: how many blobs (1-5), driven by scroll in section 5
     // Couche 1 = drone (always on), couches 2-5 = strings, bass, drums, keyboard
+    const densityIntroCutoff = 0.82;
+    const densityExperienceProgress = activeSection === 5
+        ? Math.max(0, Math.min(1, (sectionProgress - densityIntroCutoff) / (1 - densityIntroCutoff)))
+        : 0;
     const densityBlobCount = activeSection === 5
-        ? Math.min(Math.floor(sectionProgress * 5) + 1, 5)
+        ? Math.min(Math.floor(densityExperienceProgress * 5) + 1, 5)
         : 1;
 
     // Webcam state for Neuro-Adaptative section (section 4)
@@ -649,7 +658,7 @@ function App() {
                             )}
 
                             {/* Section 4: Density - musical layers counter */}
-                            {section.hasDensityLabels && activeSection === index && (
+                            {section.hasDensityLabels && activeSection === index && densityExperienceProgress > 0 && (
                                 <div className="mt-8 border-t border-tenbin-gray/20 pt-8 flex flex-col items-center gap-2 w-fit">
                                     <span className="text-3xl md:text-4xl font-heading font-medium text-white transition-all duration-500 scale-110">
                                         {densityBlobCount}
