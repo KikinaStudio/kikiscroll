@@ -591,7 +591,10 @@ function App() {
                                                     className="transition-opacity duration-500"
                                                     style={{
                                                         opacity: partProgress,
-                                                        textShadow: `0 0 ${10 * partProgress}px rgba(255,255,255,${0.18 * partProgress})`,
+                                                        color: partProgress > 0 && partProgress < 1 ? '#ffffff' : undefined,
+                                                        textShadow: partProgress > 0 && partProgress < 1
+                                                            ? `0 0 ${14 * partProgress}px rgba(255,255,255,${0.42 * partProgress})`
+                                                            : 'none',
                                                     }}
                                                 >
                                                     {pi > 0 ? ' ' : ''}{part}
@@ -617,7 +620,10 @@ function App() {
                                                     className="transition-opacity duration-500"
                                                     style={{
                                                         opacity: partProgress,
-                                                        textShadow: `0 0 ${10 * partProgress}px rgba(255,255,255,${0.18 * partProgress})`,
+                                                        color: partProgress > 0 && partProgress < 1 ? '#ffffff' : undefined,
+                                                        textShadow: partProgress > 0 && partProgress < 1
+                                                            ? `0 0 ${14 * partProgress}px rgba(255,255,255,${0.42 * partProgress})`
+                                                            : 'none',
                                                     }}
                                                 >
                                                     {pi > 0 ? ' ' : ''}{part}
