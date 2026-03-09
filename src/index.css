@@ -77,3 +77,19 @@
 .animate-chevron-bottom {
   animation: chevron-bottom 2s ease-in-out infinite 0.3s;
 }
+
+@keyframes scroll-prompt {
+  0%, 100% {
+    opacity: 0.55;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.95;
+    transform: translateY(2px);
+  }
+}
+
+.scroll-prompt-text {
+  animation: scroll-prompt 2.2s ease-in-out infinite;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.18);
+}

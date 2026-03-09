@@ -533,7 +533,10 @@ function App() {
             {/* Scroll encouragement - double chevron */}
             {hasStarted && activeSection < sectionsData.length - 1 && (
                 <div className="fixed bottom-8 left-0 right-0 z-40 flex justify-center pointer-events-none">
-                    <div className="flex flex-col items-center gap-0">
+                    <div className="flex flex-col items-center gap-2">
+                        <span className="scroll-prompt-text text-[10px] md:text-xs uppercase tracking-[0.28em] text-white/80">
+                            Continuez de scroller
+                        </span>
                         <svg width="20" height="12" viewBox="0 0 20 12" fill="none" className="text-tenbin-gray animate-chevron-top">
                             <path d="M2 2L10 10L18 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
@@ -586,7 +589,10 @@ function App() {
                                                 <span
                                                     key={pi}
                                                     className="transition-opacity duration-500"
-                                                    style={{ opacity: partProgress }}
+                                                    style={{
+                                                        opacity: partProgress,
+                                                        textShadow: `0 0 ${10 * partProgress}px rgba(255,255,255,${0.18 * partProgress})`,
+                                                    }}
                                                 >
                                                     {pi > 0 ? ' ' : ''}{part}
                                                 </span>
@@ -609,7 +615,10 @@ function App() {
                                                 <span
                                                     key={pi}
                                                     className="transition-opacity duration-500"
-                                                    style={{ opacity: partProgress }}
+                                                    style={{
+                                                        opacity: partProgress,
+                                                        textShadow: `0 0 ${10 * partProgress}px rgba(255,255,255,${0.18 * partProgress})`,
+                                                    }}
                                                 >
                                                     {pi > 0 ? ' ' : ''}{part}
                                                 </span>
