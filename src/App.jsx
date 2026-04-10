@@ -1,10 +1,11 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import Lenis from '@studio-freight/lenis';
 import Scene from './components/Scene';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAudioStore } from './store/useAudioStore';
 import * as faceapi from 'face-api.js';
+import { useTranslation } from './LanguageContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,68 +17,46 @@ gsap.registerPlugin(ScrollTrigger);
 // 4 = Musique Neuro-Adaptative (cut all non-drone, webcam → HAPPY/SAD)
 // 5 = Densité Interactive (1→5 blobs + stems accumulate, quasi-spherical)
 
-const sectionsData = [
-    {
-        id: 0,
-        title: "Un lieu a une âme.",
-        paragrapheParts: [
-            "«La musique, c'est 50% d'un film.» Francis Ford Coppola.",
-            "Dans nos boutiques et nos événements pourtant, cette magie disparaît. Le son y est subi : une playlist en boucle, aveugle à qui est là, à ce qu'ils ressentent, à l'histoire qu'on voudrait raconter.",
-            "Au cinéma, la musique désigne le personnage principal : elle le suit, réagit à ses émotions, l'élève. Nous faisons la même chose, mais pour vos visiteurs.",
-        ],
-        isIntro: true,
-    },
-    {
-        id: 1,
-        title: "Elle s'entend.",
-        paragrapheParts: [
-            "Un salon bondé, une boutique un vendredi soir : le brouhaha s'accumule, fatigue, et pousse doucement vers la sortie.",
-            "Au cinéma, le réalisateur sait isoler un personnage dans le chaos. Le monde s'efface, et il ne reste qu'une bulle d'intimité, le temps d'une scène.",
-            "Nous faisons exactement cela dans le monde physique. Une bulle de clarté, invisible, au milieu du vacarme.",
-        ],
-        hasIsolationToggle: true,
-    },
-    {
-        id: 2,
-        title: "Chaque zone a son propre rôle",
-        paragrapheParts: [
-            "Un visiteur n'est pas dans le même état d'esprit à l'entrée, devant un rayon, ou dans un espace dédié aux équipes.",
-            "Le son peut accompagner chacun de ces moments, pour les visiteurs comme pour les collaborateurs, sans que personne ne le remarque consciemment.",
-            "Trois intentions sonores. Un seul système. Pour l'expérience client comme pour le bien-être des équipes.",
-        ],
-        hasZonesPanorama: true,
-    },
-    {
-        id: 3,
-        title: "Elle se ressent.",
-        paragrapheParts: [
-            "Un simple changement d'accord transforme une scène de joie en nostalgie. La musique modifie notre rythme cardiaque, notre respiration, souvent avant même qu'on s'en rende compte.",
-            "Près de 80% de la recherche sur les effets du son sur le cerveau a été publiée ces dix dernières années. Nous pouvons désormais l'utiliser avec une précision inédite.",
-            "Concentration, apaisement, énergie : nous pouvons aujourd'hui composer l'état émotionnel d'un lieu comme un réalisateur compose sa bande originale.",
-        ],
-        hasEnvironmentLabels: true,
-    },
-    {
-        id: 4,
-        title: "Elle vit avec vous.",
-        paragrapheParts: [
-            "La musique ne joue plus pour remplir le silence. Grâce aux travaux de notre équipe en neurosciences, elle active en temps réel des paramètres émotionnels et comportementaux précis, propres à chaque moment, chaque intention, chaque client.",
-            "Pour en faire l'expérience : activez votre caméra. Souriez, ou non. La musique vous lira.",
-            "C'est ce que chacun de vos visiteurs peut vivre, sans le savoir, simplement en étant là.",
-        ],
-        hasWebcamButton: true,
-    },
-    {
-        id: 5,
-        title: "Et grandit avec vous.",
-        paragrapheParts: [
-            "Imaginez une pièce avec un simple drone sonore. Une personne entre et un violon s'éveille. Une deuxième s'approche et un rythme apparaît, doucement.",
-            "La musique ne remplit plus l'espace : elle lui répond. Plus riche, plus dense, au rythme de ceux qui arrivent.",
-            "Elle attire ceux qui passent. Elle accueille ceux qui entrent, et récompense ceux qui restent.",
-        ],
-        hasDensityLabels: true,
-    },
-];
+function getSectionsData(t) {
+    return [
+        {
+            id: 0,
+            title: t.s0_title,
+            paragrapheParts: [t.s0_p1, t.s0_p2, t.s0_p3],
+            isIntro: true,
+        },
+        {
+            id: 1,
+            title: t.s1_title,
+            paragrapheParts: [t.s1_p1, t.s1_p2, t.s1_p3],
+            hasIsolationToggle: true,
+        },
+        {
+            id: 2,
+            title: t.s2_title,
+            paragrapheParts: [t.s2_p1, t.s2_p2, t.s2_p3],
+            hasZonesPanorama: true,
+        },
+        {
+            id: 3,
+            title: t.s3_title,
+            paragrapheParts: [t.s3_p1, t.s3_p2, t.s3_p3],
+            hasEnvironmentLabels: true,
+        },
+        {
+            id: 4,
+            title: t.s4_title,
+            paragrapheParts: [t.s4_p1, t.s4_p2, t.s4_p3],
+            hasWebcamButton: true,
+        },
+        {
+            id: 5,
+            title: t.s5_title,
+            paragrapheParts: [t.s5_p1, t.s5_p2, t.s5_p3],
+            hasDensityLabels: true,
+        },
+    ];
+}
 
 // --- Continuous audio logic driven by sectionProgress ---
 function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationActive) {
@@ -233,11 +212,13 @@ function useFaceDetection(isActive, videoRef) {
 }
 
 function App() {
+    const { t } = useTranslation();
     const [scrollProgress, setScrollProgress] = useState(0);
     const [activeSection, setActiveSection] = useState(0);
     const [sectionProgress, setSectionProgress] = useState(0);
     const [hasStarted, setHasStarted] = useState(false);
     const [showMentions, setShowMentions] = useState(false);
+    const sectionsData = useMemo(() => getSectionsData(t), [t]);
 
     // Isolation: auto-driven by scroll progress in section 1
     const [isIsolationActive, setIsIsolationActive] = useState(false);
@@ -544,7 +525,7 @@ function App() {
                 <div className="fixed bottom-8 left-0 right-0 z-40 flex justify-center pointer-events-none">
                     <div className="flex flex-col items-center gap-2">
                         <span className="scroll-prompt-text text-[10px] md:text-xs uppercase tracking-[0.28em] text-white/80">
-                            Continuez de scroller
+                            {t.scroll_prompt}
                         </span>
                         <svg width="20" height="12" viewBox="0 0 20 12" fill="none" className="text-tenbin-gray animate-chevron-top">
                             <path d="M2 2L10 10L18 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -570,7 +551,7 @@ function App() {
                                     }}
                                 >
                                     <p className="text-xs md:text-sm font-semibold uppercase tracking-[0.3em] text-tenbin-gray mb-6">
-                                        Rendre le son vivant.
+                                        {t.intro_eyebrow}
                                     </p>
                                     <h2 className="text-4xl md:text-6xl font-heading font-medium tracking-tight text-white mb-8 leading-tight">
                                         {section.title}
@@ -580,12 +561,12 @@ function App() {
                                             onClick={handleStartExperience}
                                             className="px-8 py-4 border border-white bg-transparent text-white hover:bg-white hover:text-black transition-all duration-500 font-sans text-xs uppercase tracking-widest rounded-full cursor-pointer mb-8"
                                         >
-                                            Lancer l'expérience sonore
+                                            {t.intro_start}
                                         </button>
                                     ) : (
                                         <div className="flex items-center gap-3 text-tenbin-gray text-sm animate-pulse mb-8">
                                             <span>↓</span>
-                                            <span className="uppercase tracking-widest">Scrollez pour explorer</span>
+                                            <span className="uppercase tracking-widest">{t.intro_scroll}</span>
                                         </div>
                                     )}
                                     <p className="text-base md:text-lg font-sans text-tenbin-gray tracking-wide leading-relaxed font-light">
@@ -652,7 +633,7 @@ function App() {
                                         <span className={`inline-block h-6 w-6 transform rounded-full bg-tenbin-black transition-transform duration-700 ${isIsolationActive ? 'translate-x-7' : 'translate-x-1'}`} />
                                     </div>
                                     <span className={`text-sm font-medium uppercase tracking-widest transition-all duration-700 ${isIsolationActive ? 'text-white' : 'text-tenbin-gray'}`}>
-                                        {isIsolationActive ? 'Isolation activée' : 'Bruit ambiant'}
+                                        {isIsolationActive ? t.isolation_on : t.isolation_off}
                                     </span>
                                 </div>
                             )}
@@ -664,7 +645,7 @@ function App() {
                                         {densityBlobCount}
                                     </span>
                                     <span className="text-[10px] uppercase tracking-widest text-white transition-all duration-500 opacity-100">
-                                        couches sonores
+                                        {t.density_label}
                                     </span>
                                 </div>
                             )}
@@ -675,8 +656,8 @@ function App() {
                                     {[
                                         {
                                             key: 'entree',
-                                            label: "Entrée",
-                                            subtitle: "Créer l'envie de rester",
+                                            label: t.zone_entree,
+                                            subtitle: t.zone_entree_sub,
                                             start: 0.0,
                                             end: 0.33,
                                             icon: (
@@ -689,8 +670,8 @@ function App() {
                                         },
                                         {
                                             key: 'rayon',
-                                            label: 'Rayon',
-                                            subtitle: "Stimuler l'exploration",
+                                            label: t.zone_rayon,
+                                            subtitle: t.zone_rayon_sub,
                                             start: 0.33,
                                             end: 0.66,
                                             icon: (
@@ -703,8 +684,8 @@ function App() {
                                         },
                                         {
                                             key: 'equipe',
-                                            label: 'Espace équipe',
-                                            subtitle: 'Soutenir le bien-être',
+                                            label: t.zone_equipe,
+                                            subtitle: t.zone_equipe_sub,
                                             start: 0.66,
                                             end: 1.0,
                                             icon: (
@@ -744,19 +725,19 @@ function App() {
                             {section.hasEnvironmentLabels && activeSection === index && (
                                 <div className="flex gap-10 mt-8 border-t border-tenbin-gray/20 pt-8">
                                     {[
-                                        { key: 'relaxation', label: 'Relaxation', icon: (
+                                        { key: 'relaxation', label: t.neuro_relaxation, icon: (
                                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                                                 <path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 17 3.5s1.5 2 2.1 7.7A7 7 0 0 1 11 20z"/>
                                                 <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 12 13"/>
                                             </svg>
                                         )},
-                                        { key: 'regulation', label: 'Régulation émotionnelle', icon: (
+                                        { key: 'regulation', label: t.neuro_regulation, icon: (
                                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                                                 <path d="M19.5 12.572l-7.5 7.428l-7.5-7.428A5 5 0 1 1 12 6.006a5 5 0 1 1 7.5 6.572"/>
                                                 <path d="M12 6v15"/>
                                             </svg>
                                         )},
-                                        { key: 'focus', label: 'Focus cognitif', icon: (
+                                        { key: 'focus', label: t.neuro_focus, icon: (
                                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                                                 <circle cx="12" cy="12" r="10"/>
                                                 <circle cx="12" cy="12" r="6"/>
@@ -787,7 +768,7 @@ function App() {
                                                 : 'bg-transparent border-white hover:bg-white hover:text-black text-white'
                                             }`}
                                     >
-                                        {isCameraActive ? 'Caméra active' : 'Autoriser la caméra'}
+                                        {isCameraActive ? t.webcam_active : t.webcam_authorize}
                                     </button>
 
                                     {/* Emotion indicator */}
@@ -798,9 +779,9 @@ function App() {
                                                         'bg-tenbin-gray/50'
                                                 }`} />
                                             <span className="text-sm uppercase tracking-widest text-tenbin-gray">
-                                                {isSmiling === true ? 'Joyeux' :
-                                                    isSmiling === false ? 'Neutre' :
-                                                        'Analyse en cours...'}
+                                                {isSmiling === true ? t.webcam_happy :
+                                                    isSmiling === false ? t.webcam_neutral :
+                                                        t.webcam_analyzing}
                                             </span>
                                         </div>
                                     )}
@@ -830,35 +811,35 @@ function App() {
                         </div>
                         <div className="flex flex-col md:flex-row gap-8 md:gap-12 text-sm flex-1">
                             <div className="flex flex-col gap-3 flex-shrink-0 md:w-36">
-                                <a href="https://kikinalab.com" target="_blank" rel="noopener noreferrer" className="text-[#555] hover:text-[#1a1a1a] transition-colors">Qui sommes-nous</a>
+                                <a href="https://kikinalab.com" target="_blank" rel="noopener noreferrer" className="text-[#555] hover:text-[#1a1a1a] transition-colors">{t.footer_about}</a>
                                 <button 
                                     onClick={() => setShowMentions(!showMentions)} 
                                     className="text-left text-[#555] hover:text-[#1a1a1a] transition-colors focus:outline-none"
                                 >
-                                    Mentions légales
+                                    {t.footer_legal}
                                 </button>
                                 <a href="https://www.linkedin.com/company/kikinastudio/" target="_blank" rel="noopener noreferrer" className="text-[#555] hover:text-[#1a1a1a] transition-colors">LinkedIn</a>
                             </div>
                             <div className="flex flex-col gap-3 flex-1 max-w-lg">
-                                <span className="font-semibold uppercase tracking-widest text-xs mb-1">Nous contacter</span>
+                                <span className="font-semibold uppercase tracking-widest text-xs mb-1">{t.footer_contact}</span>
                                 <form className="flex flex-col gap-3" onSubmit={(e) => {
                                     e.preventDefault();
                                     const form = e.target;
                                     const email = form.email.value;
                                     const message = form.message.value;
-                                    window.location.href = `mailto:bianca@kikinastudio.com?subject=Contact depuis Kikiscroll&body=${encodeURIComponent(message + '\n\nDe : ' + email)}`;
+                                    window.location.href = `mailto:bianca@kikinastudio.com?subject=${encodeURIComponent(t.footer_mailto_subject)}&body=${encodeURIComponent(message + '\n\n' + t.footer_mailto_body_prefix + email)}`;
                                 }}>
                                     <input
                                         name="email"
                                         type="email"
                                         required
-                                        placeholder="Votre email"
+                                        placeholder={t.footer_email_placeholder}
                                         className="bg-transparent border-b border-[#ccc] focus:border-[#1a1a1a] outline-none py-2 text-sm text-[#1a1a1a] placeholder-[#999] transition-colors"
                                     />
                                     <textarea
                                         name="message"
                                         required
-                                        placeholder="Votre message"
+                                        placeholder={t.footer_message_placeholder}
                                         rows={3}
                                         className="bg-transparent border-b border-[#ccc] focus:border-[#1a1a1a] outline-none py-2 text-sm text-[#1a1a1a] placeholder-[#999] transition-colors resize-none"
                                     />
@@ -866,14 +847,14 @@ function App() {
                                         type="submit"
                                         className="self-start mt-2 px-6 py-2 text-xs uppercase tracking-widest font-semibold border border-[#1a1a1a] text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-[#f5f3f0] transition-colors rounded-full"
                                     >
-                                        Envoyer
+                                        {t.footer_send}
                                     </button>
                                 </form>
                             </div>
                         </div>
                     </div>
                     <div className="border-t border-[#d0d0d0] pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                        <span className="text-xs text-[#999]">© 2026 Kikina Lab. Tous droits réservés.</span>
+                        <span className="text-xs text-[#999]">{t.footer_copyright}</span>
                     </div>
 
                     {/* Large brand name */}
@@ -888,21 +869,19 @@ function App() {
                 {showMentions && (
                     <div className="bg-[#f5f3f0] text-[#1a1a1a] px-8 md:px-[8vw] py-16 text-[10px] leading-relaxed border-t border-[#d0d0d0]">
                         <div className="max-w-2xl">
-                            <h3 className="font-bold uppercase mb-4 text-xs">Mentions Légales</h3>
-                            <p className="mb-2"><strong>Éditeur du site :</strong> Kikina Lab / Kikina Studio</p>
-                            <p className="mb-2"><strong>Siège social :</strong> Paris, France</p>
-                            <p className="mb-2"><strong>Contact :</strong> bianca@kikinastudio.com</p>
-                            <p className="mb-2"><strong>Hébergement :</strong> Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723</p>
+                            <h3 className="font-bold uppercase mb-4 text-xs">{t.legal_title}</h3>
+                            <p className="mb-2"><strong>{t.legal_editor}</strong> {t.legal_editor_value}</p>
+                            <p className="mb-2"><strong>{t.legal_address_label}</strong> {t.legal_address_value}</p>
+                            <p className="mb-2"><strong>{t.legal_contact_label}</strong> bianca@kikinastudio.com</p>
+                            <p className="mb-2"><strong>{t.legal_hosting_label}</strong> {t.legal_hosting_value}</p>
                             <p className="mt-6 italic opacity-60">
-                                Ce site utilise des technologies de détection d'expressions faciales (face-api.js). 
-                                Aucune donnée d'image n'est enregistrée ou transmise à des serveurs tiers ; 
-                                l'Analyse est effectuée localement dans votre navigateur en temps réel.
+                                {t.legal_privacy}
                             </p>
-                            <button 
+                            <button
                                 onClick={() => setShowMentions(false)}
                                 className="mt-8 text-[#555] hover:text-[#1a1a1a] underline uppercase tracking-widest font-bold"
                             >
-                                Fermer
+                                {t.legal_close}
                             </button>
                         </div>
                     </div>

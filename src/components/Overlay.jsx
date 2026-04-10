@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useAudioStore } from '../store/useAudioStore';
+import { useTranslation } from '../LanguageContext';
 
 export default function Overlay({ onStart }) {
+    const { t } = useTranslation();
     const [isFading, setIsFading] = useState(false);
     const startAllTracks = useAudioStore((state) => state.startAllTracks);
 
@@ -21,7 +23,7 @@ export default function Overlay({ onStart }) {
         >
             <h1 className="text-5xl md:text-8xl font-heading tracking-tight text-white mb-4">KIKINA LAB</h1>
             <p className="text-lg md:text-xl font-sans text-tenbin-gray mb-12 tracking-wide font-light text-center px-4">
-                At the crossroads of science, sound, and storytelling.
+                {t.overlay_tagline}
             </p>
             <button
                 onClick={handleStart}
@@ -31,7 +33,7 @@ export default function Overlay({ onStart }) {
                 <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
                 <span className="relative z-10 font-sans text-sm md:text-base font-semibold tracking-widest text-tenbin-offwhite group-hover:text-white transition-colors uppercase">
-                    Vivre l'expérience sonore
+                    {t.overlay_cta}
                 </span>
             </button>
         </div>
