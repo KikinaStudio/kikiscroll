@@ -212,7 +212,7 @@ function useFaceDetection(isActive, videoRef) {
 }
 
 function App() {
-    const { t } = useTranslation();
+    const { t, mode } = useTranslation();
     const [scrollProgress, setScrollProgress] = useState(0);
     const [activeSection, setActiveSection] = useState(0);
     const [sectionProgress, setSectionProgress] = useState(0);
@@ -460,7 +460,7 @@ function App() {
                     <div
                         className="fixed inset-0 z-0 w-full h-full pointer-events-none"
                         style={{
-                            backgroundImage: "url(/kikiscroll/IMAGES/retail_panorama.jpg)",
+                            backgroundImage: `url(/kikiscroll/IMAGES/${mode}_panorama.jpg)`,
                             backgroundSize: 'auto 100%',
                             backgroundPositionX: `${bgX}%`,
                             backgroundPositionY: 'center',

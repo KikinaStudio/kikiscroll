@@ -1,4 +1,4 @@
-const translations = {
+const retail = {
   fr: {
     // Overlay
     overlay_tagline: "Au croisement de la science, du son et du storytelling.",
@@ -18,12 +18,12 @@ const translations = {
     s5_title: "Et grandit avec vous.",
 
     // Section 0 paragraphs
-    s0_p1: "«\u00A0La musique, c'est 50% d'un film.\u00A0» Francis Ford Coppola.",
-    s0_p2: "Dans nos boutiques et nos événements pourtant, cette magie disparaît. Le son y est subi\u00A0: une playlist en boucle, aveugle à qui est là, à ce qu'ils ressentent, à l'histoire qu'on voudrait raconter.",
-    s0_p3: "Au cinéma, la musique désigne le personnage principal\u00A0: elle le suit, réagit à ses émotions, l'élève. Nous faisons la même chose, mais pour vos visiteurs.",
+    s0_p1: "« La musique, c'est 50% d'un film. » Francis Ford Coppola.",
+    s0_p2: "Dans nos boutiques et nos événements pourtant, cette magie disparaît. Le son y est subi : une playlist en boucle, aveugle à qui est là, à ce qu'ils ressentent, à l'histoire qu'on voudrait raconter.",
+    s0_p3: "Au cinéma, la musique désigne le personnage principal : elle le suit, réagit à ses émotions, l'élève. Nous faisons la même chose, mais pour vos visiteurs.",
 
     // Section 1 paragraphs
-    s1_p1: "Un salon bondé, une boutique un vendredi soir\u00A0: le brouhaha s'accumule, fatigue, et pousse doucement vers la sortie.",
+    s1_p1: "Un salon bondé, une boutique un vendredi soir : le brouhaha s'accumule, fatigue, et pousse doucement vers la sortie.",
     s1_p2: "Au cinéma, le réalisateur sait isoler un personnage dans le chaos. Le monde s'efface, et il ne reste qu'une bulle d'intimité, le temps d'une scène.",
     s1_p3: "Nous faisons exactement cela dans le monde physique. Une bulle de clarté, invisible, au milieu du vacarme.",
 
@@ -35,16 +35,16 @@ const translations = {
     // Section 3 paragraphs
     s3_p1: "Un simple changement d'accord transforme une scène de joie en nostalgie. La musique modifie notre rythme cardiaque, notre respiration, souvent avant même qu'on s'en rende compte.",
     s3_p2: "Près de 80% de la recherche sur les effets du son sur le cerveau a été publiée ces dix dernières années. Nous pouvons désormais l'utiliser avec une précision inédite.",
-    s3_p3: "Concentration, apaisement, énergie\u00A0: nous pouvons aujourd'hui composer l'état émotionnel d'un lieu comme un réalisateur compose sa bande originale.",
+    s3_p3: "Concentration, apaisement, énergie : nous pouvons aujourd'hui composer l'état émotionnel d'un lieu comme un réalisateur compose sa bande originale.",
 
     // Section 4 paragraphs
     s4_p1: "La musique ne joue plus pour remplir le silence. Grâce aux travaux de notre équipe en neurosciences, elle active en temps réel des paramètres émotionnels et comportementaux précis, propres à chaque moment, chaque intention, chaque client.",
-    s4_p2: "Pour en faire l'expérience\u00A0: activez votre caméra. Souriez, ou non. La musique vous lira.",
+    s4_p2: "Pour en faire l'expérience : activez votre caméra. Souriez, ou non. La musique vous lira.",
     s4_p3: "C'est ce que chacun de vos visiteurs peut vivre, sans le savoir, simplement en étant là.",
 
     // Section 5 paragraphs
     s5_p1: "Imaginez une pièce avec un simple drone sonore. Une personne entre et un violon s'éveille. Une deuxième s'approche et un rythme apparaît, doucement.",
-    s5_p2: "La musique ne remplit plus l'espace\u00A0: elle lui répond. Plus riche, plus dense, au rythme de ceux qui arrivent.",
+    s5_p2: "La musique ne remplit plus l'espace : elle lui répond. Plus riche, plus dense, au rythme de ceux qui arrivent.",
     s5_p3: "Elle attire ceux qui passent. Elle accueille ceux qui entrent, et récompense ceux qui restent.",
 
     // Scroll prompt
@@ -97,7 +97,7 @@ const translations = {
     legal_contact_label: "Contact :",
     legal_hosting_label: "Hébergement :",
     legal_hosting_value: "Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723",
-    legal_privacy: "Ce site utilise des technologies de détection d'expressions faciales (face-api.js). Aucune donnée d'image n'est enregistrée ou transmise à des serveurs tiers\u00A0; l'Analyse est effectuée localement dans votre navigateur en temps réel.",
+    legal_privacy: "Ce site utilise des technologies de détection d'expressions faciales (face-api.js). Aucune donnée d'image n'est enregistrée ou transmise à des serveurs tiers ; l'Analyse est effectuée localement dans votre navigateur en temps réel.",
     legal_close: "Fermer",
   },
 
@@ -120,7 +120,7 @@ const translations = {
     s5_title: "And grows with you.",
 
     // Section 0 paragraphs
-    s0_p1: "\u201CMusic is 50% of a film.\u201D Francis Ford Coppola.",
+    s0_p1: "“Music is 50% of a film.” Francis Ford Coppola.",
     s0_p2: "Yet in our stores and events, this magic disappears. Sound is an afterthought: a playlist on loop, oblivious to who is there, what they feel, or the story waiting to be told.",
     s0_p3: "In cinema, music singles out the main character: it follows them, reacts to their emotions, elevates them. We do the same, for your visitors.",
 
@@ -186,7 +186,7 @@ const translations = {
     footer_email_placeholder: "Your email",
     footer_message_placeholder: "Your message",
     footer_send: "Send",
-    footer_copyright: "\u00A9 2026 Kikina Lab. All rights reserved.",
+    footer_copyright: "© 2026 Kikina Lab. All rights reserved.",
     footer_mailto_subject: "Contact from Kikiscroll",
     footer_mailto_body_prefix: "From: ",
 
@@ -204,4 +204,4 @@ const translations = {
   },
 };
 
-export default translations;
+export default retail;

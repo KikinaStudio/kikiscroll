@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { Howl } from 'howler';
+import { parseUrlMode } from '../urlMode';
 
-// Track list exact match with /public/MUSIC/
-const TRACKS = {
+// Retail track list — exact match with /public/MUSIC/
+const RETAIL_TRACKS = {
     drone: { src: 'MUSIC/0 Drone.mp3', initialVolume: 0.5 },
     strings: { src: 'MUSIC/1 Strings.mp3', initialVolume: 0 },
     bass: { src: 'MUSIC/2 Bass.mp3', initialVolume: 0 },
@@ -18,6 +19,29 @@ const TRACKS = {
     rayon: { src: 'MUSIC/Rap_1.mp3', initialVolume: 0 },
     cabine: { src: 'MUSIC/Bossa.mp3', initialVolume: 0 },
 };
+
+// Wellness track list — files in /public/MUSIC/wellness/.
+// Tracks marked TODO currently fall back to the retail file so audio plays in wellness mode
+// before bespoke wellness assets exist. Swap the path when each new piece is delivered.
+const WELLNESS_TRACKS = {
+    drone: { src: 'MUSIC/0 Drone.mp3', initialVolume: 0.5 },
+    strings: { src: 'MUSIC/1 Strings.mp3', initialVolume: 0 }, // TODO: replace with wellness stem
+    bass: { src: 'MUSIC/2 Bass.mp3', initialVolume: 0 },       // TODO: replace with wellness stem
+    drums: { src: 'MUSIC/3 Drums.mp3', initialVolume: 0 },     // TODO: replace with wellness stem
+    keyboard: { src: 'MUSIC/4 Keyboard.mp3', initialVolume: 0 }, // TODO: replace with wellness stem
+    crowd: { src: 'MUSIC/Crowd.mp3', initialVolume: 0 },
+    jungle: { src: 'MUSIC/Jungle.mp3', initialVolume: 0 },     // TODO: replace with wellness Relaxation track
+    pulsatingWave: { src: 'MUSIC/Pulsating Wave.mp3', initialVolume: 0 },
+    focusCognitif: { src: 'MUSIC/Focus Cognitif.mp3', initialVolume: 0 },
+    happy: { src: 'MUSIC/HAPPY.mp3', initialVolume: 0 },       // TODO: validate or replace for wellness
+    sad: { src: 'MUSIC/SAD.mp3', initialVolume: 0 },           // TODO: validate or replace for wellness
+    entrance: { src: 'MUSIC/Synthwave_1.mp3', initialVolume: 0 }, // TODO: replace with MUSIC/wellness/Accueil.mp3
+    rayon: { src: 'MUSIC/Rap_1.mp3', initialVolume: 0 },       // TODO: replace with MUSIC/wellness/Cabine.mp3
+    cabine: { src: 'MUSIC/Bossa.mp3', initialVolume: 0 },      // TODO: replace with MUSIC/wellness/Praticien.mp3
+};
+
+const { mode } = parseUrlMode();
+const TRACKS = mode === 'wellness' ? WELLNESS_TRACKS : RETAIL_TRACKS;
 
 export const useAudioStore = create((set, get) => {
     const instances = {};

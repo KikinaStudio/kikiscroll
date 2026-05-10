@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react';
 import translations from './translations';
+import { useMode } from './ModeContext';
 
 const LanguageContext = createContext('fr');
 
@@ -11,5 +12,6 @@ export function LanguageProvider({ lang, children }) {
 
 export function useTranslation() {
   const lang = useContext(LanguageContext);
-  return { t: translations[lang], lang };
+  const mode = useMode();
+  return { t: translations[mode][lang], lang, mode };
 }
