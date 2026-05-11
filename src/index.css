@@ -7,6 +7,16 @@
   --font-body: 'Space Grotesk', sans-serif;
 }
 
+/* Wellness mode palette (spa luxe 2026) — scoped to <html data-mode="wellness"> set by main.jsx */
+html[data-mode="wellness"] {
+  --spa-sand: #f4e6d6;
+  --spa-peach: #e8c5a8;
+  --spa-rose: #d49a8a;
+  --spa-warmth: #c47b6e;
+  --steam-tint: #ffffff;
+  --text-deep: #3a2820;
+}
+
 @layer base {
 
   html,
@@ -19,6 +29,29 @@
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
   }
+
+  /* Wellness: warm radial gradient background on html so it covers the full document height
+     regardless of body bg-attachment quirks; body bg layer adds the gradient on top. */
+  html[data-mode="wellness"] {
+    background-color: var(--spa-sand);
+  }
+
+  html[data-mode="wellness"] body {
+    background-color: transparent;
+    color: var(--text-deep);
+    background-image:
+      radial-gradient(ellipse 90% 60% at 50% 0%, var(--spa-sand) 0%, transparent 60%),
+      radial-gradient(ellipse 110% 80% at 50% 50%, var(--spa-peach) 0%, transparent 70%),
+      radial-gradient(ellipse 120% 80% at 50% 100%, var(--spa-rose) 0%, transparent 70%);
+    background-size: 140% 140%;
+    background-attachment: fixed;
+    animation: spa-breath 75s ease-in-out infinite;
+  }
+}
+
+@keyframes spa-breath {
+  0%, 100% { background-position: 50% 50%; }
+  50%      { background-position: 50% 48%; }
 }
 
 /* Grain Noise Overlay - visible grain over sphere gray #0a0a0a */
@@ -32,6 +65,37 @@
   pointer-events: none;
   opacity: 0.12;
   background-image: url('https://grainy-gradients.vercel.app/noise.svg');
+}
+
+/* Wellness: grain is much more subtle over warm tones */
+html[data-mode="wellness"] .grain-overlay {
+  opacity: 0.05;
+}
+
+/* Wellness: Tailwind text-white forces dark deep-brown to keep WCAG contrast on warm bg.
+   Excludes panorama and any element that opts out via .spa-keep-white. */
+html[data-mode="wellness"] .text-white:not(.spa-keep-white):not(.spa-panorama__title):not(.spa-panorama__sub):not(.spa-panorama__body):not(.spa-panorama__counter) {
+  color: var(--text-deep);
+}
+
+/* tenbin-gray is too light on warm bg; lean into a warm mid-tone */
+html[data-mode="wellness"] .text-tenbin-gray:not(.spa-keep-grey) {
+  color: rgba(58, 40, 32, 0.62);
+}
+
+html[data-mode="wellness"] .text-tenbin-offwhite {
+  color: var(--text-deep);
+}
+
+/* Borders that were white-on-dark now need to be deep-on-warm */
+html[data-mode="wellness"] .border-white {
+  border-color: var(--text-deep);
+}
+
+/* Buttons with hover white→black inversion need flipping in wellness */
+html[data-mode="wellness"] .hover\:bg-white:hover {
+  background-color: var(--text-deep);
+  color: var(--spa-sand);
 }
 
 /* UI Transitions */
@@ -92,4 +156,130 @@
 .scroll-prompt-text {
   animation: scroll-prompt 2.2s ease-in-out infinite;
   text-shadow: 0 0 12px rgba(255, 255, 255, 0.18);
+}
+
+html[data-mode="wellness"] .scroll-prompt-text {
+  text-shadow: 0 0 12px rgba(58, 40, 32, 0.18);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Wellness panorama section 2 — 4 zones premium
+   ───────────────────────────────────────────────────────────── */
+
+.spa-panorama {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.spa-panorama__track {
+  display: flex;
+  height: 100%;
+  width: max-content;
+  gap: 4vw;
+  padding: 0 8vw;
+  will-change: transform;
+}
+
+.spa-panorama__slide {
+  position: relative;
+  height: 100%;
+  flex: 0 0 auto;
+  width: 60vw;
+  aspect-ratio: 4 / 5;
+  max-width: 720px;
+  max-height: 88vh;
+  align-self: center;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow:
+    inset 12vw 0 14vw -8vw rgba(58, 40, 32, 0.18),
+    inset -12vw 0 14vw -8vw rgba(58, 40, 32, 0.18),
+    0 24px 60px -20px rgba(58, 40, 32, 0.3);
+}
+
+.spa-panorama__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: saturate(0.9) sepia(0.05);
+  transition: transform 800ms cubic-bezier(0.32, 0.72, 0, 1);
+  transform: scale(1.05);
+}
+
+.spa-panorama__slide--active .spa-panorama__bg {
+  transform: scale(1);
+}
+
+.spa-panorama__placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8vw;
+  color: rgba(58, 40, 32, 0.55);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.spa-panorama__counter {
+  position: absolute;
+  top: 8vw;
+  right: 8vw;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-deep);
+  opacity: 0.55;
+}
+
+.spa-panorama__caption {
+  position: absolute;
+  left: 8vw;
+  right: 8vw;
+  bottom: 8vw;
+  max-width: 38ch;
+  color: var(--text-deep);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 600ms ease, transform 600ms ease;
+}
+
+.spa-panorama__slide--active .spa-panorama__caption {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 200ms;
+}
+
+.spa-panorama__sub {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  opacity: 0.6;
+  margin-bottom: 12px;
+}
+
+.spa-panorama__title {
+  display: block;
+  font-size: clamp(28px, 4vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.spa-panorama__body {
+  display: block;
+  font-size: 14px;
+  line-height: 1.55;
+  opacity: 0.78;
 }

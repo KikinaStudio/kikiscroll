@@ -2,71 +2,77 @@ const wellness = {
   fr: {
     // Overlay
     overlay_tagline: "Au croisement de la science, du son et du soin.",
-    overlay_cta: "Vivre l'expérience sonore",
+    overlay_cta: "Entrer dans l'expérience sonore",
 
     // Intro section
-    intro_eyebrow: "Composer le repos.",
+    intro_eyebrow: "Composer le silence.",
     intro_start: "Lancer l'expérience sonore",
     intro_scroll: "Scrollez pour explorer",
 
     // Section titles
-    s0_title: "Un lieu a une âme.",
-    s1_title: "Elle s'entend.",
-    s2_title: "Chaque espace a son propre rôle",
-    s3_title: "Elle se ressent.",
-    s4_title: "Elle vit avec vous.",
-    s5_title: "Et grandit avec vous.",
+    s0_title: "Un lieu de soin a une signature.",
+    s1_title: "L'art de l'écoute située.",
+    s2_title: "Une signature par espace.",
+    s3_title: "Composer l'état, pas l'ambiance.",
+    s4_title: "Le son qui répond.",
+    s5_title: "Une matière qui s'épaissit.",
 
     // Section 0 paragraphs
-    s0_p1: "« La musique, c'est 50% d'un film. » Francis Ford Coppola.",
-    s0_p2: "Dans nos spas et nos instituts pourtant, cette magie disparaît. Le son y est subi : une playlist en boucle, aveugle à qui est là, à ce qu'ils ressentent, à l'état dans lequel on voudrait les conduire.",
-    s0_p3: "Au cinéma, la musique désigne le personnage principal : elle le suit, réagit à ses émotions, le porte. Nous faisons la même chose, mais pour vos curistes.",
+    s0_p1: "« Le silence n'est jamais vide. Il est composé. » Chaque spa porte un climat sonore qui décide, avant même le premier soin, si le système nerveux relâche ou reste en alerte.",
+    s0_p2: "Hôtels, instituts, thermes, retraites de longévité. Partout où l'on vient chercher une parenthèse, le son est le premier soin reçu, et le dernier souvenir emporté.",
+    s0_p3: "Nous composons cette signature, espace par espace, du seuil de l'accueil aux derniers instants de récupération. Une musique vivante, écrite par des compositeurs, guidée par les neurosciences.",
 
     // Section 1 paragraphs
-    s1_p1: "Une salle d'attente animée, un institut un samedi après-midi : les voix s'accumulent, le système nerveux reste en alerte, et le soin commence avec quelques battements de retard.",
-    s1_p2: "Au cinéma, le réalisateur sait isoler un personnage dans le chaos. Le monde s'efface, et il ne reste qu'une bulle d'intimité, le temps d'une scène.",
-    s1_p3: "Nous faisons exactement cela dans le monde physique. Une bulle de calme, invisible, qui prépare le corps avant même que la main du praticien ne se pose.",
+    s1_p1: "Un spa est un empilement de zones acoustiques contradictoires : la voix de l'accueil ne doit pas atteindre la cabine, la rumeur du hammam ne doit pas couvrir la tisanerie.",
+    s1_p2: "Nos dispositifs de diffusion directionnelle créent des bulles de cohérence sonore. Chaque zone reçoit sa propre signature, sans pollution, sans débordement, sans compromis acoustique.",
+    s1_p3: "Le client traverse le spa et perçoit, sans le formuler, que chaque espace a été pensé pour lui seul. C'est le degré zéro du luxe contemporain : la précision invisible.",
 
     // Section 2 paragraphs
-    s2_p1: "Un curiste n'est pas dans le même état à l'accueil, dans une cabine de soin, ou dans la zone humide entre deux rituels.",
-    s2_p2: "Le son peut accompagner chacun de ces moments, pour les clients comme pour les praticiens, sans que personne ne le remarque consciemment.",
-    s2_p3: "Trois intentions sonores. Un seul système. Pour l'expérience client comme pour le bien-être des équipes.",
+    s2_p1: "Quatre catégories d'espaces composent un parcours spa. Chacune a ses contraintes acoustiques, son objectif neurologique, son rythme propre. Une seule composition générique trahit toutes les autres.",
+    s2_p2: "Nous écrivons une signature distincte pour chaque zone, et nous orchestrons les transitions. Le passage d'un espace à l'autre se fait sans coupure, sans rupture, sans boucle perceptible.",
+    s2_p3: "Faites défiler pour traverser les quatre territoires sonores.",
 
     // Section 3 paragraphs
-    s3_p1: "Un simple changement d'accord ralentit la respiration, ouvre la cage thoracique, dénoue la mâchoire. La musique modifie notre rythme cardiaque avant même qu'on s'en rende compte.",
-    s3_p2: "Près de 80% de la recherche sur les effets du son sur le système nerveux a été publiée ces dix dernières années. Nous pouvons désormais l'utiliser avec une précision inédite.",
-    s3_p3: "Apaisement, lâcher-prise, ancrage : nous pouvons aujourd'hui composer l'état émotionnel d'un soin comme un réalisateur compose sa bande originale.",
+    s3_p1: "Un soin n'a pas une seule intention. Relâchement somatique, régulation parasympathique, ancrage attentionnel : ces états physiologiques sont aussi précis qu'un dosage.",
+    s3_p2: "À chaque registre correspond une trame sonore distincte. Nos compositions glissent d'un état à l'autre selon le moment du soin, sans transition perceptible.",
+    s3_p3: "Le praticien guide le geste, la signature sonore guide le système nerveux. Les deux convergent sans concertation.",
 
     // Section 4 paragraphs
-    s4_p1: "La musique ne joue plus pour habiller le silence. Grâce aux travaux de notre équipe en neurosciences, elle active en temps réel des paramètres physiologiques précis, propres à chaque rituel, chaque intention, chaque client.",
-    s4_p2: "Pour en faire l'expérience : activez votre caméra. Souriez, ou laissez votre visage au repos. La musique vous lira.",
-    s4_p3: "C'est ce que chacun de vos curistes peut vivre, sans le savoir, simplement en s'allongeant.",
+    s4_p1: "Le visage du client raconte son état avant qu'il ne le sache. Tension résiduelle, ouverture, abandon. La musique doit suivre, pas devancer.",
+    s4_p2: "Notre moteur lit les micro-signaux faciaux en temps réel et ajuste la trame sonore au plus juste : densité, registre, mouvement. La composition reste fidèle à elle-même, mais elle écoute.",
+    s4_p3: "Activez votre caméra pour ressentir le principe. C'est la version sonore de ce que la médecine de longévité fait avec les biomarqueurs : une réponse calibrée, vivante, individuelle, sans intrusion.",
 
     // Section 5 paragraphs
-    s5_p1: "Imaginez une cabine avec un simple drone sonore. Le client entre et un souffle s'éveille. Le soin commence et une nappe apparaît, doucement.",
-    s5_p2: "La musique ne remplit plus l'espace : elle accompagne le geste. À chaque étape du soin, une couche s'ajoute. Plus riche, plus dense, au rythme du modelage lui-même.",
-    s5_p3: "Elle attire ceux qui hésitent. Elle accueille ceux qui entrent, et apaise ceux qui restent.",
+    s5_p1: "Une signature sonore n'est jamais une boucle. C'est un tissu de couches qui se composent, se décomposent, se recomposent selon le moment, l'affluence, l'heure du jour.",
+    s5_p2: "Nos compositions reposent sur cinq strates indépendantes : drone, cordes, basses, percussions, claviers. Chacune entre et sort selon les paramètres de l'espace, sans jamais répéter la même combinaison.",
+    s5_p3: "Le client revient le mois suivant, retrouve la même signature, et entend autre chose. C'est ce qui fait qu'on revient.",
 
     // Scroll prompt
     scroll_prompt: "Continuez de scroller",
 
     // Section 1: Isolation toggle
-    isolation_on: "Bulle de calme active",
+    isolation_on: "Écoute située active",
     isolation_off: "Bruit ambiant",
 
     // Section 5: Density
-    density_label: "couches sonores",
+    density_label: "strates sonores",
 
-    // Section 2: Zones
-    zone_entree: "Accueil",
-    zone_entree_sub: "Préparer le lâcher-prise",
-    zone_rayon: "Cabine de soin",
-    zone_rayon_sub: "Approfondir la détente",
-    zone_equipe: "Espace praticien",
-    zone_equipe_sub: "Soutenir la concentration",
+    // Section 2: Zones (3 clés existantes réutilisées avec valeurs spa, + 4e clé recuperation)
+    zone_entree: "Accueil & transitions",
+    zone_entree_sub: "Le seuil",
+    zone_entree_body: "Réception, vestiaires, couloirs, tisanerie. La zone la plus bruyante du spa, paradoxalement. Notre composition masque sans s'imposer, abaisse la fréquence cardiaque, prépare le système nerveux avant la première parole.",
+    zone_rayon: "Rituels de chaleur",
+    zone_rayon_sub: "L'enveloppe",
+    zone_rayon_body: "Hammam, sauna, douches sensorielles, parcours kneipp. Acoustique extrême, surfaces dures, vapeur. Notre composition épouse le volume avec des basses chaudes et des textures organiques. L'objectif n'est pas la sédation mais la relaxation alerte, soutien de la circulation et du souffle.",
+    zone_equipe: "Cabines de soin",
+    zone_equipe_sub: "Le geste",
+    zone_equipe_body: "Modelage, drainage, soin du visage, énergétique. La main du praticien dialogue avec un système nerveux à vif. Nos trames sonores soutiennent le geste sans aléatoire ni surprise. Le client s'abandonne, le praticien travaille en confiance.",
+    zone_recuperation: "Espaces de récupération",
+    zone_recuperation_sub: "L'empreinte",
+    zone_recuperation_body: "Salles de repos, méditation, sound bath, breathwork. L'étape la plus négligée du parcours, et la plus puissante. Nos compositions étirent l'état parasympathique et prolongent le soin bien après la sortie de cabine. Le souvenir d'un spa n'est pas visuel, il est sonore.",
 
     // Section 3: Neuro labels
-    neuro_relaxation: "Relaxation",
+    neuro_relaxation: "Relâchement somatique",
     neuro_regulation: "Régulation parasympathique",
     neuro_focus: "Ancrage attentionnel",
 
@@ -74,8 +80,8 @@ const wellness = {
     webcam_active: "Caméra active",
     webcam_authorize: "Autoriser la caméra",
     webcam_happy: "Détendu",
-    webcam_neutral: "Neutre",
-    webcam_analyzing: "Analyse en cours...",
+    webcam_neutral: "En arrivée",
+    webcam_analyzing: "Lecture en cours",
 
     // Footer
     footer_about: "Qui sommes-nous",
@@ -97,78 +103,84 @@ const wellness = {
     legal_contact_label: "Contact :",
     legal_hosting_label: "Hébergement :",
     legal_hosting_value: "Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723",
-    legal_privacy: "Ce site utilise des technologies de détection d'expressions faciales (face-api.js). Aucune donnée d'image n'est enregistrée ou transmise à des serveurs tiers ; l'analyse est effectuée localement dans votre navigateur en temps réel.",
+    legal_privacy: "Ce site utilise des technologies de détection d'expressions faciales (face-api.js). Aucune donnée d'image n'est enregistrée ou transmise à des serveurs tiers ; l'analyse est effectuée localement dans votre navigateur en temps réel.",
     legal_close: "Fermer",
   },
 
   en: {
     // Overlay
     overlay_tagline: "At the crossroads of science, sound, and care.",
-    overlay_cta: "Start the sound experience",
+    overlay_cta: "Enter the sound experience",
 
     // Intro section
-    intro_eyebrow: "Composing rest.",
+    intro_eyebrow: "Composing silence.",
     intro_start: "Start the sound experience",
     intro_scroll: "Scroll to explore",
 
     // Section titles
-    s0_title: "A place has a soul.",
-    s1_title: "It can be heard.",
-    s2_title: "Each space has its own role",
-    s3_title: "It can be felt.",
-    s4_title: "It lives with you.",
-    s5_title: "And grows with you.",
+    s0_title: "A space of care has a signature.",
+    s1_title: "The art of situated listening.",
+    s2_title: "A signature for each space.",
+    s3_title: "Compose the state, not the ambience.",
+    s4_title: "Sound that listens back.",
+    s5_title: "Material that thickens.",
 
     // Section 0 paragraphs
-    s0_p1: "“Music is 50% of a film.” Francis Ford Coppola.",
-    s0_p2: "Yet in our spas and wellness centres, this magic disappears. Sound is an afterthought: a playlist on loop, oblivious to who is there, what they feel, or the state we want to guide them into.",
-    s0_p3: "In cinema, music singles out the main character: it follows them, reacts to their emotions, carries them. We do the same, for your guests.",
+    s0_p1: "“Silence is never empty. It is composed.” Every spa carries a sonic climate that decides, before the first treatment, whether the nervous system softens or stays on alert.",
+    s0_p2: "Hotels, day spas, thermal baths, longevity retreats. Wherever one comes seeking a pause, sound is the first treatment received, and the last memory carried away.",
+    s0_p3: "We compose that signature, space by space, from the threshold of reception to the final moments of recovery. Living music, written by composers, guided by neuroscience.",
 
     // Section 1 paragraphs
-    s1_p1: "A busy reception, a wellness centre on a Saturday afternoon: voices accumulate, the nervous system stays on alert, and the treatment begins a few heartbeats too late.",
-    s1_p2: "In cinema, the director knows how to isolate a character in the chaos. The world fades away, leaving only a bubble of intimacy for the length of a scene.",
-    s1_p3: "We do exactly that in the physical world. A bubble of calm, invisible, preparing the body before the practitioner's hand even arrives.",
+    s1_p1: "A spa is a stack of contradictory acoustic zones: the voice at reception must not reach the treatment room, the rumble of the hammam must not cover the tea lounge.",
+    s1_p2: "Our directional diffusion systems create bubbles of sonic coherence. Each zone receives its own signature, without bleed, without overflow, without acoustic compromise.",
+    s1_p3: "The guest moves through the spa and senses, without naming it, that each space has been thought through for them alone. That is the baseline of contemporary luxury: invisible precision.",
 
     // Section 2 paragraphs
-    s2_p1: "A guest is not in the same state at reception, inside a treatment room, or in the wet area between two rituals.",
-    s2_p2: "Sound can accompany each of these moments, for guests and practitioners alike, without anyone consciously noticing.",
-    s2_p3: "Three sonic intentions. One system. For the guest experience and for team well-being.",
+    s2_p1: "Four categories of space make up a spa journey. Each has its acoustic constraints, its neurological objective, its own rhythm. A single generic composition betrays all the others.",
+    s2_p2: "We write a distinct signature for each zone, and we orchestrate the transitions. Moving from one space to the next happens without cut, without break, without perceptible loop.",
+    s2_p3: "Scroll to move through the four sonic territories.",
 
     // Section 3 paragraphs
-    s3_p1: "A simple chord change slows the breath, opens the chest, releases the jaw. Music alters our heart rate before we even realise.",
-    s3_p2: "Nearly 80% of research on the effects of sound on the nervous system has been published in the last ten years. We can now use it with unprecedented precision.",
-    s3_p3: "Calm, surrender, grounding. Today we can compose the emotional state of a treatment the way a director composes a film score.",
+    s3_p1: "A treatment has more than one intention. Somatic release, parasympathetic regulation, attentional grounding: these physiological states are as precise as a dosage.",
+    s3_p2: "Each register has its own sonic fabric. Our compositions slide from one state to the next as the treatment unfolds, without perceptible transition.",
+    s3_p3: "The practitioner guides the gesture, the sonic signature guides the nervous system. Both converge without coordination.",
 
     // Section 4 paragraphs
-    s4_p1: "Music no longer plays to fill silence. Informed by our neuroscience team's research, it activates precise physiological parameters in real time, tailored to each ritual, each intention, each guest.",
-    s4_p2: "To experience it: turn on your camera. Smile, or let your face rest. The music will read you.",
-    s4_p3: "This is what each of your guests can experience, without knowing it, simply by lying down.",
+    s4_p1: "The guest's face tells their state before they know it. Residual tension, opening, surrender. The music must follow, not lead.",
+    s4_p2: "Our engine reads micro facial signals in real time and tunes the sonic fabric with precision: density, register, movement. The composition stays true to itself, but it listens.",
+    s4_p3: "Turn on your camera to feel the principle. This is the sonic version of what longevity medicine does with biomarkers: a calibrated response, alive, individual, without intrusion.",
 
     // Section 5 paragraphs
-    s5_p1: "Imagine a treatment room with a simple sonic drone. The guest walks in and a breath awakens. The treatment begins and a soft layer emerges, gently.",
-    s5_p2: "Music no longer fills the space. It accompanies the gesture. At each stage of the treatment, a layer is added. Richer, denser, in step with the unfolding ritual.",
-    s5_p3: "It draws in those who hesitate. It welcomes those who enter. It soothes those who stay.",
+    s5_p1: "A sonic signature is never a loop. It is a fabric of layers that compose, decompose, and recompose with the moment, the crowd, the hour of the day.",
+    s5_p2: "Our compositions rest on five independent strata: drone, strings, bass, percussion, keys. Each enters and exits according to the parameters of the space, never repeating the same combination.",
+    s5_p3: "The guest returns the following month, finds the same signature, and hears something else. That is what brings them back.",
 
     // Scroll prompt
     scroll_prompt: "Keep scrolling",
 
     // Section 1: Isolation toggle
-    isolation_on: "Bubble of calm active",
+    isolation_on: "Situated listening active",
     isolation_off: "Ambient noise",
 
     // Section 5: Density
-    density_label: "sound layers",
+    density_label: "sonic strata",
 
-    // Section 2: Zones
-    zone_entree: "Reception",
-    zone_entree_sub: "Prepare the surrender",
-    zone_rayon: "Treatment room",
-    zone_rayon_sub: "Deepen relaxation",
-    zone_equipe: "Practitioner space",
-    zone_equipe_sub: "Support focus",
+    // Section 2: Zones (3 existing keys reused with spa values, + 4th recuperation key)
+    zone_entree: "Reception & transitions",
+    zone_entree_sub: "The threshold",
+    zone_entree_body: "Reception, changing rooms, corridors, tea lounge. The loudest zone of the spa, paradoxically. Our composition masks without imposing, lowers heart rate, prepares the nervous system before the first word.",
+    zone_rayon: "Heat rituals",
+    zone_rayon_sub: "The envelope",
+    zone_rayon_body: "Hammam, sauna, sensory showers, Kneipp path. Extreme acoustics, hard surfaces, steam. Our composition meets the volume with warm bass and organic textures. The aim is not sedation but alert relaxation, supporting circulation and breath.",
+    zone_equipe: "Treatment rooms",
+    zone_equipe_sub: "The gesture",
+    zone_equipe_body: "Massage, drainage, facial, energy work. The practitioner's hand dialogues with a raw nervous system. Our sonic textures support the gesture without randomness or surprise. The guest surrenders, the practitioner works in confidence.",
+    zone_recuperation: "Recovery spaces",
+    zone_recuperation_sub: "The imprint",
+    zone_recuperation_body: "Rest rooms, meditation, sound bath, breathwork. The most neglected stage of the journey, and the most powerful. Our compositions extend the parasympathetic state and carry the treatment well beyond the cabin door. The memory of a spa is not visual, it is sonic.",
 
     // Section 3: Neuro labels
-    neuro_relaxation: "Relaxation",
+    neuro_relaxation: "Somatic release",
     neuro_regulation: "Parasympathetic regulation",
     neuro_focus: "Attentional grounding",
 
@@ -176,8 +188,8 @@ const wellness = {
     webcam_active: "Camera active",
     webcam_authorize: "Allow camera",
     webcam_happy: "Relaxed",
-    webcam_neutral: "Neutral",
-    webcam_analyzing: "Analysing...",
+    webcam_neutral: "Arriving",
+    webcam_analyzing: "Reading",
 
     // Footer
     footer_about: "About us",

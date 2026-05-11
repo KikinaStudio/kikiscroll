@@ -35,9 +35,10 @@ const WELLNESS_TRACKS = {
     focusCognitif: { src: 'MUSIC/Focus Cognitif.mp3', initialVolume: 0 },
     happy: { src: 'MUSIC/HAPPY.mp3', initialVolume: 0 },       // TODO: validate or replace for wellness
     sad: { src: 'MUSIC/SAD.mp3', initialVolume: 0 },           // TODO: validate or replace for wellness
-    entrance: { src: 'MUSIC/Synthwave_1.mp3', initialVolume: 0 }, // TODO: replace with MUSIC/wellness/Accueil.mp3
-    rayon: { src: 'MUSIC/Rap_1.mp3', initialVolume: 0 },       // TODO: replace with MUSIC/wellness/Cabine.mp3
-    cabine: { src: 'MUSIC/Bossa.mp3', initialVolume: 0 },      // TODO: replace with MUSIC/wellness/Praticien.mp3
+    entrance: { src: 'MUSIC/Synthwave_1.mp3', initialVolume: 0 }, // TODO: replace with MUSIC/wellness/Seuil.mp3 (Accueil & transitions)
+    rayon: { src: 'MUSIC/Rap_1.mp3', initialVolume: 0 },       // TODO: replace with MUSIC/wellness/Enveloppe.mp3 (Rituels de chaleur)
+    cabine: { src: 'MUSIC/Bossa.mp3', initialVolume: 0 },      // TODO: replace with MUSIC/wellness/Geste.mp3 (Cabines de soin)
+    recuperation: { src: 'MUSIC/Bossa.mp3', initialVolume: 0 }, // TODO: replace with MUSIC/wellness/Empreinte.mp3 (Espaces de récupération)
 };
 
 const { mode } = parseUrlMode();
