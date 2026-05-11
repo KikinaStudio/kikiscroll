@@ -1,14 +1,44 @@
 # Kikiscroll — Expérience sonore Kikina Lab
 
-Site de démonstration scroll-driven pour **Kikina Lab** : une expérience narrative en 5 sections, avec audio réactif, blob 3D (Three.js) et transition « nuit → aube » vers un footer de contact.
+Site de démonstration scroll-driven pour **Kikina Lab**, décliné en **deux variantes** qui partagent 100 % du code et diffèrent uniquement par leurs textes, leurs assets visuels et leurs pistes audio :
+
+- **Retail** — pour les boutiques, marques et lieux événementiels. URL : `/kikiscroll/<lang>`
+- **Wellness** — pour les spas, instituts et centres de soin. URL : `/kikiscroll/wellness/<lang>`
+
+Chacune se décline en français et en anglais (`fr` / `en`), soit 4 URLs au total. L'expérience reste la même : une narration scrollytelling en 6 sections, blob 3D Three.js, audio multi-pistes Howler.js, détection d'émotion par webcam (face-api.js), transition « nuit → aube » vers un footer de contact.
+
+| URL live | Variante | Langue |
+|---|---|---|
+| https://kikinastudio.github.io/kikiscroll/fr | Retail | FR |
+| https://kikinastudio.github.io/kikiscroll/en | Retail | EN |
+| https://kikinastudio.github.io/kikiscroll/wellness/fr | Wellness | FR |
+| https://kikinastudio.github.io/kikiscroll/wellness/en | Wellness | EN |
 
 ---
 
 ## Vue d’ensemble
 
-- **Objectif** : Présenter l’offre Kikina (son vivant, neuroscience, storytelling) via une expérience immersive pilotée par le scroll.
+- **Objectif** : Présenter l'offre Kikina Lab (son vivant, neuroscience, storytelling) via une expérience immersive pilotée par le scroll, en l'adaptant au contexte d'usage du prospect (retail ou wellness).
 - **Stack** : React 18, Vite, Tailwind CSS, GSAP + ScrollTrigger, Lenis (smooth scroll), Three.js (R3F), Howler.js, face-api.js, Zustand.
-- **Contenu** : Textes en français, apparition progressive par « parties » (3 par section), bouton « Lancer l’expérience » qui débloque le scroll et l’audio.
+- **Contenu** : Textes traduits par variante × langue dans `src/translations/`, apparition progressive par « parties » (3 par section), bouton « Lancer l'expérience » qui débloque le scroll et l'audio.
+
+---
+
+## Variantes retail / wellness
+
+Le mode (retail ou wellness) est résolu **une seule fois au chargement** depuis l'URL, puis stocké dans un React Context (`ModeContext`). Le `useTranslation()` hook lit le mode + la langue pour servir le bon objet de traduction. L'audio store et l'image panoramique de la section 2 deviennent mode-aware via le même mécanisme.
+
+**Ce qui change entre les deux variantes** :
+- Les textes (titres, paragraphes, libellés UI, footer) — voir `src/translations/retail.js` et `src/translations/wellness.js`
+- Les noms de zones section 2 : Entrée / Rayon / Espace équipe (retail) vs Accueil / Cabine de soin / Espace praticien (wellness)
+- L'image panoramique de fond section 2 : `public/IMAGES/retail_panorama.jpg` vs `wellness_panorama.jpg`
+- Les pistes audio « de zone » section 2 (`entrance`, `rayon`, `cabine` dans le store)
+
+**Statut wellness** : sous-page en ligne, contenu rédactionnel finalisé. L'image panoramique et la majorité des pistes audio sont des **placeholders pointant vers les assets retail** en attendant la production des assets définitifs. Chaque ligne à remplacer est marquée `// TODO` dans [src/store/useAudioStore.js](src/store/useAudioStore.js). Brief de production : [docs/wellness-assets-brief.md](docs/wellness-assets-brief.md).
+
+**Documentation détaillée** :
+- [docs/wellness-assets-brief.md](docs/wellness-assets-brief.md) — spec image + musiques à commissionner (dimensions, ambiance, niveau de mix, références)
+- [docs/wellness-dev-handoff.md](docs/wellness-dev-handoff.md) — architecture mode-aware, flow de routage, edge cases, recette pour ajouter un 3ème mode
 
 ---
 
@@ -36,20 +66,33 @@ Kikiscroll/
 ├── tailwind.config.js
 ├── .eslintrc.cjs
 ├── .prettierrc
+├── docs/
+│   ├── wellness-assets-brief.md   # Brief de production des assets wellness
+│   └── wellness-dev-handoff.md    # Spec technique de la sous-page wellness
 ├── public/
-│   ├── favicon.png          # Favicon Kikina (K + flèche)
-│   ├── logo-kikina.png      # Logo PNG (footer)
-│   ├── MUSIC/               # Pistes audio (voir liste ci‑dessous)
-│   ├── models/              # Modèles face-api.js (détection visage)
+│   ├── favicon.png                # Favicon Kikina (K + flèche)
+│   ├── logo-kikina.png            # Logo PNG (footer)
+│   ├── IMAGES/
+│   │   ├── retail_panorama.jpg    # Panorama 3 zones retail (section 2)
+│   │   └── wellness_panorama.jpg  # Panorama 3 zones wellness (placeholder)
+│   ├── MUSIC/                     # Pistes audio (voir liste ci-dessous)
+│   ├── models/                    # Modèles face-api.js (détection visage)
 │   └── Fonts/
 └── src/
-    ├── main.jsx
-    ├── App.jsx               # Orchestration scroll, sections, audio, UI
-    ├── index.css             # Tailwind + grain overlay + animations
+    ├── main.jsx                   # Parse l'URL, monte ModeProvider + LanguageProvider
+    ├── App.jsx                    # Orchestration scroll, sections, audio, UI
+    ├── index.css                  # Tailwind + grain overlay + animations
+    ├── urlMode.js                 # parseUrlMode() — source unique du parsing URL
+    ├── ModeContext.jsx            # React Context du mode (retail | wellness)
+    ├── LanguageContext.jsx        # React Context de la langue, hook useTranslation
+    ├── translations/
+    │   ├── index.js               # Bundle { retail, wellness }
+    │   ├── retail.js              # FR + EN retail
+    │   └── wellness.js            # FR + EN wellness
     ├── store/
-    │   └── useAudioStore.js  # Howler, fadeTrack, toggleMute, startAllTracks
+    │   └── useAudioStore.js       # Howler, RETAIL_TRACKS + WELLNESS_TRACKS mode-aware
     └── components/
-        ├── Scene.jsx         # Canvas R3F, blobs, caméra, post‑process
+        ├── Scene.jsx              # Canvas R3F, blobs, caméra, post-process
         ├── GrainVignette.jsx
         ├── GrainVignetteEffect.js
         └── Overlay.jsx
@@ -137,13 +180,16 @@ Après les sections : transition « aube » (dégradé noir → #f5f3f0) + foote
 
 ### Modifier les textes
 
-- Tous les textes des sections sont dans `src/App.jsx`, objet `sectionsData`. Chaque section a `title` et `paragrapheParts` (tableau de 3 strings). Modifier uniquement ces chaînes pour garder le comportement d’apparition progressive.
+- Tous les textes du parcours sont dans `src/translations/retail.js` et `src/translations/wellness.js`, structurés par langue (`fr`, `en`) et par clé (`s0_title`, `s0_p1`, etc.). Modifier uniquement ces valeurs pour garder le comportement d'apparition progressive.
+- Les deux fichiers de traductions doivent partager **strictement les mêmes clés** ; si une clé manque dans wellness, l'app crashera côté wellness. Ajouter une clé dans les 4 emplacements (retail.fr, retail.en, wellness.fr, wellness.en) lors d'ajouts.
+- L'objet `sectionsData` dans `src/App.jsx` consomme ces traductions via `useTranslation()` (helper `getSectionsData(t)`).
 
 ### Ajouter / remplacer une piste audio
 
-- Fichier dans `public/MUSIC/`.
-- Référence dans `src/store/useAudioStore.js` : ajouter une entrée dans `TRACKS`.
-- Si la piste ne doit pas rester en fond (comme le drone), l’ajouter dans `NON_DRONE_TRACKS` dans `App.jsx` (strings, bass, drums, keyboard, crowd, jungle, pulsatingWave, focusCognitif, happy, sad) pour qu’elle soit coupée à chaque changement de section. Adapter ensuite `useScrollAudio` et les callbacks ScrollTrigger (`onEnter` / `onLeave`) selon la section.
+- Fichier dans `public/MUSIC/` (ou `public/MUSIC/wellness/` pour une piste spécifique au mode wellness).
+- Référence dans `src/store/useAudioStore.js` : ajouter ou modifier une entrée dans `RETAIL_TRACKS` ET/OU `WELLNESS_TRACKS` selon le scope. Si la clé doit exister dans les deux modes, mettre à jour les deux objets.
+- Si la piste ne doit pas rester en fond (comme le drone), l'ajouter dans `NON_DRONE_TRACKS` dans `App.jsx` (strings, bass, drums, keyboard, crowd, jungle, pulsatingWave, focusCognitif, happy, sad) pour qu'elle soit coupée à chaque changement de section. Adapter ensuite `useScrollAudio` et les callbacks ScrollTrigger (`onEnter` / `onLeave`) selon la section.
+- Pour le détail des assets wellness à produire / remplacer, voir [docs/wellness-assets-brief.md](docs/wellness-assets-brief.md).
 
 ### Contacts et liens
 

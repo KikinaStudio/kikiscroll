@@ -3,9 +3,15 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment, Points, PointMaterial } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import GrainVignette from './GrainVignette';
+import { parseUrlMode } from '../urlMode';
 
 import * as THREE from 'three';
 import CustomShaderMaterial from 'three-custom-shader-material';
+
+// Mode is parsed from URL at module load — same pattern as useAudioStore.
+// Avoids React context propagation questions inside the R3F Canvas root.
+const { mode: SCENE_MODE } = parseUrlMode();
+const IS_WELLNESS = SCENE_MODE === 'wellness';
 
 // --- Shaders ---
 const vertexShader = `
@@ -86,6 +92,24 @@ const ZONES_ENVS = [
     { scale: 0.8, roughness: 0.1, transmission: 0.6, color: new THREE.Color('#c0a0b8'), rotSpeed: 0.03 },
 ];
 
+// Wellness mode: light spa-luxe palette — pierre polie / nacre / cire chaude.
+// Blob doit lire comme un objet calme et lumineux, jamais sombre.
+const WELLNESS_ZONES_ENVS = [
+    { roughness: 0.55, transmission: 0.15, color: new THREE.Color('#f0dbc4'), rotSpeed: 0.02 }, // seuil — nacre crème
+    { roughness: 0.40, transmission: 0.25, color: new THREE.Color('#e8b8a0'), rotSpeed: 0.06 }, // enveloppe — pêche chaud
+    { roughness: 0.25, transmission: 0.45, color: new THREE.Color('#e2c0b0'), rotSpeed: 0.03 }, // geste — rose pâle
+    { roughness: 0.15, transmission: 0.60, color: new THREE.Color('#faecd8'), rotSpeed: 0.02 }, // empreinte — ivoire translucide
+];
+
+// Tonalités pierre polie / rose quartz / onyx chaud — assez saturées pour rester
+// visibles sur fond sable, assez douces pour évoquer le calme.
+const WELLNESS_INTRO_COLOR         = new THREE.Color('#c89484'); // rose quartz mat
+const WELLNESS_NEUTRAL_COLOR       = new THREE.Color('#b8806c'); // pierre chaude
+const WELLNESS_NEURO_COLOR         = new THREE.Color('#c08878'); // onyx rosé
+const WELLNESS_DENSITY_COLOR       = new THREE.Color('#a87060'); // pierre profonde
+const WELLNESS_ISOLATION_ON_COLOR  = new THREE.Color('#d8a890'); // calcaire chaud apaisé
+const WELLNESS_ISOLATION_OFF_COLOR = new THREE.Color('#a86c5c'); // terre cuite plus présente
+
 // Section 3 (Scénographie) environment configs: jungle, thunderstorm, sea
 const SEC2_ENVS = [
     { roughness: 0.8, transmission: 0.0, color: new THREE.Color('#1a3a1a') },
@@ -147,8 +171,9 @@ function CameraController({ activeSection, sectionProgress }) {
 function OrganicBlob({ scrollProgress, activeSection, sectionProgress, isIsolationActive, position: pos, scale, blobIndex = 0, isDensityClone = false }) {
     const meshRef = useRef();
     const matRef = useRef();
+    const isWellness = IS_WELLNESS;
 
-    const lerpedColor = useRef(new THREE.Color('#0a0a0a'));
+    const lerpedColor = useRef(new THREE.Color(isWellness ? '#3a2820' : '#0a0a0a'));
     const lerpedRoughness = useRef(0.2);
     const lerpedTransmission = useRef(0.0);
     const lerpedDeform = useRef(0.0);
@@ -274,6 +299,64 @@ function OrganicBlob({ scrollProgress, activeSection, sectionProgress, isIsolati
             }
         }
 
+        // Wellness override: warm palette across sections, 4-zone interpolation in section 2.
+        // Color/material params are remapped; deform/scale logic kept intact so each section
+        // keeps its visual personality.
+        if (isWellness) {
+            if (isDensityClone) {
+                targetColor = WELLNESS_DENSITY_COLOR.clone();
+                targetTransmission = 0.05;
+            } else if (activeSection === 0) {
+                targetColor = WELLNESS_INTRO_COLOR.clone();
+                targetTransmission = 0.0;  // intro = pierre brute mate, pas de translucence
+            } else if (activeSection === 1) {
+                targetColor = (isIsolationActive ? WELLNESS_ISOLATION_ON_COLOR : WELLNESS_ISOLATION_OFF_COLOR).clone();
+                targetTransmission = isIsolationActive ? 0.15 : 0.0;
+            } else if (activeSection === 2) {
+                // Quarters: seuil → enveloppe → geste → empreinte
+                if (sectionProgress < 0.25) {
+                    targetColor = WELLNESS_ZONES_ENVS[0].color.clone();
+                    targetRoughness = WELLNESS_ZONES_ENVS[0].roughness;
+                    targetTransmission = WELLNESS_ZONES_ENVS[0].transmission;
+                    targetRotSpeed = WELLNESS_ZONES_ENVS[0].rotSpeed;
+                    targetDeform = 0.2;
+                } else if (sectionProgress < 0.5) {
+                    const t = (sectionProgress - 0.25) / 0.25;
+                    targetColor = WELLNESS_ZONES_ENVS[0].color.clone().lerp(WELLNESS_ZONES_ENVS[1].color, t);
+                    targetRoughness = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[0].roughness, WELLNESS_ZONES_ENVS[1].roughness, t);
+                    targetTransmission = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[0].transmission, WELLNESS_ZONES_ENVS[1].transmission, t);
+                    targetRotSpeed = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[0].rotSpeed, WELLNESS_ZONES_ENVS[1].rotSpeed, t);
+                    targetDeform = 0.2 + t * 0.15;
+                } else if (sectionProgress < 0.75) {
+                    const t = (sectionProgress - 0.5) / 0.25;
+                    targetColor = WELLNESS_ZONES_ENVS[1].color.clone().lerp(WELLNESS_ZONES_ENVS[2].color, t);
+                    targetRoughness = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[1].roughness, WELLNESS_ZONES_ENVS[2].roughness, t);
+                    targetTransmission = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[1].transmission, WELLNESS_ZONES_ENVS[2].transmission, t);
+                    targetRotSpeed = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[1].rotSpeed, WELLNESS_ZONES_ENVS[2].rotSpeed, t);
+                    targetDeform = 0.35 + t * 0.15;
+                } else {
+                    const t = (sectionProgress - 0.75) / 0.25;
+                    targetColor = WELLNESS_ZONES_ENVS[2].color.clone().lerp(WELLNESS_ZONES_ENVS[3].color, t);
+                    targetRoughness = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[2].roughness, WELLNESS_ZONES_ENVS[3].roughness, t);
+                    targetTransmission = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[2].transmission, WELLNESS_ZONES_ENVS[3].transmission, t);
+                    targetRotSpeed = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[2].rotSpeed, WELLNESS_ZONES_ENVS[3].rotSpeed, t);
+                    targetDeform = 0.5 + t * 0.2;
+                }
+            } else if (activeSection === 3) {
+                targetColor = WELLNESS_NEUTRAL_COLOR.clone();
+                targetTransmission = 0.10;
+            } else if (activeSection === 4) {
+                targetColor = WELLNESS_NEURO_COLOR.clone();
+                targetTransmission = 0.15;
+            } else if (activeSection === 5) {
+                targetColor = WELLNESS_DENSITY_COLOR.clone();
+                targetTransmission = 0.05;
+            } else {
+                targetColor = WELLNESS_INTRO_COLOR.clone();
+                targetTransmission = 0.05;
+            }
+        }
+
         // Smooth lerp
         lerpedColor.current.lerp(targetColor, lerpSpeed);
         lerpedRoughness.current = THREE.MathUtils.lerp(lerpedRoughness.current, targetRoughness, lerpSpeed);
@@ -298,15 +381,17 @@ function OrganicBlob({ scrollProgress, activeSection, sectionProgress, isIsolati
                 baseMaterial={THREE.MeshPhysicalMaterial}
                 vertexShader={vertexShader}
                 uniforms={uniforms}
-                color="#0d0d0d"
-                emissive="#000000"
-                metalness={0.85}
-                roughness={0.25}
-                clearcoat={0.6}
-                clearcoatRoughness={0.25}
+                color={isWellness ? '#c89484' : '#0d0d0d'}
+                emissive={isWellness ? '#2a1410' : '#000000'}
+                emissiveIntensity={isWellness ? 0.05 : 0}
+                metalness={isWellness ? 0.08 : 0.85}
+                roughness={isWellness ? 0.78 : 0.25}
+                clearcoat={isWellness ? 0.10 : 0.6}
+                clearcoatRoughness={isWellness ? 0.7 : 0.25}
+                specularIntensity={isWellness ? 0.25 : 1}
                 transmission={0.0}
                 wireframe={false}
-                envMapIntensity={0.8}
+                envMapIntensity={isWellness ? 0.22 : 0.8}
             />
         </mesh>
     );
@@ -345,22 +430,93 @@ function SpaceDust({ scrollProgress }) {
     );
 }
 
+/**
+ * WellnessSteam — replaces SpaceDust in wellness mode.
+ * Soft warm vapor sprites drifting upward with sinusoidal horizontal sway.
+ * Uses NormalBlending and warm tint so it reads on the light spa palette.
+ */
+function WellnessSteam() {
+    const pointsRef = useRef();
+    const COUNT = 900;
+    const VOL_X = 28;
+    const VOL_Y = 24;
+    const VOL_Z = 16;
+    const Z_OFFSET = -6; // bulk of mist behind blob
+
+    const initial = useMemo(() => {
+        const positions = new Float32Array(COUNT * 3);
+        const seeds = new Float32Array(COUNT);
+        const speeds = new Float32Array(COUNT);
+        for (let i = 0; i < COUNT; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * VOL_X;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * VOL_Y;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * VOL_Z + Z_OFFSET;
+            seeds[i] = Math.random() * Math.PI * 2;
+            speeds[i] = 0.2 + Math.random() * 0.4;
+        }
+        return { positions, seeds, speeds };
+    }, []);
+
+    useFrame((state, delta) => {
+        if (!pointsRef.current) return;
+        const geom = pointsRef.current.geometry;
+        const arr = geom.attributes.position.array;
+        const t = state.clock.elapsedTime;
+        for (let i = 0; i < COUNT; i++) {
+            const yIdx = i * 3 + 1;
+            arr[yIdx] += delta * initial.speeds[i] * 0.10;
+            if (arr[yIdx] > VOL_Y / 2) {
+                arr[yIdx] = -VOL_Y / 2;
+                arr[i * 3] = (Math.random() - 0.5) * VOL_X;
+            }
+            arr[i * 3] += Math.sin(t * 0.10 + initial.seeds[i]) * delta * 0.06;
+        }
+        geom.attributes.position.needsUpdate = true;
+    });
+
+    return (
+        <Points ref={pointsRef} positions={initial.positions} stride={3}>
+            <PointMaterial
+                transparent
+                color="#fff4e6"
+                size={0.05}
+                sizeAttenuation={true}
+                depthWrite={false}
+                opacity={0.4}
+                blending={THREE.NormalBlending}
+            />
+        </Points>
+    );
+}
+
 export default function Scene({ scrollProgress, activeSection, sectionProgress, densityBlobCount = 1, isIsolationActive = false }) {
     return (
         <Canvas
                 camera={{ position: [0, 0, 12], fov: 45 }}
                 dpr={[1, 1.5]}
-                gl={{ alpha: true, antialias: true }}
+                gl={{ alpha: true, antialias: true, preserveDrawingBuffer: false }}
                 style={{ background: 'transparent' }}
             >
             {/* Dynamic Camera */}
             <CameraController activeSection={activeSection} sectionProgress={sectionProgress} />
 
-            {/* Monochrome lighting - soft key + rim, no coloured fills */}
-            <ambientLight intensity={0.8} />
-            <directionalLight position={[8, 12, 10]} intensity={2.5} color="#e8e8e8" />
-            <directionalLight position={[-6, -8, -6]} intensity={0.6} color="#c0c0c0" />
-            <spotLight position={[0, 6, 5]} intensity={3.0} distance={18} angle={0.5} penumbra={1} color="#ffffff" />
+            {/* Lighting — wellness uses warm diffuse fills for a calm/spa feel,
+                retail keeps the cool monochrome key+rim. */}
+            {IS_WELLNESS ? (
+                <>
+                    {/* Wellness : éclairage diffus quasi-uniforme, blob doit lire comme craie/pierre brute */}
+                    <ambientLight intensity={2.4} color="#fcebda" />
+                    <hemisphereLight args={["#ffe8d4", "#d8a890", 0.8]} />
+                    <directionalLight position={[6, 10, 8]} intensity={0.35} color="#fff4e4" />
+                </>
+            ) : (
+                <>
+                    <ambientLight intensity={0.8} />
+                    <directionalLight position={[8, 12, 10]} intensity={2.5} color="#e8e8e8" />
+                    <directionalLight position={[-6, -8, -6]} intensity={0.6} color="#c0c0c0" />
+                    <spotLight position={[0, 6, 5]} intensity={3.0} distance={18} angle={0.5} penumbra={1} color="#ffffff" />
+                </>
+            )}
 
             {/* Main Blob (always visible) */}
             <OrganicBlob
@@ -427,11 +583,12 @@ export default function Scene({ scrollProgress, activeSection, sectionProgress, 
                 />
             )}
 
-            {/* Space Dust */}
-            <SpaceDust scrollProgress={scrollProgress} />
+            {/* Background particles: stars (retail) or vapor (wellness) */}
+            {IS_WELLNESS ? <WellnessSteam /> : <SpaceDust scrollProgress={scrollProgress} />}
 
-            {/* Monochrome reflections - neutral environment */}
-            <Environment preset="night" />
+            {/* Environment reflections — diffuse studio in wellness (uniform soft light),
+                neutral night in retail (dark contrast). */}
+            <Environment preset={IS_WELLNESS ? 'apartment' : 'night'} />
 
             {/* Post-Processing - safe: no Noise effect, custom grain+vignette instead */}
             <EffectComposer multisampling={0}>

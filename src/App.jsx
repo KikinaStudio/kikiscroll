@@ -59,7 +59,7 @@ function getSectionsData(t) {
 }
 
 // --- Continuous audio logic driven by sectionProgress ---
-function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationActive) {
+function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationActive, isWellness) {
     const prevPalierRef = useRef(-1);
     const densityIntroCutoff = 0.82;
 
@@ -71,23 +71,42 @@ function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationAc
             // Isolation: crowd is controlled by auto-toggle logic based on progress
             prevPalierRef.current = -1;
         } else if (activeSection === 2) {
-            // Zones: Crossfade entrance → rayon → espace équipe
+            // Zones: crossfade. Retail = 3 zones (thirds). Wellness = 4 zones (quarters).
             prevPalierRef.current = -1;
-            let entranceVol = 0, rayonVol = 0, cabineVol = 0;
-            if (sectionProgress < 0.33) {
-                entranceVol = 0.6;
-            } else if (sectionProgress < 0.66) {
-                const t = (sectionProgress - 0.33) / 0.33;
-                entranceVol = 0.6 * (1 - t);
-                rayonVol = 0.6 * t;
+            let entranceVol = 0, rayonVol = 0, cabineVol = 0, recuperationVol = 0;
+            if (isWellness) {
+                if (sectionProgress < 0.25) {
+                    entranceVol = 0.6;
+                } else if (sectionProgress < 0.5) {
+                    const t = (sectionProgress - 0.25) / 0.25;
+                    entranceVol = 0.6 * (1 - t);
+                    rayonVol = 0.6 * t;
+                } else if (sectionProgress < 0.75) {
+                    const t = (sectionProgress - 0.5) / 0.25;
+                    rayonVol = 0.6 * (1 - t);
+                    cabineVol = 0.6 * t;
+                } else {
+                    const t = (sectionProgress - 0.75) / 0.25;
+                    cabineVol = 0.6 * (1 - t);
+                    recuperationVol = 0.6 * t;
+                }
             } else {
-                const t = (sectionProgress - 0.66) / 0.34;
-                rayonVol = 0.6 * (1 - t);
-                cabineVol = 0.6 * t;
+                if (sectionProgress < 0.33) {
+                    entranceVol = 0.6;
+                } else if (sectionProgress < 0.66) {
+                    const t = (sectionProgress - 0.33) / 0.33;
+                    entranceVol = 0.6 * (1 - t);
+                    rayonVol = 0.6 * t;
+                } else {
+                    const t = (sectionProgress - 0.66) / 0.34;
+                    rayonVol = 0.6 * (1 - t);
+                    cabineVol = 0.6 * t;
+                }
             }
             fadeTrack('entrance', entranceVol, 150);
             fadeTrack('rayon', rayonVol, 150);
             fadeTrack('cabine', cabineVol, 150);
+            if (isWellness) fadeTrack('recuperation', recuperationVol, 150);
         } else if (activeSection === 3) {
             // Neuro-sonore: Crossfade jungle (relaxation) → pulsatingWave (régulation) → focusCognitif (focus)
             prevPalierRef.current = -1;
@@ -268,7 +287,7 @@ function App() {
     }, [activeSection, fadeTrack, NON_DRONE_TRACKS]);
 
     // Continuous scroll-driven audio
-    useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationActive);
+    useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationActive, mode === 'wellness');
 
     // Auto-toggle isolation at 50% progress in section 1
     useEffect(() => {
@@ -438,7 +457,7 @@ function App() {
     }, [startAllTracks]);
 
     return (
-        <div className="bg-[#0a0a0a] min-h-screen text-tenbin-offwhite font-sans selection:bg-white/20">
+        <div className={`min-h-screen font-sans selection:bg-white/20 ${mode === 'wellness' ? 'bg-transparent text-[#3a2820]' : 'bg-[#0a0a0a] text-tenbin-offwhite'}`}>
             {/* Grain overlay */}
             <div className="grain-overlay" aria-hidden="true" />
             {/* Hidden video element for webcam */}
@@ -446,8 +465,53 @@ function App() {
 
             {/* Zones panorama (fond, derrière le blob) - uniquement en section 2 */}
             {(activeSection === 2) && (() => {
-                // Map sectionProgress → backgroundPositionX
-                // Zone 1 (0–0.33) : 0% → 20%, Zone 2 (0.33–0.66) : 20% → 55%, Zone 3 (0.66–1) : 55% → 85%
+                if (mode === 'wellness') {
+                    // Wellness: 4 zones premium (parallaxe + scale + caption fade)
+                    const slides = [
+                        { key: 'accueil',      src: '/kikiscroll/IMAGES/wellness_zone_accueil.jpg',      placeholder: '#e8c5a8',
+                          sub: t.zone_entree_sub,        title: t.zone_entree,        body: t.zone_entree_body },
+                        { key: 'chaleur',      src: '/kikiscroll/IMAGES/wellness_zone_chaleur.jpg',      placeholder: '#c47b6e',
+                          sub: t.zone_rayon_sub,         title: t.zone_rayon,         body: t.zone_rayon_body },
+                        { key: 'soin',         src: '/kikiscroll/IMAGES/wellness_zone_soin.jpg',         placeholder: '#d49a8a',
+                          sub: t.zone_equipe_sub,        title: t.zone_equipe,        body: t.zone_equipe_body },
+                        { key: 'recuperation', src: '/kikiscroll/IMAGES/wellness_zone_recuperation.jpg', placeholder: '#f4e6d6',
+                          sub: t.zone_recuperation_sub,  title: t.zone_recuperation,  body: t.zone_recuperation_body },
+                    ];
+                    // Linear progress → translateX: slide 0 centered at progress=0, slide 3 at progress=1.
+                    const translateX = 12 - 192 * sectionProgress; // vw
+                    const activeIndex = sectionProgress < 1/6 ? 0
+                                      : sectionProgress < 3/6 ? 1
+                                      : sectionProgress < 5/6 ? 2
+                                      : 3;
+                    // Fade panorama in/out at section edges to avoid hard pop-in and overlap with next section.
+                    const FADE_IN_END = 0.06;
+                    const FADE_OUT_START = 0.94;
+                    const fadeIn = Math.min(1, sectionProgress / FADE_IN_END);
+                    const fadeOut = Math.min(1, (1 - sectionProgress) / (1 - FADE_OUT_START));
+                    const panoramaOpacity = Math.max(0, Math.min(fadeIn, fadeOut));
+                    return (
+                        <div className="spa-panorama" aria-hidden="true" style={{ opacity: panoramaOpacity, transition: 'opacity 300ms ease-out' }}>
+                            <div className="spa-panorama__track" style={{ transform: `translateX(${translateX}vw)` }}>
+                                {slides.map((s, i) => (
+                                    <div
+                                        key={s.key}
+                                        className={`spa-panorama__slide${i === activeIndex ? ' spa-panorama__slide--active' : ''}`}
+                                        style={{ backgroundColor: s.placeholder }}
+                                    >
+                                        <div className="spa-panorama__bg" style={{ backgroundImage: `url(${s.src})` }} />
+                                        <span className="spa-panorama__counter">{`0${i + 1} / 04`}</span>
+                                        <div className="spa-panorama__caption">
+                                            <span className="spa-panorama__sub">{s.sub}</span>
+                                            <span className="spa-panorama__title">{s.title}</span>
+                                            <span className="spa-panorama__body">{s.body}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                }
+                // Retail: single panorama image with horizontal background-position interpolation (3 zones)
                 let bgX;
                 if (sectionProgress < 0.33) {
                     bgX = (sectionProgress / 0.33) * 20;
@@ -483,14 +547,14 @@ function App() {
             </div>
 
             {/* Header */}
-            <header className="fixed top-8 left-8 md:top-10 md:left-[8vw] z-50 pointer-events-auto mix-blend-difference">
-                <svg 
-                    width="110" 
-                    height="24" 
-                    viewBox="0 0 1096 237" 
-                    fill="none" 
+            <header className={`fixed top-8 left-8 md:top-10 md:left-[8vw] z-50 pointer-events-auto ${mode === 'wellness' ? '' : 'mix-blend-difference'}`}>
+                <svg
+                    width="110"
+                    height="24"
+                    viewBox="0 0 1096 237"
+                    fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    className="text-white"
+                    className={mode === 'wellness' ? 'text-[#3a2820]' : 'text-white'}
                 >
                     <rect x="153.016" width="236.924" height="69.1027" rx="34.5513" transform="rotate(90 153.016 0)" fill="currentColor"/>
                     <rect x="67.8672" width="236.924" height="67.8687" rx="33.9344" transform="rotate(90 67.8672 0)" fill="currentColor"/>
@@ -598,29 +662,34 @@ function App() {
                                     <h2 className="text-4xl md:text-6xl font-heading font-medium tracking-tight text-white mb-8">
                                         {section.title}
                                     </h2>
-                                    <p className={"text-base md:text-lg font-sans tracking-wide leading-relaxed font-light mb-12 " + (section.hasZonesPanorama ? "text-white" : "text-tenbin-gray")}>
-                                        {section.paragrapheParts.map((part, pi) => {
-                                            const partThreshold = pi * 0.33;
-                                            const partProgress = activeSection === index
-                                                ? Math.min(1, Math.max(0, (sectionProgress - partThreshold) / 0.15))
-                                                : 0;
-                                            return (
-                                                <span
-                                                    key={pi}
-                                                    className="transition-opacity duration-500"
-                                                    style={{
-                                                        opacity: partProgress,
-                                                        color: partProgress > 0 && partProgress < 1 ? '#ffffff' : undefined,
-                                                        textShadow: partProgress > 0 && partProgress < 1
-                                                            ? `0 0 ${14 * partProgress}px rgba(255,255,255,${0.42 * partProgress})`
-                                                            : 'none',
-                                                    }}
-                                                >
-                                                    {pi > 0 ? ' ' : ''}{part}
-                                                </span>
-                                            );
-                                        })}
-                                    </p>
+                                    {section.hasZonesPanorama && mode === 'wellness' ? (
+                                        // Wellness section 2 : pas de paragraphe, les cards portent toute l'info.
+                                        null
+                                    ) : (
+                                        <p className={"text-base md:text-lg font-sans tracking-wide leading-relaxed font-light mb-12 " + (section.hasZonesPanorama ? "text-white" : "text-tenbin-gray")}>
+                                            {section.paragrapheParts.map((part, pi) => {
+                                                const partThreshold = pi * 0.33;
+                                                const partProgress = activeSection === index
+                                                    ? Math.min(1, Math.max(0, (sectionProgress - partThreshold) / 0.15))
+                                                    : 0;
+                                                return (
+                                                    <span
+                                                        key={pi}
+                                                        className="transition-opacity duration-500"
+                                                        style={{
+                                                            opacity: partProgress,
+                                                            color: partProgress > 0 && partProgress < 1 ? '#ffffff' : undefined,
+                                                            textShadow: partProgress > 0 && partProgress < 1
+                                                                ? `0 0 ${14 * partProgress}px rgba(255,255,255,${0.42 * partProgress})`
+                                                                : 'none',
+                                                        }}
+                                                    >
+                                                        {pi > 0 ? ' ' : ''}{part}
+                                                    </span>
+                                                );
+                                            })}
+                                        </p>
+                                    )}
                                 </>
                             )}
 
@@ -650,10 +719,71 @@ function App() {
                                 </div>
                             )}
 
-                            {/* Section 2 (Zones): Icônes zones (Entrée / Rayon / Espace équipe) */}
-                            {section.hasZonesPanorama && activeSection === index && (
+                            {/* Section 2 (Zones): Icônes zones — uniquement en retail (en wellness les cards portent l'info). */}
+                            {section.hasZonesPanorama && activeSection === index && mode !== 'wellness' && (
                                 <div className="flex gap-10 mt-8 border-t border-tenbin-gray/20 pt-8">
-                                    {[
+                                    {(mode === 'wellness' ? [
+                                        {
+                                            key: 'accueil',
+                                            label: t.zone_entree,
+                                            subtitle: t.zone_entree_sub,
+                                            start: 0.0,
+                                            end: 0.25,
+                                            icon: (
+                                                // Seuil — porte ouverte
+                                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M4 21V5l8-2v18" />
+                                                    <path d="M12 21h8V8l-8-3" />
+                                                    <circle cx="10" cy="12" r="0.6" />
+                                                </svg>
+                                            ),
+                                        },
+                                        {
+                                            key: 'chaleur',
+                                            label: t.zone_rayon,
+                                            subtitle: t.zone_rayon_sub,
+                                            start: 0.25,
+                                            end: 0.5,
+                                            icon: (
+                                                // Enveloppe — vapeur montante
+                                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M7 16c-1 -1.5 -1 -3 0 -4.5s1 -3 0 -4.5" />
+                                                    <path d="M12 16c-1 -1.5 -1 -3 0 -4.5s1 -3 0 -4.5" />
+                                                    <path d="M17 16c-1 -1.5 -1 -3 0 -4.5s1 -3 0 -4.5" />
+                                                </svg>
+                                            ),
+                                        },
+                                        {
+                                            key: 'soin',
+                                            label: t.zone_equipe,
+                                            subtitle: t.zone_equipe_sub,
+                                            start: 0.5,
+                                            end: 0.75,
+                                            icon: (
+                                                // Geste — main + point d'appui
+                                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M5 12c2 -3 5 -4.5 8 -4.5s6 1.5 8 4.5" />
+                                                    <path d="M5 12c2 3 5 4.5 8 4.5s6 -1.5 8 -4.5" />
+                                                    <circle cx="13" cy="12" r="1" />
+                                                </svg>
+                                            ),
+                                        },
+                                        {
+                                            key: 'recuperation',
+                                            label: t.zone_recuperation,
+                                            subtitle: t.zone_recuperation_sub,
+                                            start: 0.75,
+                                            end: 1.0,
+                                            icon: (
+                                                // Empreinte — onde apaisée
+                                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M3 12h3" />
+                                                    <path d="M6 9c1 0 1 6 2 6s1 -10 2 -10s1 12 2 12s1 -8 2 -8s1 4 2 4" />
+                                                    <path d="M18 12h3" />
+                                                </svg>
+                                            ),
+                                        },
+                                    ] : [
                                         {
                                             key: 'entree',
                                             label: t.zone_entree,
@@ -698,7 +828,7 @@ function App() {
                                                 </svg>
                                             ),
                                         },
-                                    ].map((zone, idx) => {
+                                    ]).map((zone, idx) => {
                                         const zoneLen = zone.end - zone.start;
                                         const localP = sectionProgress <= zone.start
                                             ? 0
@@ -794,9 +924,11 @@ function App() {
 
             {/* Dawn transition + Footer */}
             <div className="relative z-20">
-                {/* Evanescent black-to-white transition */}
+                {/* Dawn transition vers footer — adapté au mode (sombre en retail, chaud en wellness) */}
                 <div className="h-[60vh] relative" style={{
-                    background: 'linear-gradient(to bottom, #000000 0%, rgba(0,0,0,0.8) 20%, rgba(0,0,0,0.3) 50%, rgba(245,243,240,0.6) 75%, #f5f3f0 100%)',
+                    background: mode === 'wellness'
+                        ? 'linear-gradient(to bottom, rgba(244,230,214,0) 0%, rgba(232,197,168,0.4) 30%, rgba(212,154,138,0.5) 55%, rgba(245,243,240,0.88) 85%, #f5f3f0 100%)'
+                        : 'linear-gradient(to bottom, #000000 0%, rgba(0,0,0,0.8) 20%, rgba(0,0,0,0.3) 50%, rgba(245,243,240,0.6) 75%, #f5f3f0 100%)',
                 }}>
                     <div className="absolute inset-0 animate-aurora opacity-30" style={{
                         background: 'radial-gradient(ellipse 80% 50% at 50% 60%, rgba(200,180,160,0.4) 0%, transparent 70%)',
