@@ -216,6 +216,22 @@ html[data-mode="wellness"] .scroll-prompt-text {
   transform: scale(1);
 }
 
+/* Subtle gradient overlay to guarantee caption readability on any image */
+.spa-panorama__slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0) 35%,
+    rgba(0, 0, 0, 0) 50%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
 .spa-panorama__placeholder {
   position: absolute;
   inset: 0;
@@ -237,8 +253,10 @@ html[data-mode="wellness"] .scroll-prompt-text {
   font-size: 10px;
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: var(--text-deep);
-  opacity: 0.55;
+  color: #ffffff;
+  opacity: 0.85;
+  z-index: 2;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
 .spa-panorama__caption {
@@ -247,10 +265,12 @@ html[data-mode="wellness"] .scroll-prompt-text {
   right: 8vw;
   bottom: 8vw;
   max-width: 38ch;
-  color: var(--text-deep);
+  color: #ffffff;
   opacity: 0;
   transform: translateY(8px);
   transition: opacity 600ms ease, transform 600ms ease;
+  z-index: 2;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
 }
 
 .spa-panorama__slide--active .spa-panorama__caption {
@@ -264,7 +284,7 @@ html[data-mode="wellness"] .scroll-prompt-text {
   font-size: 10px;
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  opacity: 0.6;
+  opacity: 0.85;
   margin-bottom: 12px;
 }
 
@@ -281,5 +301,5 @@ html[data-mode="wellness"] .scroll-prompt-text {
   display: block;
   font-size: 14px;
   line-height: 1.55;
-  opacity: 0.78;
+  opacity: 0.92;
 }
