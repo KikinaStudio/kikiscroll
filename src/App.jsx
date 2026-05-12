@@ -71,22 +71,30 @@ function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationAc
             // Isolation: crowd is controlled by auto-toggle logic based on progress
             prevPalierRef.current = -1;
         } else if (activeSection === 2) {
-            // Zones: crossfade. Retail = 3 zones (thirds). Wellness = 4 zones (quarters).
+            // Zones: crossfade. Retail = 3 zones (thirds). Wellness = 4 zones (quarters with parking).
             prevPalierRef.current = -1;
             let entranceVol = 0, rayonVol = 0, cabineVol = 0, recuperationVol = 0;
             if (isWellness) {
-                if (sectionProgress < 0.25) {
+                // Remap progress with park periods at start/end (matches the visual panorama remap)
+                const PARK_START = 0.15;
+                const PARK_END = 0.85;
+                const mp = sectionProgress <= PARK_START
+                    ? 0
+                    : sectionProgress >= PARK_END
+                        ? 1
+                        : (sectionProgress - PARK_START) / (PARK_END - PARK_START);
+                if (mp < 0.25) {
                     entranceVol = 0.6;
-                } else if (sectionProgress < 0.5) {
-                    const t = (sectionProgress - 0.25) / 0.25;
+                } else if (mp < 0.5) {
+                    const t = (mp - 0.25) / 0.25;
                     entranceVol = 0.6 * (1 - t);
                     rayonVol = 0.6 * t;
-                } else if (sectionProgress < 0.75) {
-                    const t = (sectionProgress - 0.5) / 0.25;
+                } else if (mp < 0.75) {
+                    const t = (mp - 0.5) / 0.25;
                     rayonVol = 0.6 * (1 - t);
                     cabineVol = 0.6 * t;
                 } else {
-                    const t = (sectionProgress - 0.75) / 0.25;
+                    const t = (mp - 0.75) / 0.25;
                     cabineVol = 0.6 * (1 - t);
                     recuperationVol = 0.6 * t;
                 }
@@ -401,8 +409,12 @@ function App() {
 
         const sections = gsap.utils.toArray('.pin-section');
 
+        const isWellness = mode === 'wellness';
         sections.forEach((section, i) => {
-            const scrollLength = i === 2 ? window.innerHeight * 3 : (i === 5 ? window.innerHeight * 3.5 : window.innerHeight * 1.5);
+            // Section 2 horizontal pan needs more time in wellness (4 cards with park-at-start/end)
+            // than in retail (3 static icons), so we differentiate the scroll length.
+            const section2Length = isWellness ? window.innerHeight * 4.5 : window.innerHeight * 3;
+            const scrollLength = i === 2 ? section2Length : (i === 5 ? window.innerHeight * 3.5 : window.innerHeight * 1.5);
             ScrollTrigger.create({
                 trigger: section,
                 start: 'top top',
@@ -445,7 +457,7 @@ function App() {
         return () => {
             ScrollTrigger.getAll().forEach(t => t.kill());
         };
-    }, [hasStarted, fadeTrack]);
+    }, [hasStarted, fadeTrack, mode]);
 
     const startAllTracks = useAudioStore((state) => state.startAllTracks);
     const toggleMute = useAudioStore((state) => state.toggleMute);
@@ -477,11 +489,19 @@ function App() {
                         { key: 'recuperation', src: '/kikiscroll/IMAGES/wellness_zone_recuperation.jpg', placeholder: '#f4e6d6',
                           sub: t.zone_recuperation_sub,  title: t.zone_recuperation,  body: t.zone_recuperation_body },
                     ];
-                    // Linear progress → translateX: slide 0 centered at progress=0, slide 3 at progress=1.
-                    const translateX = 12 - 192 * sectionProgress; // vw
-                    const activeIndex = sectionProgress < 1/6 ? 0
-                                      : sectionProgress < 3/6 ? 1
-                                      : sectionProgress < 5/6 ? 2
+                    // Parked progress: hold slide 0 in view at the start and slide 3 at the end
+                    // so the user has time to actually read those cards before/after the horizontal pan.
+                    const PARK_START = 0.15;
+                    const PARK_END = 0.85;
+                    const movingProgress = sectionProgress <= PARK_START
+                        ? 0
+                        : sectionProgress >= PARK_END
+                            ? 1
+                            : (sectionProgress - PARK_START) / (PARK_END - PARK_START);
+                    const translateX = 12 - 192 * movingProgress; // vw
+                    const activeIndex = movingProgress < 1/6 ? 0
+                                      : movingProgress < 3/6 ? 1
+                                      : movingProgress < 5/6 ? 2
                                       : 3;
                     // Fade panorama in/out at section edges to avoid hard pop-in and overlap with next section.
                     const FADE_IN_END = 0.06;
@@ -657,20 +677,31 @@ function App() {
                                         })}
                                     </p>
                                 </div>
-                            ) : (
-                                <>
-                                    <h2 className="text-4xl md:text-6xl font-heading font-medium tracking-tight text-white mb-8">
-                                        {section.title}
-                                    </h2>
-                                    {section.hasZonesPanorama && mode === 'wellness' ? (
-                                        // Wellness section 2 : pas de paragraphe, les cards portent toute l'info.
-                                        null
-                                    ) : (
+                            ) : (() => {
+                                // Wellness section 2: fade out the intro block once the horizontal pan starts,
+                                // so the title + paragraph don't compete with the spa cards mid-scroll.
+                                const isWellnessSection2 = section.hasZonesPanorama && mode === 'wellness';
+                                const introOpacity = isWellnessSection2 && activeSection === index
+                                    ? Math.max(0, Math.min(1, (0.20 - sectionProgress) / 0.06))
+                                    : 1;
+                                return (
+                                    <div
+                                        style={{
+                                            opacity: introOpacity,
+                                            transition: 'opacity 300ms ease-out',
+                                        }}
+                                    >
+                                        <h2 className="text-4xl md:text-6xl font-heading font-medium tracking-tight text-white mb-8">
+                                            {section.title}
+                                        </h2>
                                         <p className={"text-base md:text-lg font-sans tracking-wide leading-relaxed font-light mb-12 " + (section.hasZonesPanorama ? "text-white" : "text-tenbin-gray")}>
                                             {section.paragrapheParts.map((part, pi) => {
-                                                const partThreshold = pi * 0.33;
+                                                // For wellness section 2, compress the reveal so the whole paragraph
+                                                // is visible during the start-of-section park period.
+                                                const partThreshold = isWellnessSection2 ? pi * 0.04 : pi * 0.33;
+                                                const revealRamp = isWellnessSection2 ? 0.05 : 0.15;
                                                 const partProgress = activeSection === index
-                                                    ? Math.min(1, Math.max(0, (sectionProgress - partThreshold) / 0.15))
+                                                    ? Math.min(1, Math.max(0, (sectionProgress - partThreshold) / revealRamp))
                                                     : 0;
                                                 return (
                                                     <span
@@ -689,9 +720,9 @@ function App() {
                                                 );
                                             })}
                                         </p>
-                                    )}
-                                </>
-                            )}
+                                    </div>
+                                );
+                            })()}
 
                             {/* Section 1: Isolation Toggle (auto-driven by scroll progress) */}
                             {section.hasIsolationToggle && (
