@@ -92,10 +92,13 @@ html[data-mode="wellness"] .border-white {
   border-color: var(--text-deep);
 }
 
-/* Buttons with hover white→black inversion need flipping in wellness */
+/* Buttons with hover white→black inversion need flipping in wellness.
+   `color: !important` because `.text-white:not(...):not(...)...` from the override
+   above has higher specificity (5 negations) and would otherwise keep the text
+   dark on the dark hover background. */
 html[data-mode="wellness"] .hover\:bg-white:hover {
   background-color: var(--text-deep);
-  color: var(--spa-sand);
+  color: var(--spa-sand) !important;
 }
 
 /* UI Transitions */

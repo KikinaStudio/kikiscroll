@@ -701,21 +701,6 @@ function App() {
                                             );
                                         })}
                                     </p>
-                                    {/* Wellness intro note: short reading of what the live experience demonstrates.
-                                        Hidden until the user has started + scrolled a touch so it doesn't crowd the hero. */}
-                                    {mode === 'wellness' && t.s0_note && (() => {
-                                        const noteOpacity = activeSection === index
-                                            ? Math.min(1, Math.max(0, (sectionProgress - 0.55) / 0.20))
-                                            : 0;
-                                        return (
-                                            <p
-                                                className="mt-6 text-sm md:text-base font-sans text-tenbin-gray/90 tracking-wide leading-relaxed italic max-w-xl transition-opacity duration-500"
-                                                style={{ opacity: noteOpacity }}
-                                            >
-                                                {t.s0_note}
-                                            </p>
-                                        );
-                                    })()}
                                 </div>
                             ) : (() => {
                                 // Wellness section 2: fade out the intro block once the horizontal pan starts,
@@ -1022,29 +1007,27 @@ function App() {
                 {/* Footer content */}
                 <footer className="bg-[#f5f3f0] text-[#1a1a1a] px-8 md:px-[8vw] pt-16 pb-12">
                     {/* Wellness CTA intro — editorial pre-form block.
-                        Closes the experience with a direct invitation before the contact form. */}
+                        Closes the experience with a direct invitation before the contact form.
+                        Kept compact so the footer doesn't dominate the page. */}
                     {mode === 'wellness' && (
-                        <div className="max-w-3xl mb-20 md:mb-24">
-                            <h2 className="text-4xl md:text-6xl font-heading font-medium tracking-tight leading-tight mb-8">
+                        <div className="max-w-2xl mb-12 md:mb-14">
+                            <h2 className="text-2xl md:text-4xl font-heading font-medium tracking-tight leading-snug mb-4">
                                 {t.cta_title}
                             </h2>
-                            <p className="text-base md:text-lg text-[#3a3a3a] leading-relaxed mb-4 font-light">
-                                {t.cta_body}
+                            <p className="text-sm md:text-base text-[#3a3a3a] leading-relaxed font-light">
+                                {t.cta_body}{' '}<span className="font-medium text-[#1a1a1a]">{t.cta_invite}</span>{' '}
+                                <a
+                                    href={`mailto:${t.cta_email}`}
+                                    className="underline decoration-1 underline-offset-4 hover:decoration-2 transition-all"
+                                >
+                                    {t.cta_email}
+                                </a>
                             </p>
-                            <p className="text-lg md:text-xl font-medium mb-8">
-                                {t.cta_invite}
-                            </p>
-                            <a
-                                href={`mailto:${t.cta_email}`}
-                                className="inline-block text-base md:text-lg underline decoration-1 underline-offset-4 hover:decoration-2 transition-all"
-                            >
-                                {t.cta_email}
-                            </a>
                         </div>
                     )}
                     <div className="flex flex-col md:flex-row justify-between gap-12 mb-16">
                         <div className="flex-shrink-0">
-                            <img src="logo-kikina.png" alt="Kikina Lab" className="h-6 md:h-8 w-auto invert" />
+                            <img src={`${import.meta.env.BASE_URL}logo-kikina.png`} alt="Kikina Lab" className="h-6 md:h-8 w-auto invert" />
                         </div>
                         <div className="flex flex-col md:flex-row gap-8 md:gap-12 text-sm flex-1">
                             <div className="flex flex-col gap-3 flex-shrink-0 md:w-36">

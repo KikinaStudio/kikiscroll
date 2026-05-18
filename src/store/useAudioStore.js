@@ -2,22 +2,28 @@ import { create } from 'zustand';
 import { Howl } from 'howler';
 import { parseUrlMode } from '../urlMode';
 
+// Howler resolves relative paths against the current document URL, which breaks
+// at sub-routes like /kikiscroll/wellness/en (audio would resolve to
+// /kikiscroll/wellness/MUSIC/... instead of /kikiscroll/MUSIC/...). Always use
+// the Vite base prefix so the URL is absolute regardless of the page route.
+const BASE = import.meta.env.BASE_URL;
+
 // Retail track list — exact match with /public/MUSIC/
 const RETAIL_TRACKS = {
-    drone: { src: 'MUSIC/0 Drone.mp3', initialVolume: 0.5 },
-    strings: { src: 'MUSIC/1 Strings.mp3', initialVolume: 0 },
-    bass: { src: 'MUSIC/2 Bass.mp3', initialVolume: 0 },
-    drums: { src: 'MUSIC/3 Drums.mp3', initialVolume: 0 },
-    keyboard: { src: 'MUSIC/4 Keyboard.mp3', initialVolume: 0 },
-    crowd: { src: 'MUSIC/Crowd.mp3', initialVolume: 0 },
-    jungle: { src: 'MUSIC/Jungle.mp3', initialVolume: 0 },
-    pulsatingWave: { src: 'MUSIC/Pulsating Wave.mp3', initialVolume: 0 },
-    focusCognitif: { src: 'MUSIC/Focus Cognitif.mp3', initialVolume: 0 },
-    happy: { src: 'MUSIC/HAPPY.mp3', initialVolume: 0 },
-    sad: { src: 'MUSIC/SAD.mp3', initialVolume: 0 },
-    entrance: { src: 'MUSIC/Synthwave_1.mp3', initialVolume: 0 },
-    rayon: { src: 'MUSIC/Rap_1.mp3', initialVolume: 0 },
-    cabine: { src: 'MUSIC/Bossa.mp3', initialVolume: 0 },
+    drone: { src: `${BASE}MUSIC/0 Drone.mp3`, initialVolume: 0.5 },
+    strings: { src: `${BASE}MUSIC/1 Strings.mp3`, initialVolume: 0 },
+    bass: { src: `${BASE}MUSIC/2 Bass.mp3`, initialVolume: 0 },
+    drums: { src: `${BASE}MUSIC/3 Drums.mp3`, initialVolume: 0 },
+    keyboard: { src: `${BASE}MUSIC/4 Keyboard.mp3`, initialVolume: 0 },
+    crowd: { src: `${BASE}MUSIC/Crowd.mp3`, initialVolume: 0 },
+    jungle: { src: `${BASE}MUSIC/Jungle.mp3`, initialVolume: 0 },
+    pulsatingWave: { src: `${BASE}MUSIC/Pulsating Wave.mp3`, initialVolume: 0 },
+    focusCognitif: { src: `${BASE}MUSIC/Focus Cognitif.mp3`, initialVolume: 0 },
+    happy: { src: `${BASE}MUSIC/HAPPY.mp3`, initialVolume: 0 },
+    sad: { src: `${BASE}MUSIC/SAD.mp3`, initialVolume: 0 },
+    entrance: { src: `${BASE}MUSIC/Synthwave_1.mp3`, initialVolume: 0 },
+    rayon: { src: `${BASE}MUSIC/Rap_1.mp3`, initialVolume: 0 },
+    cabine: { src: `${BASE}MUSIC/Bossa.mp3`, initialVolume: 0 },
 };
 
 // Wellness track list — wellness reuses the retail audio set for now; replace
@@ -26,7 +32,7 @@ const RETAIL_TRACKS = {
 // same source as `cabine` so all 4 wellness zones have audio.
 const WELLNESS_TRACKS = {
     ...RETAIL_TRACKS,
-    recuperation: { src: 'MUSIC/Bossa.mp3', initialVolume: 0 },
+    recuperation: { src: `${BASE}MUSIC/Bossa.mp3`, initialVolume: 0 },
 };
 
 const { mode } = parseUrlMode();

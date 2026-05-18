@@ -22,9 +22,6 @@ const wellness = {
     s0_p2: "Hôtels, instituts, thermes, retraites de longévité, nous composons cette signature, espace par espace, du seuil de l'accueil aux derniers instants de récupération.",
     s0_p3: "Une musique vivante, écrite par des compositeurs, guidée par les neurosciences.",
 
-    // Section 0 — short note describing what the live experience demonstrates
-    s0_note: "Ce que vous allez vivre est un soundscape Kikina. Une piste unique, fil rouge audible et signature de la marque, traverse tout le spa. Autour d'elle s'ajoutent en continu des couches qui répondent à chaque espace, à chaque mouvement, à chaque moment du parcours.",
-
     // Section 1 paragraphs — piste nue continue + chaque espace s'accorde avec elle
     s1_p1: "Sous chaque espace du spa, une seule piste nue joue en continu. Une signature dénudée, présente partout, qui ancre l'expérience et porte la marque.",
     s1_p2: "Autour d'elle, chaque pièce écrit sa propre musique en dialogue avec cette piste de fond. Réception, hammam, cabine, salon : chaque morceau est composé pour épouser le même socle harmonique.",
@@ -143,9 +140,6 @@ const wellness = {
     s0_p1: "Every spa carries a sonic climate that shapes the nervous system before the first treatment. It is often the first sensation a guest receives, and one of the last impressions they carry away.",
     s0_p2: "Hotels, day spas, thermal baths, longevity retreats, we compose that signature, space by space, from the threshold of reception to the final moments of recovery.",
     s0_p3: "Living music, written by composers, guided by neuroscience.",
-
-    // Section 0 — short note describing what the live experience demonstrates
-    s0_note: "What you are about to experience is a Kikina soundscape. One identifiable signature, the brand's red thread, runs through the entire spa. Around it, intelligent layers respond in real time to each space, each movement, each moment of the journey.",
 
     // Section 1 paragraphs — a continuous naked track + each space scored to harmonize with it
     s1_p1: "Beneath every space of the spa, a single bare track plays continuously. A naked signature, present everywhere, that anchors the experience and carries the brand.",
