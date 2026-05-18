@@ -20,25 +20,13 @@ const RETAIL_TRACKS = {
     cabine: { src: 'MUSIC/Bossa.mp3', initialVolume: 0 },
 };
 
-// Wellness track list — files in /public/MUSIC/wellness/.
-// Tracks marked TODO currently fall back to the retail file so audio plays in wellness mode
-// before bespoke wellness assets exist. Swap the path when each new piece is delivered.
+// Wellness track list — wellness reuses the retail audio set for now; replace
+// individual entries once bespoke wellness pieces are delivered. `recuperation`
+// is the only wellness-specific slot (4th zone), and currently points to the
+// same source as `cabine` so all 4 wellness zones have audio.
 const WELLNESS_TRACKS = {
-    drone: { src: 'MUSIC/0 Drone.mp3', initialVolume: 0.5 },
-    strings: { src: 'MUSIC/1 Strings.mp3', initialVolume: 0 }, // TODO: replace with wellness stem
-    bass: { src: 'MUSIC/2 Bass.mp3', initialVolume: 0 },       // TODO: replace with wellness stem
-    drums: { src: 'MUSIC/3 Drums.mp3', initialVolume: 0 },     // TODO: replace with wellness stem
-    keyboard: { src: 'MUSIC/4 Keyboard.mp3', initialVolume: 0 }, // TODO: replace with wellness stem
-    crowd: { src: 'MUSIC/Crowd.mp3', initialVolume: 0 },
-    jungle: { src: 'MUSIC/Jungle.mp3', initialVolume: 0 },     // TODO: replace with wellness Relaxation track
-    pulsatingWave: { src: 'MUSIC/Pulsating Wave.mp3', initialVolume: 0 },
-    focusCognitif: { src: 'MUSIC/Focus Cognitif.mp3', initialVolume: 0 },
-    happy: { src: 'MUSIC/HAPPY.mp3', initialVolume: 0 },       // TODO: validate or replace for wellness
-    sad: { src: 'MUSIC/SAD.mp3', initialVolume: 0 },           // TODO: validate or replace for wellness
-    entrance: { src: 'MUSIC/Synthwave_1.mp3', initialVolume: 0 }, // TODO: replace with MUSIC/wellness/Seuil.mp3 (Accueil & transitions)
-    rayon: { src: 'MUSIC/Rap_1.mp3', initialVolume: 0 },       // TODO: replace with MUSIC/wellness/Enveloppe.mp3 (Rituels de chaleur)
-    cabine: { src: 'MUSIC/Bossa.mp3', initialVolume: 0 },      // TODO: replace with MUSIC/wellness/Geste.mp3 (Cabines de soin)
-    recuperation: { src: 'MUSIC/Bossa.mp3', initialVolume: 0 }, // TODO: replace with MUSIC/wellness/Empreinte.mp3 (Espaces de récupération)
+    ...RETAIL_TRACKS,
+    recuperation: { src: 'MUSIC/Bossa.mp3', initialVolume: 0 },
 };
 
 const { mode } = parseUrlMode();

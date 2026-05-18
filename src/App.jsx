@@ -76,8 +76,8 @@ function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationAc
             let entranceVol = 0, rayonVol = 0, cabineVol = 0, recuperationVol = 0;
             if (isWellness) {
                 // Remap progress with park periods at start/end (matches the visual panorama remap)
-                const PARK_START = 0.15;
-                const PARK_END = 0.85;
+                const PARK_START = 0.28;
+                const PARK_END = 0.86;
                 const mp = sectionProgress <= PARK_START
                     ? 0
                     : sectionProgress >= PARK_END
@@ -413,7 +413,7 @@ function App() {
         sections.forEach((section, i) => {
             // Section 2 horizontal pan needs more time in wellness (4 cards with park-at-start/end)
             // than in retail (3 static icons), so we differentiate the scroll length.
-            const section2Length = isWellness ? window.innerHeight * 4.5 : window.innerHeight * 3;
+            const section2Length = isWellness ? window.innerHeight * 5.5 : window.innerHeight * 3;
             const scrollLength = i === 2 ? section2Length : (i === 5 ? window.innerHeight * 3.5 : window.innerHeight * 1.5);
             ScrollTrigger.create({
                 trigger: section,
@@ -491,8 +491,10 @@ function App() {
                     ];
                     // Parked progress: hold slide 0 in view at the start and slide 3 at the end
                     // so the user has time to actually read those cards before/after the horizontal pan.
-                    const PARK_START = 0.15;
-                    const PARK_END = 0.85;
+                    // PARK_START is pushed late enough that the intro title + paragraph have time
+                    // to be read and fade out before the rooms become the focus.
+                    const PARK_START = 0.28;
+                    const PARK_END = 0.86;
                     const movingProgress = sectionProgress <= PARK_START
                         ? 0
                         : sectionProgress >= PARK_END
@@ -503,10 +505,12 @@ function App() {
                                       : movingProgress < 3/6 ? 1
                                       : movingProgress < 5/6 ? 2
                                       : 3;
-                    // Fade panorama in/out at section edges to avoid hard pop-in and overlap with next section.
-                    const FADE_IN_END = 0.06;
+                    // Delay panorama fade-in so the rooms only appear once the intro paragraph
+                    // has had time to be read and is fading out.
+                    const FADE_IN_START = 0.18;
+                    const FADE_IN_END = 0.26;
                     const FADE_OUT_START = 0.94;
-                    const fadeIn = Math.min(1, sectionProgress / FADE_IN_END);
+                    const fadeIn = Math.max(0, Math.min(1, (sectionProgress - FADE_IN_START) / (FADE_IN_END - FADE_IN_START)));
                     const fadeOut = Math.min(1, (1 - sectionProgress) / (1 - FADE_OUT_START));
                     const panoramaOpacity = Math.max(0, Math.min(fadeIn, fadeOut));
                     return (
@@ -676,13 +680,28 @@ function App() {
                                             );
                                         })}
                                     </p>
+                                    {/* Wellness intro note: short reading of what the live experience demonstrates.
+                                        Hidden until the user has started + scrolled a touch so it doesn't crowd the hero. */}
+                                    {mode === 'wellness' && t.s0_note && (() => {
+                                        const noteOpacity = activeSection === index
+                                            ? Math.min(1, Math.max(0, (sectionProgress - 0.55) / 0.20))
+                                            : 0;
+                                        return (
+                                            <p
+                                                className="mt-6 text-sm md:text-base font-sans text-tenbin-gray/90 tracking-wide leading-relaxed italic max-w-xl transition-opacity duration-500"
+                                                style={{ opacity: noteOpacity }}
+                                            >
+                                                {t.s0_note}
+                                            </p>
+                                        );
+                                    })()}
                                 </div>
                             ) : (() => {
                                 // Wellness section 2: fade out the intro block once the horizontal pan starts,
                                 // so the title + paragraph don't compete with the spa cards mid-scroll.
                                 const isWellnessSection2 = section.hasZonesPanorama && mode === 'wellness';
                                 const introOpacity = isWellnessSection2 && activeSection === index
-                                    ? Math.max(0, Math.min(1, (0.20 - sectionProgress) / 0.06))
+                                    ? Math.max(0, Math.min(1, (0.22 - sectionProgress) / 0.06))
                                     : 1;
                                 return (
                                     <div
@@ -697,9 +716,9 @@ function App() {
                                         <p className={"text-base md:text-lg font-sans tracking-wide leading-relaxed font-light mb-12 " + (section.hasZonesPanorama ? "text-white" : "text-tenbin-gray")}>
                                             {section.paragrapheParts.map((part, pi) => {
                                                 // For wellness section 2, compress the reveal so the whole paragraph
-                                                // is visible during the start-of-section park period.
-                                                const partThreshold = isWellnessSection2 ? pi * 0.04 : pi * 0.33;
-                                                const revealRamp = isWellnessSection2 ? 0.05 : 0.15;
+                                                // is fully visible by ~0.10 progress — well before the cards appear.
+                                                const partThreshold = isWellnessSection2 ? pi * 0.03 : pi * 0.33;
+                                                const revealRamp = isWellnessSection2 ? 0.04 : 0.15;
                                                 const partProgress = activeSection === index
                                                     ? Math.min(1, Math.max(0, (sectionProgress - partThreshold) / revealRamp))
                                                     : 0;
@@ -738,16 +757,29 @@ function App() {
                                 </div>
                             )}
 
-                            {/* Section 4: Density - musical layers counter */}
+                            {/* Section 5: density indicator
+                                — Retail: numeric counter (1 → 5 strates sonores)
+                                — Wellness: each strate is a phase of a 1h treatment, so we show the phase name */}
                             {section.hasDensityLabels && activeSection === index && densityExperienceProgress > 0 && (
-                                <div className="mt-8 border-t border-tenbin-gray/20 pt-8 flex flex-col items-center gap-2 w-fit">
-                                    <span className="text-3xl md:text-4xl font-heading font-medium text-white transition-all duration-500 scale-110">
-                                        {densityBlobCount}
-                                    </span>
-                                    <span className="text-[10px] uppercase tracking-widest text-white transition-all duration-500 opacity-100">
-                                        {t.density_label}
-                                    </span>
-                                </div>
+                                mode === 'wellness' ? (
+                                    <div className="mt-8 border-t border-tenbin-gray/20 pt-8 flex flex-col items-start gap-2 w-fit">
+                                        <span className="text-[10px] uppercase tracking-[0.28em] text-white/70 transition-all duration-500">
+                                            {`${densityBlobCount} / 5 — ${t.phase_label}`}
+                                        </span>
+                                        <span className="text-2xl md:text-3xl font-heading font-medium text-white transition-all duration-500">
+                                            {t[`phase_${densityBlobCount}`]}
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <div className="mt-8 border-t border-tenbin-gray/20 pt-8 flex flex-col items-center gap-2 w-fit">
+                                        <span className="text-3xl md:text-4xl font-heading font-medium text-white transition-all duration-500 scale-110">
+                                            {densityBlobCount}
+                                        </span>
+                                        <span className="text-[10px] uppercase tracking-widest text-white transition-all duration-500 opacity-100">
+                                            {t.density_label}
+                                        </span>
+                                    </div>
+                                )
                             )}
 
                             {/* Section 2 (Zones): Icônes zones — uniquement en retail (en wellness les cards portent l'info). */}

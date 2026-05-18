@@ -2,7 +2,7 @@
 
 > Document destiné à une **autre session Claude Code** qui reprend ce projet sans contexte. Lis ce fichier **avant** d'agir. Il résume l'état du repo, ce qui a été fait, ce qu'il reste à faire, et les décisions déjà prises (à ne pas re-débattre).
 
-Dernière mise à jour : **2026-05-12** (après merge spa luxe + section 2 polish)
+Dernière mise à jour : **2026-05-18** (après refonte copy spa luxe v2 + transformation s5 phases du soin)
 
 ---
 
@@ -11,8 +11,9 @@ Dernière mise à jour : **2026-05-12** (après merge spa luxe + section 2 polis
 1. Le site Kikiscroll a maintenant **deux variantes** : retail (`/kikiscroll/<lang>`) et wellness (`/kikiscroll/wellness/<lang>`), `<lang>` ∈ `{fr, en}`. 4 URLs au total.
 2. Le mode est résolu **une seule fois au chargement** depuis l'URL via `src/urlMode.js`, puis injecté dans `ModeContext` + lu par le store audio au module load. Pas de switch runtime.
 3. La version retail est **inchangée** depuis l'origine et reste live sur `main`.
-4. La version wellness « spa luxe 2026 » (4 zones + palette warm + blob galet + vapeur) est **mergée et déployée**. La branche `wellness-spa-luxe-refonte` n'a plus de raison d'exister mais n'a pas été supprimée.
-5. Le seul gap restant : les **assets audio bespoke** (4 pistes wellness pour la section 2) ne sont pas livrés — fallback sur les pistes retail avec TODO marqués dans le code.
+4. La version wellness « spa luxe 2026 » est **mergée et déployée**. Itération copy v2 : narratif retravaillé bout en bout (s0 intro note + métaphore Guerlain s2 + s4 capteur spatial + s5 phases du soin).
+5. **Audio wellness = audio retail** (décision Jeremie 2026-05-18). `WELLNESS_TRACKS` réutilise explicitement `RETAIL_TRACKS` via spread, avec `recuperation` en slot supplémentaire. Plus de TODO sur les pistes ; les vraies musiques wellness arriveront plus tard.
+6. **Section 5 transformée** : ce n'est plus un compteur générique "1→5 strates sonores" mais **5 phases d'un soin exemple** d'une heure (Arrivée → Prise de contact → Profondeur → Relâchement → Retour). Wellness uniquement, retail garde le compteur numérique.
 
 ---
 
@@ -111,33 +112,65 @@ Kikiscroll/
 
 6. **`9cfa4f8` Merge wellness-spa-luxe-refonte: section 2 polish + session handoff** — merge des commits 073fcfd + 51ff698 (la première moitié du contenu spa luxe avait déjà été mergée via PR #1 `50319a3`).
 
+### Itération copy v2 + transformation section 5 (session 2026-05-18, ce commit)
+
+7. **Refonte copy wellness v2 — narratif retravaillé bout en bout** (`src/translations/wellness.js`)
+   - **Section 0** : titre `Sound, as a signature of care` / `Le son, signature du soin`. Eyebrow `Composing presence` / `Composer la présence`. Paragraphe principal allégé (3 parts). Ajout d'une nouvelle clé `s0_note` rendue en italique sous le paragraphe (fade-in à `sectionProgress > 0.55`) : explique en une phrase ce que l'expérience démontre — *"a Kikina soundscape: one identifiable signature, the brand's red thread, with intelligent layers responding to each space, each movement"*.
+   - **Section 2** : titre `One signature, many spaces` / `Une signature, plusieurs espaces`. Paragraphe réécrit avec métaphore parfum Guerlain (tête / cœur / base). Le paragraphe est désormais affiché en wellness (auparavant null) avec compress reveal et fade-out coordonné avec l'apparition des cartes.
+   - **Section 4** : pivot complet. Plus de "lecture faciale" mais **capteur spatial** qui lit la cabine, ajuste la musique à la structure du soin et aux gestes du praticien. Sert d'intro narrative à la section 5. Titre : `Sound that listens to the gesture` / `Le son à l'écoute du geste`. La démo webcam reste fonctionnelle mais le texte la présente comme proxy : *"What you see here through a webcam, we deploy in the treatment room with spatial sensors"*.
+   - **Section 5** : **transformation totale**. Plus de "matière qui s'épaissit" / "5 strates" génériques. Désormais : **un soin d'une heure a un arc en 5 phases**, et la composition épouse cet arc. Titre : `A score for every treatment` / `Une partition par soin`. Nouvelles clés `phase_1` à `phase_5` + `phase_label` :
+     - 1 → Arrival / L'arrivée
+     - 2 → First contact / La prise de contact
+     - 3 → Depth / La profondeur
+     - 4 → Release / Le relâchement
+     - 5 → Return / Le retour
+   - **Bodies des cards section 2** (Receptions+transitions + Recovery spaces) raffinés. Les 2 autres (Heat rituals + Treatment rooms) inchangés.
+
+8. **Section 2 timings rebalanced** (`src/App.jsx`) — la copy v2 a besoin de plus d'air pour la lecture du paragraphe avant l'apparition des chambres :
+   - `section2Length` : 4.5× → **5.5× viewport** en wellness
+   - Park periods : `PARK_START 0.15 → 0.28`, `PARK_END 0.85 → 0.86` (visuel + audio crossfade) — alignés dans `useScrollAudio` et dans le rendu panorama
+   - Panorama fade-in : était `0 → 0.06`, devient **`0.18 → 0.26`** (les chambres n'apparaissent qu'une fois le paragraphe en train de disparaître)
+   - Intro block fade-out : était `0.20 - 0.06/0.06`, devient `0.22 - 0.06/0.06` (le titre + paragraphe restent lisibles légèrement plus longtemps)
+   - Paragraph reveal compressé : threshold/ramp `0.04/0.05` → `0.03/0.04` pour que les 3 parts soient toutes visibles avant `sectionProgress 0.10`
+   - Résultat : le user lit le paragraphe en clair pendant 0→0.16, fade crossfade 0.16→0.26, première chambre parquée pleinement visible jusqu'à 0.28, puis pan horizontal jusqu'à 0.86, dernière chambre parquée 0.86→1.0.
+
+9. **Section 5 rendering branché par mode** (`src/App.jsx#L763`) — auparavant `{densityBlobCount}` + `{t.density_label}` indifféremment. Désormais :
+   - Wellness : nom de la phase (`{t['phase_' + densityBlobCount]}`) en heading + ligne fine `"N / 5 — phase du soin"` au-dessus.
+   - Retail : compteur numérique + `density_label` (inchangé).
+   - `density_label` retiré de `wellness.js` (plus utilisé), `phase_*` + `phase_label` ajoutés.
+
+10. **Audio wellness = audio retail** (`src/store/useAudioStore.js`)
+    - `WELLNESS_TRACKS` était une duplication des 14 entrées retail avec TODOs sur 11 d'entre elles. Réécrit en `{ ...RETAIL_TRACKS, recuperation: { src: 'MUSIC/Bossa.mp3', initialVolume: 0 } }` — explicite et concis.
+    - Décision Jeremie : *"je veux que tu utilise pour le site wellness les memes sons du site retail, je les modifierai moi meme plus tard"*. Le swap vers des pistes bespoke se fera plus tard, à sa main.
+
 ---
 
 ## Ce qui reste à faire
 
-### Bloquant / prioritaire
+### Audio (décision : à la main de Jeremie)
 
-1. **Musiques wellness bespoke** — 4 pistes manquantes (actuellement fallback retail) :
-   - `entrance` → "Accueil & transitions / Le seuil" → besoin d'une piste qui masque sans s'imposer, prépare le système nerveux
-   - `rayon` → "Rituels de chaleur / L'enveloppe" → basses chaudes et textures organiques, relaxation alerte
-   - `cabine` → "Cabines de soin / Le geste" → soutien du geste, pas d'aléatoire
-   - `recuperation` → "Espaces de récupération / L'empreinte" → étirement parasympathique, prolongement post-soin
-   - Cible : `public/MUSIC/wellness/Seuil.mp3`, `Enveloppe.mp3`, `Geste.mp3`, `Empreinte.mp3` ; mettre à jour `useAudioStore.js` lignes 38–41 quand livrées.
-   - Specs détaillées (tempo, références, niveaux LUFS) dans [docs/wellness-assets-brief.md](./wellness-assets-brief.md) — **doc à actualiser** : elle parle de 3 zones, les noms zones ne matchent plus.
-
-2. **Validation à l'écoute des autres pistes wellness** (`jungle`, `happy`, `sad`, stems s5) — actuellement marquées TODO dans `useAudioStore.js`, retail par défaut. Décider piste par piste.
+1. **Musiques wellness bespoke** — Jeremie a choisi explicitement (2026-05-18) de **garder les pistes retail** pour le wellness pour l'instant, et de les remplacer lui-même plus tard. La doc [wellness-assets-brief.md](./wellness-assets-brief.md) reste utile comme spec si jamais des pistes bespoke sont produites, mais ce n'est plus bloquant côté dev.
+   - Si swap futur : déposer `public/MUSIC/wellness/<nom>.mp3` et changer les valeurs dans `WELLNESS_TRACKS` (actuellement `{ ...RETAIL_TRACKS, recuperation }`). Les noms de pistes à cibler côté wellness (en lien avec les 4 zones + 5 phases) :
+     - `entrance` → Accueil & transitions / Le seuil
+     - `rayon` → Rituels de chaleur / L'enveloppe
+     - `cabine` → Cabines de soin / Le geste
+     - `recuperation` → Espaces de récupération / L'empreinte (slot wellness-only)
+     - 5 stems section 5 (`drone`, `strings`, `bass`, `drums`, `keyboard`) → phases du soin (arrivée / contact / profondeur / relâchement / retour)
+     - `happy` / `sad` (section 4) → variantes "gesture-following" si production faite
 
 ### Non bloquant / cleanup
 
-3. **Dead code à supprimer** : dans [src/App.jsx#L723](../src/App.jsx#L723), le bloc `{section.hasZonesPanorama && activeSection === index && mode !== 'wellness' && (...)}` contient un ternaire `mode === 'wellness' ? [...] : [...]` qui est unreachable (la condition extérieure exclut déjà wellness). Les 4 SVG wellness à l'intérieur ne s'affichent jamais. À nettoyer.
+2. **Dead code à supprimer** : dans [src/App.jsx#L723](../src/App.jsx#L723), le bloc `{section.hasZonesPanorama && activeSection === index && mode !== 'wellness' && (...)}` contient un ternaire `mode === 'wellness' ? [...] : [...]` qui est unreachable (la condition extérieure exclut déjà wellness). Les 4 SVG wellness à l'intérieur ne s'affichent jamais. À nettoyer.
 
-4. **`public/IMAGES/wellness_panorama.jpg`** est devenu un asset orphelin (plus référencé dans le code — la section 2 wellness utilise les 4 zone images individuelles). À supprimer.
+3. **`public/IMAGES/wellness_panorama.jpg`** est devenu un asset orphelin (plus référencé dans le code — la section 2 wellness utilise les 4 zone images individuelles). À supprimer.
 
-5. **Branche `wellness-spa-luxe-refonte`** : son contenu est intégralement sur `main`. Peut être supprimée localement (`git branch -d wellness-spa-luxe-refonte`) et remote (`git push origin --delete wellness-spa-luxe-refonte`).
+4. **Branche `wellness-spa-luxe-refonte`** : son contenu est intégralement sur `main`. Peut être supprimée localement (`git branch -d wellness-spa-luxe-refonte`) et remote (`git push origin --delete wellness-spa-luxe-refonte`).
 
-6. **Docs à actualiser** :
-   - [docs/wellness-dev-handoff.md](./wellness-dev-handoff.md) — section "Edge cases" affirme que les clés sont strictement identiques entre modes, ce n'est plus vrai. La section sur le panorama unique n'est plus valide en wellness (carousel 4 slides). Section "Modèle des traductions" mentionne un contrat "strictement identique" à corriger.
-   - [docs/wellness-assets-brief.md](./wellness-assets-brief.md) — 3 zones devenues 4. Noms changés. Image panorama unique remplacée par 4 zone images. Brief musique à adapter (4 pistes au lieu de 3).
+5. **Docs à actualiser** :
+   - [docs/wellness-dev-handoff.md](./wellness-dev-handoff.md) — section "Edge cases" affirme que les clés sont strictement identiques entre modes, ce n'est plus vrai. La section sur le panorama unique n'est plus valide en wellness (carousel 4 slides). Section "Modèle des traductions" mentionne un contrat "strictement identique" à corriger. Mentionner aussi les nouvelles clés `s0_note`, `phase_1`...`phase_5`, `phase_label`.
+   - [docs/wellness-assets-brief.md](./wellness-assets-brief.md) — 3 zones devenues 4. Noms changés. Image panorama unique remplacée par 4 zone images. Brief musique à adapter (4 pistes au lieu de 3 + 5 stems section 5 phases du soin). À noter aussi : ce brief n'est plus bloquant, Jeremie produit lui-même les musiques.
+
+6. **Section 4 : démo webcam vs narratif capteur spatial** — la section 4 parle désormais de capteurs spatiaux qui lisent les gestes du praticien, mais la démo interactive reste une webcam qui lit l'expression du visage. Le texte le présente comme proxy *"What you see here through a webcam, we deploy in the treatment room with spatial sensors"*, ce qui marche pour la prez. Si tu veux pousser plus loin : remplacer la détection happy/sad par autre chose (mouvement de la main devant la caméra, posture, etc.). Pas demandé, mais c'est l'écart conceptuel le plus visible.
 
 ---
 
@@ -154,6 +187,11 @@ Kikiscroll/
 | Pas de tests automatisés | Le repo n'en a jamais eu | — |
 | Push direct sur main = needs explicit user confirmation (sécurité harness) | Workflow de protection Claude Code | Bloqué une fois en session 1 |
 | `dist/` est tracké en git par convention historique | Le CI rebuild de toute façon, mais on garde le tracking | Convention du repo |
+| Audio wellness = audio retail (pas de bespoke pour l'instant) | Décision Jeremie 2026-05-18, il remplacera les pistes lui-même | `useAudioStore.js` |
+| Section 5 wellness = phases d'un soin, pas strates génériques | Refonte narrative 2026-05-18 : le scroll s5 raconte l'arc d'un soin d'une heure | Commits 2026-05-18 |
+| Section 4 wellness = capteur spatial + gestes (pas reco faciale) | Pivot 2026-05-18 : sert d'intro narrative à la section 5 (phases du soin) | Idem |
+| Démo webcam s4 conservée comme proxy malgré le pivot narratif | Le hardware "capteur spatial" n'est pas démontrable côté web ; la webcam est le proxy lisible. Le texte le rend explicite. | Idem |
+| s5 : compteur numérique en retail, nom de phase en wellness | Branche par mode dans le rendu (`mode === 'wellness' ? ... : ...`) — retail garde son identité, wellness gagne le storytelling | Idem |
 
 ---
 
