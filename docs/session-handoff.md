@@ -2,7 +2,7 @@
 
 > Document destiné à une **autre session Claude Code** qui reprend ce projet sans contexte. Lis ce fichier **avant** d'agir. Il résume l'état du repo, ce qui a été fait, ce qu'il reste à faire, et les décisions déjà prises (à ne pas re-débattre).
 
-Dernière mise à jour : **2026-05-18** (après refonte copy spa luxe v2 + transformation s5 phases du soin)
+Dernière mise à jour : **2026-05-18** (après réordonnancement wellness + copy v3 piste naked + section 4 "sounds that listen")
 
 ---
 
@@ -14,6 +14,8 @@ Dernière mise à jour : **2026-05-18** (après refonte copy spa luxe v2 + trans
 4. La version wellness « spa luxe 2026 » est **mergée et déployée**. Itération copy v2 : narratif retravaillé bout en bout (s0 intro note + métaphore Guerlain s2 + s4 capteur spatial + s5 phases du soin).
 5. **Audio wellness = audio retail** (décision Jeremie 2026-05-18). `WELLNESS_TRACKS` réutilise explicitement `RETAIL_TRACKS` via spread, avec `recuperation` en slot supplémentaire. Plus de TODO sur les pistes ; les vraies musiques wellness arriveront plus tard.
 6. **Section 5 transformée** : ce n'est plus un compteur générique "1→5 strates sonores" mais **5 phases d'un soin exemple** d'une heure (Arrivée → Prise de contact → Profondeur → Relâchement → Retour). Wellness uniquement, retail garde le compteur numérique.
+7. **Wellness sections réordonnées** (intro → zones → neuro → sculpting → webcam → score) **sans toucher au retail**. Le code identifie chaque section par son `id` stable (0-5) plutôt que sa position dans le tableau ; `getSectionsData(t, mode)` retourne l'ordre approprié par mode. Voir §"Architecture des sections (id vs position)" plus bas.
+8. **Section 1 wellness retitrée** "The science of acoustic sculpting" / "La science de la sculpture acoustique" + nouveau narratif **piste nue continue** : une piste dénudée présente partout sert de socle, chaque espace écrit sa musique pour s'accorder avec, le client glisse d'un espace à l'autre sans rupture.
 
 ---
 
@@ -143,6 +145,46 @@ Kikiscroll/
     - `WELLNESS_TRACKS` était une duplication des 14 entrées retail avec TODOs sur 11 d'entre elles. Réécrit en `{ ...RETAIL_TRACKS, recuperation: { src: 'MUSIC/Bossa.mp3', initialVolume: 0 } }` — explicite et concis.
     - Décision Jeremie : *"je veux que tu utilise pour le site wellness les memes sons du site retail, je les modifierai moi meme plus tard"*. Le swap vers des pistes bespoke se fera plus tard, à sa main.
 
+### Réordonnancement wellness + copy v3 (session 2026-05-18, second commit)
+
+11. **Wellness sections réordonnées** (`src/App.jsx` — `getSectionsData(t, mode)`)
+    - Demande Jeremie : déplacer la section "The art of situated listening" **après** "Compose the state, not the ambience". Plus changement de titre : "The science of acoustic sculpting" / "La science de la sculpture acoustique".
+    - **Nouvel ordre wellness** : intro (id 0) → zones (id 2) → neuro (id 3) → sculpting/isolation (id 1) → webcam (id 4) → score (id 5).
+    - **Retail reste inchangé** (id 0→5 dans l'ordre naturel) — convention "ne pas casser le retail" respectée.
+    - **Architecture** : voir §"Architecture des sections (id vs position)" plus bas. En court : chaque section a un `id` stable identifiant son comportement (audio crossfade, blob behavior, etc.) ; le tableau retourné par `getSectionsData` peut être réordonné par mode sans toucher au reste du code.
+    - **Refactor associé** : tous les `if (activeSection === N)` du code (hors `.map` rendering) ont été remplacés par `if (activeSectionId === N)` où `activeSectionId = sectionsData[activeSection]?.id`. Pareil pour les `i === N` dans ScrollTrigger.forEach (remplacés par `sd?.hasIsolationToggle`, `sd?.hasEnvironmentLabels`, `sd?.hasZonesPanorama`, `sd?.hasDensityLabels` selon le besoin). Idem pour les useEffect : leurs deps incluent maintenant `activeSectionId` et `sectionsData`.
+
+12. **Copy v3 wellness — narratif raffiné** (`src/translations/wellness.js`)
+    - **s1** (sculpting) : nouveau narratif **piste nue + harmonisation continue**. Une piste dénudée joue partout, chaque espace écrit sa musique en dialogue avec elle, le client passe d'un espace à l'autre sans coupure (texture qui change, identité qui reste). Aligné avec le titre "The science of acoustic sculpting".
+    - **s2** (zones) : "Guests forget most of what they hear. But they remember how a place sounded." Le paragraphe central insiste sur la *mémoire du lieu* plutôt que sur la métaphore Guerlain (qui restait un peu marketing). Closing inchangé : "The guest never recalls a track. They recall the place."
+    - **s4** (sounds that listen) : narratif fourni mot-pour-mot par Jeremie. "In the treatment room, music should not be a backdrop." → la cabine, le geste, le partenariat, et la webcam comme proxy lisible de ce qui sera déployé via capteur spatial. Em dash retiré (convention projet).
+    - **s5** (score for treatment) : narratif fourni mot-pour-mot. "Behind this real-time adaptation, every treatment has its own composed score." → l'arc en 5 phases, et l'articulation explicite entre partition composée + capteur en complément live. Sert de clôture narrative.
+
+---
+
+## Architecture des sections (id vs position)
+
+Référence pour qui éditerait l'ordre, la copie ou les comportements de section.
+
+**Concept** : chaque section a deux notions distinctes :
+- **`id`** (0 à 5) — stable, identifie le **comportement** (audio crossfade, blob, contrôles UI spécifiques) :
+  - `id 0` → Intro (drone only)
+  - `id 1` → Sculpting / Isolation (crowd track, toggle automatique à 40 %)
+  - `id 2` → Zones panorama (entrance/rayon/cabine/+recuperation crossfade)
+  - `id 3` → Neuro (jungle → pulsatingWave → focusCognitif crossfade)
+  - `id 4` → Webcam / Neuro-adaptive (happy/sad via face-api)
+  - `id 5` → Score / Density (1→5 stems accumulation)
+- **`activeSection`** — position dans le tableau `sectionsData`, qui correspond à la position DOM (= ordre de scroll). En retail, `activeSection === id`. En wellness, le tableau est réordonné, donc **non**.
+
+**Règle d'or** : pour tout comportement (audio, blob, états spécifiques), **toujours** switcher sur `activeSectionId = sectionsData[activeSection]?.id`. Jamais sur `activeSection`. Les seuls usages légitimes de `activeSection` (le numéro brut) sont :
+- Le DOM ordering dans `gsap.utils.toArray('.pin-section').forEach((section, i) => ...)` — utilise `sectionsData[i]?.id` ou les `has*` flags pour décider du scrollLength, du onEnter, etc.
+- Le test `activeSection === index` dans `.map((section, index) => ...)` qui détermine si la section en cours de rendu est la section visible — c'est sémantiquement "ma position correspond à la position active", donc OK tel quel.
+
+**Pour ajouter / réordonner des sections** :
+- Éditer `getSectionsData(t, mode)` dans `App.jsx`. Le retour est un array ordonné. Chaque élément est un objet `{ id, title, paragrapheParts, has*: true }`.
+- Pour réordonner par mode : c'est ce que wellness fait actuellement. Ajouter un autre `if (mode === 'X')` avec un array dans l'ordre souhaité.
+- **Ne pas changer les `id`** des sections existantes — tout le code de comportement en dépend.
+
 ---
 
 ## Ce qui reste à faire
@@ -192,6 +234,8 @@ Kikiscroll/
 | Section 4 wellness = capteur spatial + gestes (pas reco faciale) | Pivot 2026-05-18 : sert d'intro narrative à la section 5 (phases du soin) | Idem |
 | Démo webcam s4 conservée comme proxy malgré le pivot narratif | Le hardware "capteur spatial" n'est pas démontrable côté web ; la webcam est le proxy lisible. Le texte le rend explicite. | Idem |
 | s5 : compteur numérique en retail, nom de phase en wellness | Branche par mode dans le rendu (`mode === 'wellness' ? ... : ...`) — retail garde son identité, wellness gagne le storytelling | Idem |
+| Wellness sections réordonnées, retail intact | Demande Jeremie. Le code identifie chaque section par son `id` stable, pas sa position. `getSectionsData(t, mode)` retourne l'ordre approprié. | Commit 2026-05-18 (second) |
+| Section 1 wellness retitrée "The science of acoustic sculpting" | Aligné avec le nouveau narratif "piste nue continue + harmonisation" — plus pertinent que le titre original "art of situated listening" | Idem |
 
 ---
 

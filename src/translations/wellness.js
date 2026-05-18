@@ -11,7 +11,7 @@ const wellness = {
 
     // Section titles
     s0_title: "Le son, signature du soin.",
-    s1_title: "L'art de l'écoute située.",
+    s1_title: "La science de la sculpture acoustique.",
     s2_title: "Une signature, plusieurs espaces.",
     s3_title: "Composer l'état, pas l'ambiance.",
     s4_title: "Le son à l'écoute du geste.",
@@ -25,30 +25,30 @@ const wellness = {
     // Section 0 — short note describing what the live experience demonstrates
     s0_note: "Ce que vous allez vivre est un soundscape Kikina. Une piste unique, fil rouge audible et signature de la marque, traverse tout le spa. Autour d'elle s'ajoutent en continu des couches qui répondent à chaque espace, à chaque mouvement, à chaque moment du parcours.",
 
-    // Section 1 paragraphs
-    s1_p1: "Un spa est un empilement de zones acoustiques contradictoires : la voix de l'accueil ne doit pas atteindre la cabine, la rumeur du hammam ne doit pas couvrir la tisanerie.",
-    s1_p2: "Nos dispositifs de diffusion directionnelle créent des bulles de cohérence sonore. Chaque zone reçoit sa propre signature, sans pollution, sans débordement, sans compromis acoustique.",
-    s1_p3: "Le client traverse le spa et perçoit, sans le formuler, que chaque espace a été pensé pour lui seul. C'est le degré zéro du luxe contemporain : la précision invisible.",
+    // Section 1 paragraphs — piste nue continue + chaque espace s'accorde avec elle
+    s1_p1: "Sous chaque espace du spa, une seule piste nue joue en continu. Une signature dénudée, présente partout, qui ancre l'expérience et porte la marque.",
+    s1_p2: "Autour d'elle, chaque pièce écrit sa propre musique en dialogue avec cette piste de fond. Réception, hammam, cabine, salon : chaque morceau est composé pour épouser le même socle harmonique.",
+    s1_p3: "Le client passe d'un espace à l'autre sans entendre de coupure. La composition change de texture, pas d'identité. Une longue évolution, pas une playlist de pièces.",
 
     // Section 2 paragraphs
-    s2_p1: "Comme un parfum Guerlain a sa tête, son cœur, sa base, un spa a une narration acoustique qui se déploie d'espace en espace.",
-    s2_p2: "Nous composons une seule identité sonore pour le spa, puis nous la déclinons espace par espace, avec le même ADN et des intensités différentes.",
-    s2_p3: "Le client ne reconnaît jamais un morceau. Il reconnaît le lieu.",
+    s2_p1: "Le client oublie l'essentiel de ce qu'il entend. Mais il se souvient de comment un lieu a sonné.",
+    s2_p2: "De l'accueil à la récupération, un spa est une suite de moments, chacun avec son rôle et son intensité. Nous composons une signature sonore qui traverse chaque espace, prend une forme différente dans chacun, et reste en mémoire longtemps après le dernier soin.",
+    s2_p3: "Le client ne se souvient jamais d'un morceau. Il se souvient du lieu.",
 
     // Section 3 paragraphs
     s3_p1: "Un soin n'a pas une seule intention. Relâchement somatique, régulation parasympathique, ancrage attentionnel : ces états physiologiques sont aussi précis qu'un dosage.",
     s3_p2: "À chaque registre correspond une trame sonore distincte. Nos compositions glissent d'un état à l'autre selon le moment du soin, sans transition perceptible.",
     s3_p3: "Le praticien guide le geste, la signature sonore guide le système nerveux. Les deux convergent sans concertation.",
 
-    // Section 4 paragraphs — capteur spatial : la musique épouse la structure du soin et les gestes
-    s4_p1: "Un capteur spatial lit la cabine. La position du praticien, le rythme du geste, le souffle du corps sur la table. La musique n'est plus un décor : elle devient partenaire du soin.",
-    s4_p2: "Notre moteur ajuste la trame sonore à la structure du soin et aux mains qui travaillent. Chaque geste, chaque phase, trouve sa réponse sonore — pour accompagner sensoriellement et émotionnellement l'expérience du client.",
-    s4_p3: "Activez votre caméra pour ressentir le principe. Ce que vous voyez ici via une webcam, nous le déployons en cabine avec des capteurs spatiaux : une réponse calibrée, vivante, individuelle, sans intrusion.",
+    // Section 4 paragraphs — la musique suit le geste en temps réel (capteur spatial)
+    s4_p1: "Dans la cabine de soin, la musique ne doit pas être un décor. Elle doit suivre les mains qui travaillent, en temps réel. Un capteur spatial lit la pièce : la position du praticien, le rythme du geste, le souffle du corps sur la table.",
+    s4_p2: "Notre moteur ajuste la trame sonore à ce qui se joue réellement, pour que chaque geste trouve sa réponse sonore. La praticienne n'est plus accompagnée par une playlist. Elle est associée à une composition qui l'écoute.",
+    s4_p3: "Pour ressentir le principe ici, activez votre caméra. Nous lirons vos micro-signaux faciaux et ajusterons la musique à votre état en temps réel. C'est une démonstration de la même idée : un son qui répond au corps. En cabine, la même logique est déployée par des capteurs spatiaux qui suivent le geste plutôt que le visage. Une réponse calibrée, vivante, individuelle, sans intrusion.",
 
-    // Section 5 paragraphs — la composition épouse la structure du soin (5 phases)
-    s5_p1: "Un soin d'une heure a un arc. Une arrivée, une prise de contact, une profondeur, un relâchement, un retour. La musique peut ignorer cet arc, ou l'épouser.",
-    s5_p2: "Nous composons à côté du geste. Cinq strates écrites pour cinq phases : chaque couche entre lorsque le soin l'appelle, chaque couche se retire lorsque le corps se dépose.",
-    s5_p3: "Le client n'y pense jamais. Le corps reconnaît la signature. Le système nerveux se souvient de la précision.",
+    // Section 5 paragraphs — la partition épouse l'arc du soin, le capteur ajoute la couche live
+    s5_p1: "Derrière cette adaptation en temps réel, chaque soin a sa propre partition composée. Un soin d'une heure a un arc : une arrivée, une prise de contact, une profondeur, un relâchement, un retour. La musique peut ignorer cet arc, ou l'épouser.",
+    s5_p2: "Nous composons à côté de cet arc. Cinq strates écrites pour cinq phases : chaque couche entre lorsque le soin l'appelle, chaque couche se retire lorsque le corps se dépose.",
+    s5_p3: "La partition s'adapte au soin d'elle-même. Le capteur, lorsqu'il est présent, ajoute une réponse vive au geste du praticien. Le client n'y pense jamais. Le corps reconnaît la signature. Le système nerveux se souvient de la précision.",
 
     // Scroll prompt
     scroll_prompt: "Continuez de scroller",
@@ -127,7 +127,7 @@ const wellness = {
 
     // Section titles
     s0_title: "Sound, as a signature of care.",
-    s1_title: "The art of situated listening.",
+    s1_title: "The science of acoustic sculpting.",
     s2_title: "One signature, many spaces.",
     s3_title: "Compose the state, not the ambience.",
     s4_title: "Sound that listens to the gesture.",
@@ -141,30 +141,30 @@ const wellness = {
     // Section 0 — short note describing what the live experience demonstrates
     s0_note: "What you are about to experience is a Kikina soundscape. One identifiable signature, the brand's red thread, runs through the entire spa. Around it, intelligent layers respond in real time to each space, each movement, each moment of the journey.",
 
-    // Section 1 paragraphs
-    s1_p1: "A spa is a stack of contradictory acoustic zones: the voice at reception must not reach the treatment room, the rumble of the hammam must not cover the tea lounge.",
-    s1_p2: "Our directional diffusion systems create bubbles of sonic coherence. Each zone receives its own signature, without bleed, without overflow, without acoustic compromise.",
-    s1_p3: "The guest moves through the spa and senses, without naming it, that each space has been thought through for them alone. That is the baseline of contemporary luxury: invisible precision.",
+    // Section 1 paragraphs — a continuous naked track + each space scored to harmonize with it
+    s1_p1: "Beneath every space of the spa, a single bare track plays continuously. A naked signature, present everywhere, that anchors the experience and carries the brand.",
+    s1_p2: "Around it, each room writes its own music in conversation with that bare track. Reception, hammam, treatment cabin, lounge: every piece is composed to settle into the same harmonic ground.",
+    s1_p3: "The guest moves from one space to the next and never hears a cut. The composition shifts in texture, not in identity. One long evolution, not a playlist of rooms.",
 
     // Section 2 paragraphs
-    s2_p1: "Like a Guerlain fragrance has a head, a heart, a base, a spa has an acoustic narrative that unfolds across spaces.",
-    s2_p2: "We compose one sonic identity for the spa, then decline it space by space, with the same DNA and different intensities.",
-    s2_p3: "The guest never recognizes a track. They recognize the place.",
+    s2_p1: "Guests forget most of what they hear. But they remember how a place sounded.",
+    s2_p2: "From reception to recovery, a spa is a sequence of moments, each with its own role and its own intensity. We compose a sonic signature that runs through every space, takes a different shape in each, and stays in memory long after the last treatment ends.",
+    s2_p3: "The guest never recalls a track. They recall the place.",
 
     // Section 3 paragraphs
     s3_p1: "A treatment has more than one intention. Somatic release, parasympathetic regulation, attentional grounding: these physiological states are as precise as a dosage.",
     s3_p2: "Each register has its own sonic fabric. Our compositions slide from one state to the next as the treatment unfolds, without perceptible transition.",
     s3_p3: "The practitioner guides the gesture, the sonic signature guides the nervous system. Both converge without coordination.",
 
-    // Section 4 paragraphs — spatial sensor: music follows the treatment structure and the practitioner's gestures
-    s4_p1: "A spatial sensor reads the room. The position of the practitioner, the rhythm of the gesture, the breath of the body on the table. The music is no longer a backdrop: it becomes a partner to the treatment.",
-    s4_p2: "Our engine tunes the sonic fabric to the structure of the treatment and to the hands at work. Each gesture, each phase, finds its sonic answer — sensorially and emotionally accompanying the client's experience.",
-    s4_p3: "Turn on your camera to feel the principle. What you see here through a webcam, we deploy in the treatment room with spatial sensors: a calibrated response, alive, individual, without intrusion.",
+    // Section 4 paragraphs — music follows the hands in real time, via a spatial sensor
+    s4_p1: "In the treatment room, music should not be a backdrop. It should follow the hands at work, in real time. A spatial sensor reads the room: the position of the practitioner, the rhythm of the gesture, the breath of the body on the table.",
+    s4_p2: "Our engine adjusts the sonic fabric to what is actually unfolding, so every gesture finds its sonic answer. The practitioner is no longer accompanied by a playlist. She is partnered by a composition that listens to her.",
+    s4_p3: "To feel the principle here, turn on your camera. We will read your facial micro-signals and adjust the music to your state in real time. It is a demonstration of the same idea: sound that responds to the body. In the treatment room, the same logic is deployed through spatial sensors that follow the gesture rather than the face. A calibrated response, alive, individual, without intrusion.",
 
-    // Section 5 paragraphs — the composition mirrors the treatment structure (5 phases)
-    s5_p1: "A one-hour treatment has an arc. An arrival, a first contact, a depth, a release, a return. The music can ignore that arc, or follow it.",
-    s5_p2: "We compose alongside the gesture. Five strata written for five phases: each layer enters when the treatment calls for it, each layer steps back as the body settles.",
-    s5_p3: "The client never thinks about it. The body recognizes the signature. The nervous system remembers the precision.",
+    // Section 5 paragraphs — composed score follows the treatment arc, sensor adds the live layer
+    s5_p1: "Behind this real-time adaptation, every treatment has its own composed score. A one-hour treatment has an arc: an arrival, a first contact, a depth, a release, a return. The music can ignore that arc, or follow it.",
+    s5_p2: "We compose alongside that arc. Five strata written for five phases: each layer enters when the treatment calls for it, each layer steps back as the body settles.",
+    s5_p3: "The score adapts to the treatment by itself. The sensor, when present, adds a live response to the practitioner's gesture. The client never thinks about it. The body recognizes the signature. The nervous system remembers the precision.",
 
     // Scroll prompt
     scroll_prompt: "Keep scrolling",

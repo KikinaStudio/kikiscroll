@@ -9,68 +9,81 @@ import { useTranslation } from './LanguageContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// SECTION ORDER:
-// 0 = Intro (drone only, near-round blob)
-// 1 = Isolation Directionnelle (crowd → toggle at ~50% progress)
-// 2 = Zones (panorama + 3 zones: Entrée/Rayon/Espace équipe)
-// 3 = Neuro-Sonore (jungle/relaxation → pulsatingWave/régulation → focusCognitif/focus)
-// 4 = Musique Neuro-Adaptative (cut all non-drone, webcam → HAPPY/SAD)
-// 5 = Densité Interactive (1→5 blobs + stems accumulate, quasi-spherical)
+// SECTION IDs (stable, identify the BEHAVIOR — not the position on screen):
+//   0 = Intro (drone only, near-round blob)
+//   1 = Isolation / Acoustic sculpting (crowd → toggle at ~40% progress)
+//   2 = Zones panorama (entrance / rayon / cabine / + recuperation in wellness)
+//   3 = Neuro-Sonore (jungle → pulsatingWave → focusCognitif)
+//   4 = Webcam / Neuro-Adaptative (HAPPY/SAD via face-api)
+//   5 = Density / Score (1→5 blobs + stems accumulate)
+//
+// Retail keeps the original 0→5 narrative order. Wellness reorders to
+// intro → zones → neuro → sculpting → webcam → score so the story reads
+// "what we compose" → "for which spaces" → "for which states" → "how it
+// stitches together" → "and how it listens in real time" → "score for the
+// treatment". The behavior is bound to `id`, never to the array position.
 
-function getSectionsData(t) {
-    return [
-        {
-            id: 0,
-            title: t.s0_title,
-            paragrapheParts: [t.s0_p1, t.s0_p2, t.s0_p3],
-            isIntro: true,
-        },
-        {
-            id: 1,
-            title: t.s1_title,
-            paragrapheParts: [t.s1_p1, t.s1_p2, t.s1_p3],
-            hasIsolationToggle: true,
-        },
-        {
-            id: 2,
-            title: t.s2_title,
-            paragrapheParts: [t.s2_p1, t.s2_p2, t.s2_p3],
-            hasZonesPanorama: true,
-        },
-        {
-            id: 3,
-            title: t.s3_title,
-            paragrapheParts: [t.s3_p1, t.s3_p2, t.s3_p3],
-            hasEnvironmentLabels: true,
-        },
-        {
-            id: 4,
-            title: t.s4_title,
-            paragrapheParts: [t.s4_p1, t.s4_p2, t.s4_p3],
-            hasWebcamButton: true,
-        },
-        {
-            id: 5,
-            title: t.s5_title,
-            paragrapheParts: [t.s5_p1, t.s5_p2, t.s5_p3],
-            hasDensityLabels: true,
-        },
-    ];
+function getSectionsData(t, mode) {
+    const intro = {
+        id: 0,
+        title: t.s0_title,
+        paragrapheParts: [t.s0_p1, t.s0_p2, t.s0_p3],
+        isIntro: true,
+    };
+    const sculpting = {
+        id: 1,
+        title: t.s1_title,
+        paragrapheParts: [t.s1_p1, t.s1_p2, t.s1_p3],
+        hasIsolationToggle: true,
+    };
+    const zones = {
+        id: 2,
+        title: t.s2_title,
+        paragrapheParts: [t.s2_p1, t.s2_p2, t.s2_p3],
+        hasZonesPanorama: true,
+    };
+    const neuro = {
+        id: 3,
+        title: t.s3_title,
+        paragrapheParts: [t.s3_p1, t.s3_p2, t.s3_p3],
+        hasEnvironmentLabels: true,
+    };
+    const webcam = {
+        id: 4,
+        title: t.s4_title,
+        paragrapheParts: [t.s4_p1, t.s4_p2, t.s4_p3],
+        hasWebcamButton: true,
+    };
+    const score = {
+        id: 5,
+        title: t.s5_title,
+        paragrapheParts: [t.s5_p1, t.s5_p2, t.s5_p3],
+        hasDensityLabels: true,
+    };
+
+    if (mode === 'wellness') {
+        return [intro, zones, neuro, sculpting, webcam, score];
+    }
+    return [intro, sculpting, zones, neuro, webcam, score];
 }
 
 // --- Continuous audio logic driven by sectionProgress ---
-function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationActive, isWellness) {
+// activeSection is the DOM order index of the current pinned section. activeSectionId is the
+// stable behavior id (0=intro, 1=isolation/sculpting, 2=zones, 3=neuro, 4=webcam, 5=density)
+// — they are equal in retail, but the wellness sectionsData is reordered, so always switch on
+// the id, never on the position.
+function useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolationActive, isWellness) {
     const prevPalierRef = useRef(-1);
     const densityIntroCutoff = 0.82;
 
     useEffect(() => {
-        if (activeSection === 0) {
+        if (activeSectionId === 0) {
             // Intro: only drone plays (already at 0.5 from init)
             prevPalierRef.current = -1;
-        } else if (activeSection === 1) {
-            // Isolation: crowd is controlled by auto-toggle logic based on progress
+        } else if (activeSectionId === 1) {
+            // Isolation / acoustic sculpting: crowd controlled by auto-toggle logic based on progress
             prevPalierRef.current = -1;
-        } else if (activeSection === 2) {
+        } else if (activeSectionId === 2) {
             // Zones: crossfade. Retail = 3 zones (thirds). Wellness = 4 zones (quarters with parking).
             prevPalierRef.current = -1;
             let entranceVol = 0, rayonVol = 0, cabineVol = 0, recuperationVol = 0;
@@ -115,7 +128,7 @@ function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationAc
             fadeTrack('rayon', rayonVol, 150);
             fadeTrack('cabine', cabineVol, 150);
             if (isWellness) fadeTrack('recuperation', recuperationVol, 150);
-        } else if (activeSection === 3) {
+        } else if (activeSectionId === 3) {
             // Neuro-sonore: Crossfade jungle (relaxation) → pulsatingWave (régulation) → focusCognitif (focus)
             prevPalierRef.current = -1;
             let jungleVol = 0, pulsatingVol = 0, focusVol = 0;
@@ -135,10 +148,10 @@ function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationAc
             fadeTrack('jungle', jungleVol, 150);
             fadeTrack('pulsatingWave', pulsatingVol, 150);
             fadeTrack('focusCognitif', focusVol, 150);
-        } else if (activeSection === 4) {
+        } else if (activeSectionId === 4) {
             // Neuro-Adaptative: happy/sad controlled by webcam state, handled in App
             prevPalierRef.current = -1;
-        } else if (activeSection === 5) {
+        } else if (activeSectionId === 5) {
             // Density: progressive stem accumulation (1→5 layers, couche 1 = drone already playing)
             prevPalierRef.current = -1;
             const densityProgress = Math.max(
@@ -158,7 +171,7 @@ function useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationAc
         } else {
             prevPalierRef.current = -1;
         }
-    }, [activeSection, sectionProgress, fadeTrack, isIsolationActive]);
+    }, [activeSectionId, sectionProgress, fadeTrack, isIsolationActive]);
 }
 
 // --- Face detection using face-api.js for real expression recognition ---
@@ -245,18 +258,23 @@ function App() {
     const [sectionProgress, setSectionProgress] = useState(0);
     const [hasStarted, setHasStarted] = useState(false);
     const [showMentions, setShowMentions] = useState(false);
-    const sectionsData = useMemo(() => getSectionsData(t), [t]);
+    const sectionsData = useMemo(() => getSectionsData(t, mode), [t, mode]);
 
-    // Isolation: auto-driven by scroll progress in section 1
+    // Map the currently-pinned section position (DOM order) to its stable behavior id.
+    // In retail, position === id. In wellness, the array is reordered (zones first, then neuro,
+    // then sculpting, then webcam, then score), so we must always go through sectionsData.
+    const activeSectionId = sectionsData[activeSection]?.id ?? activeSection;
+
+    // Isolation: auto-driven by scroll progress in the sculpting/isolation section (id 1)
     const [isIsolationActive, setIsIsolationActive] = useState(false);
 
-    // Density: how many blobs (1-5), driven by scroll in section 5
+    // Density: how many blobs (1-5), driven by scroll in the score section (id 5)
     // Couche 1 = drone (always on), couches 2-5 = strings, bass, drums, keyboard
     const densityIntroCutoff = 0.82;
-    const densityExperienceProgress = activeSection === 5
+    const densityExperienceProgress = activeSectionId === 5
         ? Math.max(0, Math.min(1, (sectionProgress - densityIntroCutoff) / (1 - densityIntroCutoff)))
         : 0;
-    const densityBlobCount = activeSection === 5
+    const densityBlobCount = activeSectionId === 5
         ? Math.min(Math.floor(densityExperienceProgress * 5) + 1, 5)
         : 1;
 
@@ -295,11 +313,11 @@ function App() {
     }, [activeSection, fadeTrack, NON_DRONE_TRACKS]);
 
     // Continuous scroll-driven audio
-    useScrollAudio(activeSection, sectionProgress, fadeTrack, isIsolationActive, mode === 'wellness');
+    useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolationActive, mode === 'wellness');
 
-    // Auto-toggle isolation at 50% progress in section 1
+    // Auto-toggle isolation at 40% progress in the sculpting/isolation section (id 1)
     useEffect(() => {
-        if (activeSection === 1) {
+        if (activeSectionId === 1) {
             if (sectionProgress >= 0.4 && !isIsolationActive) {
                 setIsIsolationActive(true);
                 fadeTrack('crowd', 0.05, 800);
@@ -308,11 +326,11 @@ function App() {
                 fadeTrack('crowd', 0.6, 400);
             }
         }
-    }, [activeSection, sectionProgress, isIsolationActive, fadeTrack]);
+    }, [activeSectionId, sectionProgress, isIsolationActive, fadeTrack]);
 
-    // Neuro-Adaptative: react to smile detection
+    // Neuro-Adaptative: react to smile detection (webcam section, id 4)
     useEffect(() => {
-        if (activeSection !== 4 || !isCameraActive) return;
+        if (activeSectionId !== 4 || !isCameraActive) return;
 
         if (isSmiling === true) {
             fadeTrack('happy', 0.5, 600);
@@ -325,7 +343,7 @@ function App() {
             fadeTrack('happy', 0, 400);
             fadeTrack('sad', 0, 400);
         }
-    }, [isSmiling, isCameraActive, activeSection, fadeTrack]);
+    }, [isSmiling, isCameraActive, activeSectionId, fadeTrack]);
 
     // Camera activation handler
     const handleCameraToggle = useCallback(async () => {
@@ -353,9 +371,9 @@ function App() {
         }
     }, [isCameraActive, fadeTrack]);
 
-    // Cleanup camera on unmount or section change
+    // Cleanup camera on unmount or section change (away from webcam section, id 4)
     useEffect(() => {
-        if (activeSection !== 4 && isCameraActive) {
+        if (activeSectionId !== 4 && isCameraActive) {
             if (streamRef.current) {
                 streamRef.current.getTracks().forEach(t => t.stop());
                 streamRef.current = null;
@@ -364,7 +382,7 @@ function App() {
             fadeTrack('happy', 0, 300);
             fadeTrack('sad', 0, 300);
         }
-    }, [activeSection, isCameraActive, fadeTrack]);
+    }, [activeSectionId, isCameraActive, fadeTrack]);
 
     // Initial setup for Lenis
     useEffect(() => {
@@ -411,10 +429,15 @@ function App() {
 
         const isWellness = mode === 'wellness';
         sections.forEach((section, i) => {
-            // Section 2 horizontal pan needs more time in wellness (4 cards with park-at-start/end)
-            // than in retail (3 static icons), so we differentiate the scroll length.
-            const section2Length = isWellness ? window.innerHeight * 5.5 : window.innerHeight * 3;
-            const scrollLength = i === 2 ? section2Length : (i === 5 ? window.innerHeight * 3.5 : window.innerHeight * 1.5);
+            // Resolve this DOM-position to its stable behavior id so the trigger config
+            // doesn't break when wellness reorders the sections array.
+            const sd = sectionsData[i];
+            const sectionLength2 = isWellness ? window.innerHeight * 5.5 : window.innerHeight * 3;
+            const scrollLength = sd?.hasZonesPanorama
+                ? sectionLength2
+                : sd?.hasDensityLabels
+                    ? window.innerHeight * 3.5
+                    : window.innerHeight * 1.5;
             ScrollTrigger.create({
                 trigger: section,
                 start: 'top top',
@@ -427,25 +450,23 @@ function App() {
                 },
                 onEnter: () => {
                     setActiveSection(i);
-                    // Section 1 (Isolation): start crowd
-                    if (i === 1) fadeTrack('crowd', 0.6, 500);
-                    // Section 2 (Zones): entrance will be faded in by useScrollAudio
-                    // Section 3 (Scénographie): start jungle
-                    if (i === 3) fadeTrack('jungle', 0.6, 500);
-                    // Section 4 (Neuro): all non-drone tracks are reset just before via onLeave
-                    // Section 5 (Density): stems will be handled by useScrollAudio
+                    // Sculpting/Isolation section: start crowd
+                    if (sd?.hasIsolationToggle) fadeTrack('crowd', 0.6, 500);
+                    // Neuro section: start jungle
+                    if (sd?.hasEnvironmentLabels) fadeTrack('jungle', 0.6, 500);
+                    // Zones section: tracks faded in by useScrollAudio
+                    // Webcam section: non-drone tracks reset just before via onLeave
+                    // Score section: stems handled by useScrollAudio
                 },
                 onLeave: () => {
-                    // When leaving any section forward, fade all non-drone tracks to zero
                     NON_DRONE_TRACKS.forEach(t => fadeTrack(t, 0, 500));
-                    if (i === 1) {
+                    if (sd?.hasIsolationToggle) {
                         setIsIsolationActive(false);
                     }
                 },
                 onLeaveBack: () => {
-                    // When scrolling back above any section, also fade all non-drone tracks to zero
                     NON_DRONE_TRACKS.forEach(t => fadeTrack(t, 0, 500));
-                    if (i === 1) {
+                    if (sd?.hasIsolationToggle) {
                         setIsIsolationActive(false);
                     }
                 }
@@ -457,7 +478,7 @@ function App() {
         return () => {
             ScrollTrigger.getAll().forEach(t => t.kill());
         };
-    }, [hasStarted, fadeTrack, mode]);
+    }, [hasStarted, fadeTrack, mode, sectionsData]);
 
     const startAllTracks = useAudioStore((state) => state.startAllTracks);
     const toggleMute = useAudioStore((state) => state.toggleMute);
@@ -476,7 +497,7 @@ function App() {
             <video ref={videoRef} className="hidden" playsInline muted />
 
             {/* Zones panorama (fond, derrière le blob) - uniquement en section 2 */}
-            {(activeSection === 2) && (() => {
+            {(activeSectionId === 2) && (() => {
                 if (mode === 'wellness') {
                     // Wellness: 4 zones premium (parallaxe + scale + caption fade)
                     const slides = [
@@ -764,7 +785,7 @@ function App() {
                                 mode === 'wellness' ? (
                                     <div className="mt-8 border-t border-tenbin-gray/20 pt-8 flex flex-col items-start gap-2 w-fit">
                                         <span className="text-[10px] uppercase tracking-[0.28em] text-white/70 transition-all duration-500">
-                                            {`${densityBlobCount} / 5 — ${t.phase_label}`}
+                                            {`${densityBlobCount} / 5 · ${t.phase_label}`}
                                         </span>
                                         <span className="text-2xl md:text-3xl font-heading font-medium text-white transition-all duration-500">
                                             {t[`phase_${densityBlobCount}`]}
