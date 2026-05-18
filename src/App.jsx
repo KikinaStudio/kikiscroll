@@ -1021,6 +1021,27 @@ function App() {
 
                 {/* Footer content */}
                 <footer className="bg-[#f5f3f0] text-[#1a1a1a] px-8 md:px-[8vw] pt-16 pb-12">
+                    {/* Wellness CTA intro — editorial pre-form block.
+                        Closes the experience with a direct invitation before the contact form. */}
+                    {mode === 'wellness' && (
+                        <div className="max-w-3xl mb-20 md:mb-24">
+                            <h2 className="text-4xl md:text-6xl font-heading font-medium tracking-tight leading-tight mb-8">
+                                {t.cta_title}
+                            </h2>
+                            <p className="text-base md:text-lg text-[#3a3a3a] leading-relaxed mb-4 font-light">
+                                {t.cta_body}
+                            </p>
+                            <p className="text-lg md:text-xl font-medium mb-8">
+                                {t.cta_invite}
+                            </p>
+                            <a
+                                href={`mailto:${t.cta_email}`}
+                                className="inline-block text-base md:text-lg underline decoration-1 underline-offset-4 hover:decoration-2 transition-all"
+                            >
+                                {t.cta_email}
+                            </a>
+                        </div>
+                    )}
                     <div className="flex flex-col md:flex-row justify-between gap-12 mb-16">
                         <div className="flex-shrink-0">
                             <img src="logo-kikina.png" alt="Kikina Lab" className="h-6 md:h-8 w-auto invert" />

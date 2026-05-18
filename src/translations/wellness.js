@@ -102,6 +102,12 @@ const wellness = {
     footer_mailto_subject: "Contact depuis Kikiscroll Wellness",
     footer_mailto_body_prefix: "De : ",
 
+    // Wellness CTA intro (placée juste au-dessus du formulaire de contact)
+    cta_title: "Quel est le son de votre maison ?",
+    cta_body: "Vous avez un parfum. Vous avez une architecture. Vous avez un geste. Le son de votre spa ne devrait pas être laissé au hasard.",
+    cta_invite: "Composons-le ensemble.",
+    cta_email: "bianca@kikinastudio.com",
+
     // Legal modal
     legal_title: "Mentions Légales",
     legal_editor: "Éditeur du site :",
@@ -217,6 +223,12 @@ const wellness = {
     footer_copyright: "© 2026 Kikina Lab. All rights reserved.",
     footer_mailto_subject: "Contact from Kikiscroll Wellness",
     footer_mailto_body_prefix: "From: ",
+
+    // Wellness CTA intro (sits right above the contact form)
+    cta_title: "What does your house sound like?",
+    cta_body: "You have a fragrance. You have an architecture. You have a gesture. The sound of your spa should not be left to chance.",
+    cta_invite: "Let's compose it together.",
+    cta_email: "bianca@kikinastudio.com",
 
     // Legal modal
     legal_title: "Legal Notice",

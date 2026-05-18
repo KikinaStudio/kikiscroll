@@ -2,7 +2,7 @@
 
 > Document destiné à une **autre session Claude Code** qui reprend ce projet sans contexte. Lis ce fichier **avant** d'agir. Il résume l'état du repo, ce qui a été fait, ce qu'il reste à faire, et les décisions déjà prises (à ne pas re-débattre).
 
-Dernière mise à jour : **2026-05-18** (après réordonnancement wellness + copy v3 piste naked + section 4 "sounds that listen")
+Dernière mise à jour : **2026-05-18** (après ajout CTA wellness footer + réordonnancement + copy v3)
 
 ---
 
@@ -159,6 +159,11 @@ Kikiscroll/
     - **s2** (zones) : "Guests forget most of what they hear. But they remember how a place sounded." Le paragraphe central insiste sur la *mémoire du lieu* plutôt que sur la métaphore Guerlain (qui restait un peu marketing). Closing inchangé : "The guest never recalls a track. They recall the place."
     - **s4** (sounds that listen) : narratif fourni mot-pour-mot par Jeremie. "In the treatment room, music should not be a backdrop." → la cabine, le geste, le partenariat, et la webcam comme proxy lisible de ce qui sera déployé via capteur spatial. Em dash retiré (convention projet).
     - **s5** (score for treatment) : narratif fourni mot-pour-mot. "Behind this real-time adaptation, every treatment has its own composed score." → l'arc en 5 phases, et l'articulation explicite entre partition composée + capteur en complément live. Sert de clôture narrative.
+
+13. **Wellness CTA pre-form block dans le footer** (`src/App.jsx` footer + `src/translations/wellness.js`)
+    - Nouveau bloc éditorial **wellness-only** placé en haut du footer, au-dessus de la ligne logo/links/form existante. Sert de clôture commerciale juste avant le formulaire de contact.
+    - Structure : titre H2 ("Quel est le son de votre maison ?" / "What does your house sound like?") + paragraphe ("Vous avez un parfum. Vous avez une architecture. Vous avez un geste. Le son de votre spa ne devrait pas être laissé au hasard.") + ligne invite ("Composons-le ensemble." / "Let's compose it together.") + mailto link explicite (`bianca@kikinastudio.com`).
+    - Nouvelles clés wellness : `cta_title`, `cta_body`, `cta_invite`, `cta_email`. Gated par `mode === 'wellness'` dans le rendu : retail n'affiche pas ce bloc (footer retail inchangé).
 
 ---
 
