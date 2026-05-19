@@ -30,9 +30,18 @@ const RETAIL_TRACKS = {
 // individual entries once bespoke wellness pieces are delivered. `recuperation`
 // is the only wellness-specific slot (4th zone), and currently points to the
 // same source as `cabine` so all 4 wellness zones have audio.
+// Section 2 ("One signature, many spaces") plays a single wellness instrumental
+// across all 4 zones. The same file in all 4 slots means the crossfade between
+// zones is a no-op audibly: one continuous signature track from card 0 to card 3,
+// aligned with the narrative.
+const WELLNESS_S2_TRACK = `${BASE}MUSIC/wellness/Instrumental.mp3`;
+
 const WELLNESS_TRACKS = {
     ...RETAIL_TRACKS,
-    recuperation: { src: `${BASE}MUSIC/Bossa.mp3`, initialVolume: 0 },
+    entrance: { src: WELLNESS_S2_TRACK, initialVolume: 0 },
+    rayon: { src: WELLNESS_S2_TRACK, initialVolume: 0 },
+    cabine: { src: WELLNESS_S2_TRACK, initialVolume: 0 },
+    recuperation: { src: WELLNESS_S2_TRACK, initialVolume: 0 },
 };
 
 const { mode } = parseUrlMode();
