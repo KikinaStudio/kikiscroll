@@ -127,13 +127,24 @@ function useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolation
                 } else {
                     recuperationVol = 0.6;
                 }
+                // The 4 zone tracks should NOT play during the section's intro text
+                // phase — the user wants drone-only while they read the title and
+                // paragraph. Once the rooms start to enter focus, we ramp the zone
+                // audio in smoothly so the first track (keysy.mp3 on slide 0) doesn't
+                // pop. Ramp window matches the panorama visual fade-in roughly.
+                const ZONE_AUDIO_RAMP_START = 0.20;
+                const ZONE_AUDIO_RAMP_END = 0.28;
+                const zoneAudioRamp = Math.max(0, Math.min(1,
+                    (sectionProgress - ZONE_AUDIO_RAMP_START) /
+                    (ZONE_AUDIO_RAMP_END - ZONE_AUDIO_RAMP_START)
+                ));
                 // Longer fade duration (250ms) than the visual transitions feels smoother
                 // and gives the crossfade math a wider window to settle into the constant
                 // sum, avoiding micro-bumps under fast scroll.
-                fadeTrack('entrance', entranceVol, 250);
-                fadeTrack('rayon', rayonVol, 250);
-                fadeTrack('cabine', cabineVol, 250);
-                fadeTrack('recuperation', recuperationVol, 250);
+                fadeTrack('entrance', entranceVol * zoneAudioRamp, 250);
+                fadeTrack('rayon', rayonVol * zoneAudioRamp, 250);
+                fadeTrack('cabine', cabineVol * zoneAudioRamp, 250);
+                fadeTrack('recuperation', recuperationVol * zoneAudioRamp, 250);
             } else {
                 if (sectionProgress < 0.33) {
                     entranceVol = 0.6;
@@ -577,17 +588,21 @@ function App() {
                                 {slides.map((s, i) => {
                                     // Caption opacity is driven inline by the slide's distance
                                     // from the viewport-center in movingProgress space (slide i
-                                    // is centered when mp = i/3). The CSS-based "active class +
-                                    // 800ms transition" used to make captions appear too late
-                                    // when scrolling fast — the user would already be past the
-                                    // card by the time the text faded in.
+                                    // is centered when mp = i/3). Plateau is 0.10 wide on each
+                                    // side of center, then a 0.12 mp linear fade to 0. With
+                                    // slides 1/3 apart in mp, that means the caption starts
+                                    // appearing as soon as its slide is 2/3 of the way to
+                                    // centered, and stays fully visible for ~60% of the time
+                                    // its slide is the nearest one. CSS transition is removed
+                                    // so the opacity tracks the live scroll position frame by
+                                    // frame instead of trailing it by ~120ms.
                                     const slideCenter = i / 3;
                                     const dist = Math.abs(movingProgress - slideCenter);
-                                    const captionOpacity = dist <= 0.08
+                                    const captionOpacity = dist <= 0.10
                                         ? 1
-                                        : dist >= 0.18
+                                        : dist >= 0.22
                                             ? 0
-                                            : 1 - (dist - 0.08) / 0.10;
+                                            : 1 - (dist - 0.10) / 0.12;
                                     return (
                                         <div
                                             key={s.key}

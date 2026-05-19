@@ -270,9 +270,10 @@ html[data-mode="wellness"] .scroll-prompt-text {
   max-width: 38ch;
   color: #ffffff;
   /* Opacity + transform are driven inline from the current movingProgress in
-     App.jsx so the caption tracks the scroll position directly. The short
-     transition here just smooths out micro-jumps from React render to render. */
-  transition: opacity 120ms linear, transform 120ms linear;
+     App.jsx. No CSS transition: any fixed-duration easing here makes the
+     caption trail behind the scroll position, which the user perceived as
+     "the text is late". The inline values now apply directly on each render
+     (~60fps), so the caption tracks the live scroll. */
   z-index: 2;
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
 }
