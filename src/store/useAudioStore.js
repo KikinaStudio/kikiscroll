@@ -30,18 +30,19 @@ const RETAIL_TRACKS = {
 // individual entries once bespoke wellness pieces are delivered. `recuperation`
 // is the only wellness-specific slot (4th zone), and currently points to the
 // same source as `cabine` so all 4 wellness zones have audio.
-// Section 2 ("One signature, many spaces") plays a single wellness instrumental
-// across all 4 zones. The same file in all 4 slots means the crossfade between
-// zones is a no-op audibly: one continuous signature track from card 0 to card 3,
-// aligned with the narrative.
-const WELLNESS_S2_TRACK = `${BASE}MUSIC/wellness/Instrumental.mp3`;
-
+// Section 2 ("One signature, many spaces") plays one continuous wellness piece.
+// We DON'T reuse the same file across the 4 zone tracks because 4 Howl instances
+// playing the same file would never crossfade perfectly in sync (fadeTrack has
+// 150ms easing per call, so during transitions the sum of volumes briefly drifts
+// above 0.6 = audible overlap). Instead we use a single dedicated track
+// `wellnessSignature` and skip the per-zone crossfade entirely in section 2.
 const WELLNESS_TRACKS = {
     ...RETAIL_TRACKS,
-    entrance: { src: WELLNESS_S2_TRACK, initialVolume: 0 },
-    rayon: { src: WELLNESS_S2_TRACK, initialVolume: 0 },
-    cabine: { src: WELLNESS_S2_TRACK, initialVolume: 0 },
-    recuperation: { src: WELLNESS_S2_TRACK, initialVolume: 0 },
+    // Keep the original 4 zone slots in the dictionary so any retail code path
+    // that touches them stays safe (volumes stay at 0 in wellness mode).
+    recuperation: { src: `${BASE}MUSIC/Bossa.mp3`, initialVolume: 0 },
+    // The actual wellness section 2 signature, played continuously.
+    wellnessSignature: { src: `${BASE}MUSIC/wellness/Instrumental-FX.wav`, initialVolume: 0 },
 };
 
 const { mode } = parseUrlMode();

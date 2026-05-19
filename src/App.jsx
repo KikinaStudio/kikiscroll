@@ -84,34 +84,20 @@ function useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolation
             // Isolation / acoustic sculpting: crowd controlled by auto-toggle logic based on progress
             prevPalierRef.current = -1;
         } else if (activeSectionId === 2) {
-            // Zones: crossfade. Retail = 3 zones (thirds). Wellness = 4 zones (quarters with parking).
+            // Zones audio. Retail = 3 zones crossfaded (thirds). Wellness = one single
+            // signature track at constant volume — no crossfade between zones, so we never
+            // see the brief volume bumps that happened when 4 Howl instances tried to fade
+            // in sync with 150ms easing.
             prevPalierRef.current = -1;
-            let entranceVol = 0, rayonVol = 0, cabineVol = 0, recuperationVol = 0;
             if (isWellness) {
-                // Remap progress with park periods at start/end (matches the visual panorama remap)
-                const PARK_START = 0.28;
-                const PARK_END = 0.86;
-                const mp = sectionProgress <= PARK_START
-                    ? 0
-                    : sectionProgress >= PARK_END
-                        ? 1
-                        : (sectionProgress - PARK_START) / (PARK_END - PARK_START);
-                if (mp < 0.25) {
-                    entranceVol = 0.6;
-                } else if (mp < 0.5) {
-                    const t = (mp - 0.25) / 0.25;
-                    entranceVol = 0.6 * (1 - t);
-                    rayonVol = 0.6 * t;
-                } else if (mp < 0.75) {
-                    const t = (mp - 0.5) / 0.25;
-                    rayonVol = 0.6 * (1 - t);
-                    cabineVol = 0.6 * t;
-                } else {
-                    const t = (mp - 0.75) / 0.25;
-                    cabineVol = 0.6 * (1 - t);
-                    recuperationVol = 0.6 * t;
-                }
+                fadeTrack('wellnessSignature', 0.6, 400);
+                // Make sure the retail zone tracks stay silent in case they were lingering.
+                fadeTrack('entrance', 0, 200);
+                fadeTrack('rayon', 0, 200);
+                fadeTrack('cabine', 0, 200);
+                fadeTrack('recuperation', 0, 200);
             } else {
+                let entranceVol = 0, rayonVol = 0, cabineVol = 0;
                 if (sectionProgress < 0.33) {
                     entranceVol = 0.6;
                 } else if (sectionProgress < 0.66) {
@@ -123,11 +109,10 @@ function useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolation
                     rayonVol = 0.6 * (1 - t);
                     cabineVol = 0.6 * t;
                 }
+                fadeTrack('entrance', entranceVol, 150);
+                fadeTrack('rayon', rayonVol, 150);
+                fadeTrack('cabine', cabineVol, 150);
             }
-            fadeTrack('entrance', entranceVol, 150);
-            fadeTrack('rayon', rayonVol, 150);
-            fadeTrack('cabine', cabineVol, 150);
-            if (isWellness) fadeTrack('recuperation', recuperationVol, 150);
         } else if (activeSectionId === 3) {
             // Neuro-sonore: Crossfade jungle (relaxation) → pulsatingWave (régulation) → focusCognitif (focus)
             prevPalierRef.current = -1;
@@ -301,6 +286,8 @@ function App() {
         'entrance',
         'rayon',
         'cabine',
+        'recuperation',
+        'wellnessSignature',
     ];
 
     // Hard-reset all non-drone tracks on every section change
