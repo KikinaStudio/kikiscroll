@@ -7,7 +7,7 @@ const wellness = {
     // Intro section
     intro_eyebrow: "Composer la présence.",
     intro_start: "Lancer l'expérience sonore",
-    intro_scroll: "Scrollez pour explorer",
+    intro_scroll: "Scrollez lentement pour explorer",
 
     // Section titles
     s0_title: "Le son, signature du soin.",
@@ -42,13 +42,16 @@ const wellness = {
     s4_p2: "Notre moteur ajuste la trame sonore à ce qui se joue réellement, pour que chaque geste trouve sa réponse sonore. La praticienne n'est plus accompagnée par une playlist. Elle est associée à une composition qui l'écoute.",
     s4_p3: "Pour ressentir le principe ici, activez votre caméra. Nous lirons vos micro-signaux faciaux et ajusterons la musique à votre état en temps réel. C'est une démonstration de la même idée : un son qui répond au corps. En cabine, la même logique est déployée par des capteurs spatiaux qui suivent le geste plutôt que le visage. Une réponse calibrée, vivante, individuelle, sans intrusion.",
 
-    // Section 5 paragraphs — la partition épouse l'arc du soin, le capteur ajoute la couche live
-    s5_p1: "Derrière cette adaptation en temps réel, chaque soin a sa propre partition composée. Un soin d'une heure a un arc : une arrivée, une prise de contact, une profondeur, un relâchement, un retour. La musique peut ignorer cet arc, ou l'épouser.",
-    s5_p2: "Nous composons à côté de cet arc. Cinq strates écrites pour cinq phases : chaque couche entre lorsque le soin l'appelle, chaque couche se retire lorsque le corps se dépose.",
-    s5_p3: "La partition s'adapte au soin d'elle-même. Le capteur, lorsqu'il est présent, ajoute une réponse vive au geste du praticien. Le client n'y pense jamais. Le corps reconnaît la signature. Le système nerveux se souvient de la précision.",
+    // Section 5 paragraphs — la partition épouse l'arc du soin, le capteur ajoute la couche live.
+    // Split en 5 chunks pour 4 sauts de ligne visuels.
+    s5_p1: "Derrière cette adaptation en temps réel, chaque soin a sa propre partition composée.",
+    s5_p2: "Un soin d'une heure a un arc : une arrivée, une prise de contact, une profondeur, un relâchement, un retour. La musique peut ignorer cet arc, ou l'épouser.",
+    s5_p3: "Nous composons à côté de cet arc. Cinq strates écrites pour cinq phases : chaque couche entre lorsque le soin l'appelle, chaque couche se retire lorsque le corps se dépose.",
+    s5_p4: "La partition s'adapte au soin d'elle-même. Le capteur, lorsqu'il est présent, ajoute une réponse vive au geste du praticien.",
+    s5_p5: "Le client n'y pense jamais. Le corps reconnaît la signature. Le système nerveux se souvient de la précision.",
 
     // Scroll prompt
-    scroll_prompt: "Continuez de scroller",
+    scroll_prompt: "Continuez de scroller lentement",
 
     // Section 1: Isolation toggle
     isolation_on: "Écoute située active",
@@ -126,7 +129,7 @@ const wellness = {
     // Intro section
     intro_eyebrow: "Composing presence.",
     intro_start: "Start the sound experience",
-    intro_scroll: "Scroll to explore",
+    intro_scroll: "Scroll slowly to explore",
 
     // Section titles
     s0_title: "Sound, as a signature of care.",
@@ -162,12 +165,14 @@ const wellness = {
     s4_p3: "To feel the principle here, turn on your camera. We will read your facial micro-signals and adjust the music to your state in real time. It is a demonstration of the same idea: sound that responds to the body. In the treatment room, the same logic is deployed through spatial sensors that follow the gesture rather than the face. A calibrated response, alive, individual, without intrusion.",
 
     // Section 5 paragraphs — composed score follows the treatment arc, sensor adds the live layer
-    s5_p1: "Behind this real-time adaptation, every treatment has its own composed score. A one-hour treatment has an arc: an arrival, a first contact, a depth, a release, a return. The music can ignore that arc, or follow it.",
-    s5_p2: "We compose alongside that arc. Five strata written for five phases: each layer enters when the treatment calls for it, each layer steps back as the body settles.",
-    s5_p3: "The score adapts to the treatment by itself. The sensor, when present, adds a live response to the practitioner's gesture. The client never thinks about it. The body recognizes the signature. The nervous system remembers the precision.",
+    s5_p1: "Behind this real-time adaptation, every treatment has its own composed score.",
+    s5_p2: "A one-hour treatment has an arc: an arrival, a first contact, a depth, a release, a return. The music can ignore that arc, or follow it.",
+    s5_p3: "We compose alongside that arc. Five strata written for five phases: each layer enters when the treatment calls for it, each layer steps back as the body settles.",
+    s5_p4: "The score adapts to the treatment by itself. The sensor, when present, adds a live response to the practitioner's gesture.",
+    s5_p5: "The client never thinks about it. The body recognizes the signature. The nervous system remembers the precision.",
 
     // Scroll prompt
-    scroll_prompt: "Keep scrolling",
+    scroll_prompt: "Keep scrolling slowly",
 
     // Section 1: Isolation toggle
     isolation_on: "Situated listening active",

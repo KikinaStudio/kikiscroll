@@ -53,12 +53,14 @@ function getSectionsData(t, mode) {
         title: t.s4_title,
         paragrapheParts: [t.s4_p1, t.s4_p2, t.s4_p3],
         hasWebcamButton: true,
+        withLineBreaks: true, // 3 parts → 2 visible line breaks
     };
     const score = {
         id: 5,
         title: t.s5_title,
-        paragrapheParts: [t.s5_p1, t.s5_p2, t.s5_p3],
+        paragrapheParts: [t.s5_p1, t.s5_p2, t.s5_p3, t.s5_p4, t.s5_p5],
         hasDensityLabels: true,
+        withLineBreaks: true, // 5 parts → 4 visible line breaks
     };
 
     if (mode === 'wellness') {
@@ -533,13 +535,15 @@ function App() {
             {(activeSectionId === 2) && (() => {
                 if (mode === 'wellness') {
                     // Wellness: 4 zones premium (parallaxe + scale + caption fade)
+                    // Order: Reception → Treatment rooms → Heat rituals → Recovery.
+                    // The audio store mirrors this order: keysy → deep → less deep → Instrumental (2).
                     const slides = [
                         { key: 'accueil',      src: '/kikiscroll/IMAGES/wellness_zone_accueil.jpg',      placeholder: '#e8c5a8',
                           sub: t.zone_entree_sub,        title: t.zone_entree,        body: t.zone_entree_body },
-                        { key: 'chaleur',      src: '/kikiscroll/IMAGES/wellness_zone_chaleur.jpg',      placeholder: '#c47b6e',
-                          sub: t.zone_rayon_sub,         title: t.zone_rayon,         body: t.zone_rayon_body },
                         { key: 'soin',         src: '/kikiscroll/IMAGES/wellness_zone_soin.jpg',         placeholder: '#d49a8a',
                           sub: t.zone_equipe_sub,        title: t.zone_equipe,        body: t.zone_equipe_body },
+                        { key: 'chaleur',      src: '/kikiscroll/IMAGES/wellness_zone_chaleur.jpg',      placeholder: '#c47b6e',
+                          sub: t.zone_rayon_sub,         title: t.zone_rayon,         body: t.zone_rayon_body },
                         { key: 'recuperation', src: '/kikiscroll/IMAGES/wellness_zone_recuperation.jpg', placeholder: '#f4e6d6',
                           sub: t.zone_recuperation_sub,  title: t.zone_recuperation,  body: t.zone_recuperation_body },
                     ];
@@ -591,7 +595,6 @@ function App() {
                                             style={{ backgroundColor: s.placeholder }}
                                         >
                                             <div className="spa-panorama__bg" style={{ backgroundImage: `url(${s.src})` }} />
-                                            <span className="spa-panorama__counter">{`0${i + 1} / 04`}</span>
                                             <div
                                                 className="spa-panorama__caption"
                                                 style={{
@@ -775,17 +778,27 @@ function App() {
                                         </h2>
                                         <p className={"text-base md:text-lg font-sans tracking-wide leading-relaxed font-light mb-12 " + (section.hasZonesPanorama ? "text-white" : "text-tenbin-gray")}>
                                             {section.paragrapheParts.map((part, pi) => {
+                                                const numParts = section.paragrapheParts.length;
                                                 // For wellness section 2, compress the reveal so the whole paragraph
                                                 // is fully visible by ~0.10 progress — well before the cards appear.
-                                                const partThreshold = isWellnessSection2 ? pi * 0.03 : pi * 0.33;
+                                                // For sections with line breaks (s4, s5), spread the reveal evenly
+                                                // across the section regardless of how many parts there are.
+                                                const partThreshold = isWellnessSection2
+                                                    ? pi * 0.03
+                                                    : pi * (0.66 / Math.max(1, numParts - 1));
                                                 const revealRamp = isWellnessSection2 ? 0.04 : 0.15;
                                                 const partProgress = activeSection === index
                                                     ? Math.min(1, Math.max(0, (sectionProgress - partThreshold) / revealRamp))
                                                     : 0;
+                                                // withLineBreaks turns the inline span into a block with margin,
+                                                // creating proper paragraph separation (avoids the "wall of text" feel).
+                                                const breakClasses = section.withLineBreaks
+                                                    ? ` block${pi > 0 ? ' mt-4' : ''}`
+                                                    : '';
                                                 return (
                                                     <span
                                                         key={pi}
-                                                        className="transition-opacity duration-500"
+                                                        className={`transition-opacity duration-500${breakClasses}`}
                                                         style={{
                                                             opacity: partProgress,
                                                             color: partProgress > 0 && partProgress < 1 ? '#ffffff' : undefined,
@@ -794,7 +807,7 @@ function App() {
                                                                 : 'none',
                                                         }}
                                                     >
-                                                        {pi > 0 ? ' ' : ''}{part}
+                                                        {pi > 0 && !section.withLineBreaks ? ' ' : ''}{part}
                                                     </span>
                                                 );
                                             })}

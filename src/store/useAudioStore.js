@@ -34,16 +34,19 @@ const RETAIL_TRACKS = {
 // zone. The 4 files are *different* compositions in the same wellness palette,
 // so the crossfade between them is a true musical transition rather than the
 // in-phase summing problem we hit when reusing one file across all 4 slots.
-// Mapping (zone → file) chosen by character of the track name:
-//   entrance (Reception & transitions)  → keysy   (welcoming keys)
-//   rayon    (Heat rituals)              → less deep (medium-warm)
-//   cabine   (Treatment rooms)           → deep    (focused, contemplative)
-//   recuperation (Recovery spaces)       → Instrumental (2) (restful instrumental)
+//
+// Audio plays in slot order entrance → rayon → cabine → recuperation.
+// The visual slide order is Reception → Treatment rooms → Heat rituals → Recovery,
+// so the file mapping below is what makes each card hear the right character:
+//   entrance (slot 1, Reception & transitions)  → keysy             (welcoming keys)
+//   rayon    (slot 2, Treatment rooms)          → deep              (focused, contemplative)
+//   cabine   (slot 3, Heat rituals)             → less deep         (medium-warm)
+//   recuperation (slot 4, Recovery spaces)      → Instrumental (2)  (restful instrumental)
 const WELLNESS_TRACKS = {
     ...RETAIL_TRACKS,
     entrance: { src: `${BASE}MUSIC/wellness/keysy.mp3`, initialVolume: 0 },
-    rayon: { src: `${BASE}MUSIC/wellness/less deep.mp3`, initialVolume: 0 },
-    cabine: { src: `${BASE}MUSIC/wellness/deep.mp3`, initialVolume: 0 },
+    rayon: { src: `${BASE}MUSIC/wellness/deep.mp3`, initialVolume: 0 },
+    cabine: { src: `${BASE}MUSIC/wellness/less deep.mp3`, initialVolume: 0 },
     recuperation: { src: `${BASE}MUSIC/wellness/Instrumental (2).mp3`, initialVolume: 0 },
 };
 
