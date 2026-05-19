@@ -269,17 +269,12 @@ html[data-mode="wellness"] .scroll-prompt-text {
   bottom: 8vw;
   max-width: 38ch;
   color: #ffffff;
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 600ms ease, transform 600ms ease;
+  /* Opacity + transform are driven inline from the current movingProgress in
+     App.jsx so the caption tracks the scroll position directly. The short
+     transition here just smooths out micro-jumps from React render to render. */
+  transition: opacity 120ms linear, transform 120ms linear;
   z-index: 2;
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
-}
-
-.spa-panorama__slide--active .spa-panorama__caption {
-  opacity: 1;
-  transform: translateY(0);
-  transition-delay: 200ms;
 }
 
 .spa-panorama__sub {

@@ -30,19 +30,21 @@ const RETAIL_TRACKS = {
 // individual entries once bespoke wellness pieces are delivered. `recuperation`
 // is the only wellness-specific slot (4th zone), and currently points to the
 // same source as `cabine` so all 4 wellness zones have audio.
-// Section 2 ("One signature, many spaces") plays one continuous wellness piece.
-// We DON'T reuse the same file across the 4 zone tracks because 4 Howl instances
-// playing the same file would never crossfade perfectly in sync (fadeTrack has
-// 150ms easing per call, so during transitions the sum of volumes briefly drifts
-// above 0.6 = audible overlap). Instead we use a single dedicated track
-// `wellnessSignature` and skip the per-zone crossfade entirely in section 2.
+// Section 2 ("One signature, many spaces") — 4 bespoke wellness tracks, one per
+// zone. The 4 files are *different* compositions in the same wellness palette,
+// so the crossfade between them is a true musical transition rather than the
+// in-phase summing problem we hit when reusing one file across all 4 slots.
+// Mapping (zone → file) chosen by character of the track name:
+//   entrance (Reception & transitions)  → keysy   (welcoming keys)
+//   rayon    (Heat rituals)              → less deep (medium-warm)
+//   cabine   (Treatment rooms)           → deep    (focused, contemplative)
+//   recuperation (Recovery spaces)       → Instrumental (2) (restful instrumental)
 const WELLNESS_TRACKS = {
     ...RETAIL_TRACKS,
-    // Keep the original 4 zone slots in the dictionary so any retail code path
-    // that touches them stays safe (volumes stay at 0 in wellness mode).
-    recuperation: { src: `${BASE}MUSIC/Bossa.mp3`, initialVolume: 0 },
-    // The actual wellness section 2 signature, played continuously.
-    wellnessSignature: { src: `${BASE}MUSIC/wellness/Instrumental-FX.wav`, initialVolume: 0 },
+    entrance: { src: `${BASE}MUSIC/wellness/keysy.mp3`, initialVolume: 0 },
+    rayon: { src: `${BASE}MUSIC/wellness/less deep.mp3`, initialVolume: 0 },
+    cabine: { src: `${BASE}MUSIC/wellness/deep.mp3`, initialVolume: 0 },
+    recuperation: { src: `${BASE}MUSIC/wellness/Instrumental (2).mp3`, initialVolume: 0 },
 };
 
 const { mode } = parseUrlMode();

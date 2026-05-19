@@ -74,7 +74,11 @@ function getSectionsData(t, mode) {
 // the id, never on the position.
 function useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolationActive, isWellness) {
     const prevPalierRef = useRef(-1);
-    const densityIntroCutoff = 0.82;
+    // Wellness drives the 5 phases of an example soin and needs them spread across
+    // most of the section so each phase has time to land (text + blob + stem).
+    // Retail keeps the historical 0.82 cutoff so the "intro then quick reveal"
+    // pacing stays intact.
+    const densityIntroCutoff = isWellness ? 0.20 : 0.82;
 
     useEffect(() => {
         if (activeSectionId === 0) {
@@ -84,20 +88,51 @@ function useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolation
             // Isolation / acoustic sculpting: crowd controlled by auto-toggle logic based on progress
             prevPalierRef.current = -1;
         } else if (activeSectionId === 2) {
-            // Zones audio. Retail = 3 zones crossfaded (thirds). Wellness = one single
-            // signature track at constant volume — no crossfade between zones, so we never
-            // see the brief volume bumps that happened when 4 Howl instances tried to fade
-            // in sync with 150ms easing.
+            // Zones audio. Retail = 3 zones crossfaded (thirds).
+            // Wellness = 4 distinct zone tracks. Each track has a clear "solo" window
+            // matched to its slide being centered, with tight (~10% of movingProgress wide)
+            // crossfades around the slide midpoints. Volumes always sum to 0.6.
             prevPalierRef.current = -1;
+            let entranceVol = 0, rayonVol = 0, cabineVol = 0, recuperationVol = 0;
             if (isWellness) {
-                fadeTrack('wellnessSignature', 0.6, 400);
-                // Make sure the retail zone tracks stay silent in case they were lingering.
-                fadeTrack('entrance', 0, 200);
-                fadeTrack('rayon', 0, 200);
-                fadeTrack('cabine', 0, 200);
-                fadeTrack('recuperation', 0, 200);
+                const PARK_START = 0.28;
+                const PARK_END = 0.86;
+                const mp = sectionProgress <= PARK_START
+                    ? 0
+                    : sectionProgress >= PARK_END
+                        ? 1
+                        : (sectionProgress - PARK_START) / (PARK_END - PARK_START);
+                // Crossfade midpoints: 1/6, 1/2, 5/6 (aligned with slide-active flips).
+                // Solo windows: mp in [0, 0.10] / [0.22, 0.45] / [0.55, 0.78] / [0.90, 1.0].
+                if (mp < 0.10) {
+                    entranceVol = 0.6;
+                } else if (mp < 0.22) {
+                    const t = (mp - 0.10) / 0.12;
+                    entranceVol = 0.6 * (1 - t);
+                    rayonVol = 0.6 * t;
+                } else if (mp < 0.45) {
+                    rayonVol = 0.6;
+                } else if (mp < 0.55) {
+                    const t = (mp - 0.45) / 0.10;
+                    rayonVol = 0.6 * (1 - t);
+                    cabineVol = 0.6 * t;
+                } else if (mp < 0.78) {
+                    cabineVol = 0.6;
+                } else if (mp < 0.90) {
+                    const t = (mp - 0.78) / 0.12;
+                    cabineVol = 0.6 * (1 - t);
+                    recuperationVol = 0.6 * t;
+                } else {
+                    recuperationVol = 0.6;
+                }
+                // Longer fade duration (250ms) than the visual transitions feels smoother
+                // and gives the crossfade math a wider window to settle into the constant
+                // sum, avoiding micro-bumps under fast scroll.
+                fadeTrack('entrance', entranceVol, 250);
+                fadeTrack('rayon', rayonVol, 250);
+                fadeTrack('cabine', cabineVol, 250);
+                fadeTrack('recuperation', recuperationVol, 250);
             } else {
-                let entranceVol = 0, rayonVol = 0, cabineVol = 0;
                 if (sectionProgress < 0.33) {
                     entranceVol = 0.6;
                 } else if (sectionProgress < 0.66) {
@@ -147,11 +182,15 @@ function useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolation
             const blobCount = Math.min(Math.floor(densityProgress * 5) + 1, 5);
             // blobCount 1 = drone only, 2 = +strings, 3 = +bass, 4 = +drums, 5 = +keyboard
             const stemsActive = Math.max(0, blobCount - 1);
+            // Shorter fade (150ms) in wellness so the stem entry tracks the
+            // blob/text snap more tightly — the user perceives all 3 cues
+            // as the same phase change rather than audio trailing visuals.
+            const fadeDur = isWellness ? 150 : 300;
             for (let s = 0; s < stemsActive; s++) {
-                fadeTrack(stems[s], 0.4, 300);
+                fadeTrack(stems[s], 0.4, fadeDur);
             }
             for (let s = stemsActive; s < stems.length; s++) {
-                fadeTrack(stems[s], 0, 300);
+                fadeTrack(stems[s], 0, fadeDur);
             }
         } else {
             prevPalierRef.current = -1;
@@ -254,8 +293,12 @@ function App() {
     const [isIsolationActive, setIsIsolationActive] = useState(false);
 
     // Density: how many blobs (1-5), driven by scroll in the score section (id 5)
-    // Couche 1 = drone (always on), couches 2-5 = strings, bass, drums, keyboard
-    const densityIntroCutoff = 0.82;
+    // Couche 1 = drone (always on), couches 2-5 = strings, bass, drums, keyboard.
+    // Wellness lowers the intro cutoff so the 5 phases span 80% of the section
+    // (rather than the last 18%), giving each phase room to breathe visually.
+    // MUST match the same constant in useScrollAudio so visual blobs, phase text,
+    // and audio stems all change at the same sectionProgress thresholds.
+    const densityIntroCutoff = mode === 'wellness' ? 0.20 : 0.82;
     const densityExperienceProgress = activeSectionId === 5
         ? Math.max(0, Math.min(1, (sectionProgress - densityIntroCutoff) / (1 - densityIntroCutoff)))
         : 0;
@@ -287,7 +330,6 @@ function App() {
         'rayon',
         'cabine',
         'recuperation',
-        'wellnessSignature',
     ];
 
     // Hard-reset all non-drone tracks on every section change
@@ -420,10 +462,14 @@ function App() {
             // doesn't break when wellness reorders the sections array.
             const sd = sectionsData[i];
             const sectionLength2 = isWellness ? window.innerHeight * 5.5 : window.innerHeight * 3;
+            // Density (id 5) needs more time in wellness because the 5 phases now span
+            // 80% of the section (cutoff = 0.20) instead of 18% — without extending the
+            // scroll length each phase would feel rushed and out of sync with the audio.
+            const sectionLength5 = isWellness ? window.innerHeight * 5 : window.innerHeight * 3.5;
             const scrollLength = sd?.hasZonesPanorama
                 ? sectionLength2
                 : sd?.hasDensityLabels
-                    ? window.innerHeight * 3.5
+                    ? sectionLength5
                     : window.innerHeight * 1.5;
             ScrollTrigger.create({
                 trigger: section,
@@ -524,21 +570,42 @@ function App() {
                     return (
                         <div className="spa-panorama" aria-hidden="true" style={{ opacity: panoramaOpacity, transition: 'opacity 300ms ease-out' }}>
                             <div className="spa-panorama__track" style={{ transform: `translateX(${translateX}vw)` }}>
-                                {slides.map((s, i) => (
-                                    <div
-                                        key={s.key}
-                                        className={`spa-panorama__slide${i === activeIndex ? ' spa-panorama__slide--active' : ''}`}
-                                        style={{ backgroundColor: s.placeholder }}
-                                    >
-                                        <div className="spa-panorama__bg" style={{ backgroundImage: `url(${s.src})` }} />
-                                        <span className="spa-panorama__counter">{`0${i + 1} / 04`}</span>
-                                        <div className="spa-panorama__caption">
-                                            <span className="spa-panorama__sub">{s.sub}</span>
-                                            <span className="spa-panorama__title">{s.title}</span>
-                                            <span className="spa-panorama__body">{s.body}</span>
+                                {slides.map((s, i) => {
+                                    // Caption opacity is driven inline by the slide's distance
+                                    // from the viewport-center in movingProgress space (slide i
+                                    // is centered when mp = i/3). The CSS-based "active class +
+                                    // 800ms transition" used to make captions appear too late
+                                    // when scrolling fast — the user would already be past the
+                                    // card by the time the text faded in.
+                                    const slideCenter = i / 3;
+                                    const dist = Math.abs(movingProgress - slideCenter);
+                                    const captionOpacity = dist <= 0.08
+                                        ? 1
+                                        : dist >= 0.18
+                                            ? 0
+                                            : 1 - (dist - 0.08) / 0.10;
+                                    return (
+                                        <div
+                                            key={s.key}
+                                            className={`spa-panorama__slide${i === activeIndex ? ' spa-panorama__slide--active' : ''}`}
+                                            style={{ backgroundColor: s.placeholder }}
+                                        >
+                                            <div className="spa-panorama__bg" style={{ backgroundImage: `url(${s.src})` }} />
+                                            <span className="spa-panorama__counter">{`0${i + 1} / 04`}</span>
+                                            <div
+                                                className="spa-panorama__caption"
+                                                style={{
+                                                    opacity: captionOpacity,
+                                                    transform: `translateY(${(1 - captionOpacity) * 8}px)`,
+                                                }}
+                                            >
+                                                <span className="spa-panorama__sub">{s.sub}</span>
+                                                <span className="spa-panorama__title">{s.title}</span>
+                                                <span className="spa-panorama__body">{s.body}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     );
