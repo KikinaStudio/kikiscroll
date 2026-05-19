@@ -58,9 +58,9 @@ function getSectionsData(t, mode) {
     const score = {
         id: 5,
         title: t.s5_title,
-        paragrapheParts: [t.s5_p1, t.s5_p2, t.s5_p3, t.s5_p4, t.s5_p5],
+        paragrapheParts: [t.s5_p1, t.s5_p2, t.s5_p3],
         hasDensityLabels: true,
-        withLineBreaks: true, // 5 parts → 4 visible line breaks
+        withLineBreaks: true, // 3 parts → 2 visible line breaks
     };
 
     if (mode === 'wellness') {
@@ -701,8 +701,10 @@ function App() {
                 </button>
             )}
 
-            {/* Scroll encouragement - double chevron */}
-            {hasStarted && activeSection < sectionsData.length - 1 && (
+            {/* Scroll encouragement - double chevron. Visible on every section including
+                the last (score) so the phase strip invites the user to keep scrolling through
+                all five phases. */}
+            {hasStarted && (
                 <div className="fixed bottom-8 left-0 right-0 z-40 flex justify-center pointer-events-none">
                     <div className="flex flex-col items-center gap-2">
                         <span className="scroll-prompt-text text-[10px] md:text-xs uppercase tracking-[0.28em] text-white/80">
@@ -847,16 +849,25 @@ function App() {
 
                             {/* Section 5: density indicator
                                 — Retail: numeric counter (1 → 5 strates sonores)
-                                — Wellness: each strate is a phase of a 1h treatment, so we show the phase name */}
+                                — Wellness: the 5 treatment phases sit side-by-side; the active one is white,
+                                  the rest are dimmed (same active/inactive pattern as the neuro section above). */}
                             {section.hasDensityLabels && activeSection === index && densityExperienceProgress > 0 && (
                                 mode === 'wellness' ? (
-                                    <div className="mt-8 border-t border-tenbin-gray/20 pt-8 flex flex-col items-start gap-2 w-fit">
-                                        <span className="text-[10px] uppercase tracking-[0.28em] text-white/70 transition-all duration-500">
-                                            {`${densityBlobCount} / 5 · ${t.phase_label}`}
-                                        </span>
-                                        <span className="text-2xl md:text-3xl font-heading font-medium text-white transition-all duration-500">
-                                            {t[`phase_${densityBlobCount}`]}
-                                        </span>
+                                    <div className="mt-8 border-t border-tenbin-gray/20 pt-8 flex flex-wrap gap-6 md:gap-10">
+                                        {[1, 2, 3, 4, 5].map((phaseNum) => {
+                                            const isActive = phaseNum === densityBlobCount;
+                                            return (
+                                                <div
+                                                    key={phaseNum}
+                                                    className={`flex flex-col items-center gap-2 transition-all duration-500 ${isActive ? 'text-white opacity-100 scale-110' : 'text-tenbin-gray opacity-30 scale-100'}`}
+                                                >
+                                                    <span className={`w-2 h-2 rounded-full transition-colors duration-500 ${isActive ? 'bg-white' : 'bg-tenbin-gray/50'}`} />
+                                                    <span className="text-[10px] uppercase tracking-widest whitespace-nowrap">
+                                                        {t[`phase_${phaseNum}`]}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 ) : (
                                     <div className="mt-8 border-t border-tenbin-gray/20 pt-8 flex flex-col items-center gap-2 w-fit">
@@ -1088,15 +1099,14 @@ function App() {
 
                 {/* Footer content */}
                 <footer className="bg-[#f5f3f0] text-[#1a1a1a] px-8 md:px-[8vw] pt-16 pb-12">
-                    {/* Wellness CTA intro — editorial pre-form block.
-                        Closes the experience with a direct invitation before the contact form.
-                        Kept compact so the footer doesn't dominate the page. */}
+                    {/* Wellness CTA — centered editorial block that replaces the contact form.
+                        cta_title sets the question, the prose answers it, and the email closes it. */}
                     {mode === 'wellness' && (
-                        <div className="max-w-2xl mb-12 md:mb-14">
-                            <h2 className="text-2xl md:text-4xl font-heading font-medium tracking-tight leading-snug mb-4">
+                        <div className="max-w-3xl mx-auto text-center mb-16 md:mb-20">
+                            <h2 className="text-2xl md:text-4xl font-heading font-medium tracking-tight leading-snug mb-6">
                                 {t.cta_title}
                             </h2>
-                            <p className="text-sm md:text-base text-[#3a3a3a] leading-relaxed font-light">
+                            <p className="text-base md:text-lg text-[#3a3a3a] leading-relaxed font-light">
                                 {t.cta_body}{' '}<span className="font-medium text-[#1a1a1a]">{t.cta_invite}</span>{' '}
                                 <a
                                     href={`mailto:${t.cta_email}`}
@@ -1111,48 +1121,50 @@ function App() {
                         <div className="flex-shrink-0">
                             <img src={`${import.meta.env.BASE_URL}logo-kikina.png`} alt="Kikina Lab" className="h-6 md:h-8 w-auto invert" />
                         </div>
-                        <div className="flex flex-col md:flex-row gap-8 md:gap-12 text-sm flex-1">
+                        <div className="flex flex-col md:flex-row gap-8 md:gap-12 text-sm flex-1 md:justify-end">
                             <div className="flex flex-col gap-3 flex-shrink-0 md:w-36">
                                 <a href="https://kikinalab.com" target="_blank" rel="noopener noreferrer" className="text-[#555] hover:text-[#1a1a1a] transition-colors">{t.footer_about}</a>
-                                <button 
-                                    onClick={() => setShowMentions(!showMentions)} 
+                                <button
+                                    onClick={() => setShowMentions(!showMentions)}
                                     className="text-left text-[#555] hover:text-[#1a1a1a] transition-colors focus:outline-none"
                                 >
                                     {t.footer_legal}
                                 </button>
                                 <a href="https://www.linkedin.com/company/kikinastudio/" target="_blank" rel="noopener noreferrer" className="text-[#555] hover:text-[#1a1a1a] transition-colors">LinkedIn</a>
                             </div>
-                            <div className="flex flex-col gap-3 flex-1 max-w-lg">
-                                <span className="font-semibold uppercase tracking-widest text-xs mb-1">{t.footer_contact}</span>
-                                <form className="flex flex-col gap-3" onSubmit={(e) => {
-                                    e.preventDefault();
-                                    const form = e.target;
-                                    const email = form.email.value;
-                                    const message = form.message.value;
-                                    window.location.href = `mailto:bianca@kikinastudio.com?subject=${encodeURIComponent(t.footer_mailto_subject)}&body=${encodeURIComponent(message + '\n\n' + t.footer_mailto_body_prefix + email)}`;
-                                }}>
-                                    <input
-                                        name="email"
-                                        type="email"
-                                        required
-                                        placeholder={t.footer_email_placeholder}
-                                        className="bg-transparent border-b border-[#ccc] focus:border-[#1a1a1a] outline-none py-2 text-sm text-[#1a1a1a] placeholder-[#999] transition-colors"
-                                    />
-                                    <textarea
-                                        name="message"
-                                        required
-                                        placeholder={t.footer_message_placeholder}
-                                        rows={3}
-                                        className="bg-transparent border-b border-[#ccc] focus:border-[#1a1a1a] outline-none py-2 text-sm text-[#1a1a1a] placeholder-[#999] transition-colors resize-none"
-                                    />
-                                    <button
-                                        type="submit"
-                                        className="self-start mt-2 px-6 py-2 text-xs uppercase tracking-widest font-semibold border border-[#1a1a1a] text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-[#f5f3f0] transition-colors rounded-full"
-                                    >
-                                        {t.footer_send}
-                                    </button>
-                                </form>
-                            </div>
+                            {mode !== 'wellness' && (
+                                <div className="flex flex-col gap-3 flex-1 max-w-lg">
+                                    <span className="font-semibold uppercase tracking-widest text-xs mb-1">{t.footer_contact}</span>
+                                    <form className="flex flex-col gap-3" onSubmit={(e) => {
+                                        e.preventDefault();
+                                        const form = e.target;
+                                        const email = form.email.value;
+                                        const message = form.message.value;
+                                        window.location.href = `mailto:bianca@kikinastudio.com?subject=${encodeURIComponent(t.footer_mailto_subject)}&body=${encodeURIComponent(message + '\n\n' + t.footer_mailto_body_prefix + email)}`;
+                                    }}>
+                                        <input
+                                            name="email"
+                                            type="email"
+                                            required
+                                            placeholder={t.footer_email_placeholder}
+                                            className="bg-transparent border-b border-[#ccc] focus:border-[#1a1a1a] outline-none py-2 text-sm text-[#1a1a1a] placeholder-[#999] transition-colors"
+                                        />
+                                        <textarea
+                                            name="message"
+                                            required
+                                            placeholder={t.footer_message_placeholder}
+                                            rows={3}
+                                            className="bg-transparent border-b border-[#ccc] focus:border-[#1a1a1a] outline-none py-2 text-sm text-[#1a1a1a] placeholder-[#999] transition-colors resize-none"
+                                        />
+                                        <button
+                                            type="submit"
+                                            className="self-start mt-2 px-6 py-2 text-xs uppercase tracking-widest font-semibold border border-[#1a1a1a] text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-[#f5f3f0] transition-colors rounded-full"
+                                        >
+                                            {t.footer_send}
+                                        </button>
+                                    </form>
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div className="border-t border-[#d0d0d0] pt-8 flex flex-col md:flex-row justify-between items-center gap-4">

@@ -38,17 +38,14 @@ const wellness = {
     s3_p3: "Le praticien guide le geste, la signature sonore guide le système nerveux. Les deux convergent sans concertation.",
 
     // Section 4 paragraphs — la musique suit le geste en temps réel (capteur spatial)
-    s4_p1: "Dans la cabine de soin, la musique ne doit pas être un décor. Elle doit suivre les mains qui travaillent, en temps réel. Un capteur spatial lit la pièce : la position du praticien, le rythme du geste, le souffle du corps sur la table.",
-    s4_p2: "Notre moteur ajuste la trame sonore à ce qui se joue réellement, pour que chaque geste trouve sa réponse sonore. La praticienne n'est plus accompagnée par une playlist. Elle est associée à une composition qui l'écoute.",
-    s4_p3: "Pour ressentir le principe ici, activez votre caméra. Nous lirons vos micro-signaux faciaux et ajusterons la musique à votre état en temps réel. C'est une démonstration de la même idée : un son qui répond au corps. En cabine, la même logique est déployée par des capteurs spatiaux qui suivent le geste plutôt que le visage. Une réponse calibrée, vivante, individuelle, sans intrusion.",
+    s4_p1: "Dans la cabine de soin, la musique ne doit pas être un décor. Elle doit suivre les mains qui travaillent, en temps réel.",
+    s4_p2: "Un capteur spatial lit la pièce en temps réel : la position du praticien, le rythme du geste, le souffle du corps sur la table. La composition s'ajuste à ce qui se joue réellement. La praticienne n'est plus accompagnée par une playlist, mais associée à une composition qui l'écoute.",
+    s4_p3: "Pour ressentir le principe, activez votre caméra. Nous lirons vos micro-signaux faciaux et ajusterons la musique à votre état. En cabine, la même logique est déployée par des capteurs spatiaux qui suivent le geste, pas le visage. Une réponse calibrée, vivante, individuelle, sans intrusion.",
 
     // Section 5 paragraphs — la partition épouse l'arc du soin, le capteur ajoute la couche live.
-    // Split en 5 chunks pour 4 sauts de ligne visuels.
-    s5_p1: "Derrière cette adaptation en temps réel, chaque soin a sa propre partition composée.",
-    s5_p2: "Un soin d'une heure a un arc : une arrivée, une prise de contact, une profondeur, un relâchement, un retour. La musique peut ignorer cet arc, ou l'épouser.",
-    s5_p3: "Nous composons à côté de cet arc. Cinq strates écrites pour cinq phases : chaque couche entre lorsque le soin l'appelle, chaque couche se retire lorsque le corps se dépose.",
-    s5_p4: "La partition s'adapte au soin d'elle-même. Le capteur, lorsqu'il est présent, ajoute une réponse vive au geste du praticien.",
-    s5_p5: "Le client n'y pense jamais. Le corps reconnaît la signature. Le système nerveux se souvient de la précision.",
+    s5_p1: "Derrière cette adaptation en temps réel, chaque soin a sa propre partition composée. Un soin d'une heure a un arc : une arrivée, une prise de contact, une profondeur, un relâchement, un retour.",
+    s5_p2: "La musique peut ignorer cet arc, ou l'épouser. Nous composons à côté : cinq strates écrites pour cinq phases, qui entrent et se retirent au fur et à mesure que le corps se dépose.",
+    s5_p3: "La partition s'adapte au soin d'elle-même. Le capteur, lorsqu'il est présent, ajoute une réponse vive au geste du praticien. Le corps se détend. Le système nerveux se souvient de la précision.",
 
     // Scroll prompt
     scroll_prompt: "Continuez de scroller lentement",
@@ -59,11 +56,11 @@ const wellness = {
 
     // Section 5: phases du soin (5 strates = 5 phases d'un soin exemple)
     phase_label: "phase du soin",
-    phase_1: "L'arrivée",
-    phase_2: "La prise de contact",
-    phase_3: "La profondeur",
-    phase_4: "Le relâchement",
-    phase_5: "Le retour",
+    phase_1: "Bienvenue",
+    phase_2: "Ouverture",
+    phase_3: "Profondeur",
+    phase_4: "Relâchement",
+    phase_5: "Retour",
 
     // Section 2: Zones (3 clés existantes réutilisées avec valeurs spa, + 4e clé recuperation)
     zone_entree: "Accueil & transitions",
@@ -160,16 +157,14 @@ const wellness = {
     s3_p3: "The practitioner guides the gesture, the sonic signature guides the nervous system. Both converge without coordination.",
 
     // Section 4 paragraphs — music follows the hands in real time, via a spatial sensor
-    s4_p1: "In the treatment room, music should not be a backdrop. It should follow the hands at work, in real time. A spatial sensor reads the room: the position of the practitioner, the rhythm of the gesture, the breath of the body on the table.",
-    s4_p2: "Our engine adjusts the sonic fabric to what is actually unfolding, so every gesture finds its sonic answer. The practitioner is no longer accompanied by a playlist. She is partnered by a composition that listens to her.",
-    s4_p3: "To feel the principle here, turn on your camera. We will read your facial micro-signals and adjust the music to your state in real time. It is a demonstration of the same idea: sound that responds to the body. In the treatment room, the same logic is deployed through spatial sensors that follow the gesture rather than the face. A calibrated response, alive, individual, without intrusion.",
+    s4_p1: "In the treatment room, music should not be a backdrop. It should follow the hands at work, in real time.",
+    s4_p2: "A spatial sensor reads the room in real time: the position of the practitioner, the rhythm of the gesture, the breath of the body on the table. The composition adjusts to what is actually unfolding. The practitioner is no longer accompanied by a playlist, but partnered by a composition that listens to her.",
+    s4_p3: "To feel the principle, turn on your camera. We will read your facial micro-signals and adjust the music to your state. In the treatment room, the same logic runs through spatial sensors that follow the gesture, not the face. A calibrated response, alive, individual, without intrusion.",
 
     // Section 5 paragraphs — composed score follows the treatment arc, sensor adds the live layer
-    s5_p1: "Behind this real-time adaptation, every treatment has its own composed score.",
-    s5_p2: "A one-hour treatment has an arc: an arrival, a first contact, a depth, a release, a return. The music can ignore that arc, or follow it.",
-    s5_p3: "We compose alongside that arc. Five strata written for five phases: each layer enters when the treatment calls for it, each layer steps back as the body settles.",
-    s5_p4: "The score adapts to the treatment by itself. The sensor, when present, adds a live response to the practitioner's gesture.",
-    s5_p5: "The client never thinks about it. The body recognizes the signature. The nervous system remembers the precision.",
+    s5_p1: "Behind this real-time adaptation, every treatment has its own composed score. A one-hour treatment has an arc: an arrival, a first contact, a depth, a release, a return.",
+    s5_p2: "The music can ignore that arc, or follow it. We compose alongside it: five strata written for five phases, entering and stepping back as the body settles.",
+    s5_p3: "The score adapts to the treatment by itself. The sensor, when present, adds a live response to the practitioner's gesture. The body softens. The nervous system remembers the precision.",
 
     // Scroll prompt
     scroll_prompt: "Keep scrolling slowly",
@@ -180,8 +175,8 @@ const wellness = {
 
     // Section 5: treatment phases (5 strata = 5 phases of an example treatment)
     phase_label: "treatment phase",
-    phase_1: "Arrival",
-    phase_2: "First contact",
+    phase_1: "Welcome",
+    phase_2: "Opening",
     phase_3: "Depth",
     phase_4: "Release",
     phase_5: "Return",
