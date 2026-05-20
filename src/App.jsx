@@ -29,24 +29,28 @@ function getSectionsData(t, mode) {
         title: t.s0_title,
         paragrapheParts: [t.s0_p1, t.s0_p2, t.s0_p3],
         isIntro: true,
+        withLineBreaks: true, // 3 parts → 2 visible line breaks (matches the closing sections)
     };
     const sculpting = {
         id: 1,
         title: t.s1_title,
         paragrapheParts: [t.s1_p1, t.s1_p2, t.s1_p3],
         hasIsolationToggle: true,
+        withLineBreaks: true,
     };
     const zones = {
         id: 2,
         title: t.s2_title,
         paragrapheParts: [t.s2_p1, t.s2_p2, t.s2_p3],
         hasZonesPanorama: true,
+        withLineBreaks: true,
     };
     const neuro = {
         id: 3,
         title: t.s3_title,
         paragrapheParts: [t.s3_p1, t.s3_p2, t.s3_p3],
         hasEnvironmentLabels: true,
+        withLineBreaks: true,
     };
     const webcam = {
         id: 4,
@@ -232,15 +236,18 @@ async function loadFaceApiModels() {
     faceApiModelsLoading = false;
 }
 
+// Returns 'happy' | 'sad' | 'neutral' | null. null = no face / analyzing.
+// We pick the dominant of {happy, sad}; if neither is strong enough we fall back to 'neutral'
+// (rather than burning a third audio track — neutral mutes the happy/sad layers).
 function useFaceDetection(isActive, videoRef) {
-    const [isSmiling, setIsSmiling] = useState(null);
+    const [expression, setExpression] = useState(null);
     const intervalRef = useRef(null);
     const modelsReadyRef = useRef(false);
 
     useEffect(() => {
         if (!isActive || !videoRef.current) {
             if (intervalRef.current) clearInterval(intervalRef.current);
-            setIsSmiling(null);
+            setExpression(null);
             return;
         }
 
@@ -269,9 +276,16 @@ function useFaceDetection(isActive, videoRef) {
 
                     if (result) {
                         const { expressions } = result;
-                        setIsSmiling(expressions.happy > 0.5);
+                        // Thresholds tuned so a clear smile or frown wins, otherwise neutral.
+                        if (expressions.happy > 0.5) {
+                            setExpression('happy');
+                        } else if (expressions.sad > 0.35) {
+                            setExpression('sad');
+                        } else {
+                            setExpression('neutral');
+                        }
                     } else {
-                        setIsSmiling(null);
+                        setExpression(null);
                     }
                 } catch (e) {
                     // Silently ignore transient detection errors
@@ -285,7 +299,7 @@ function useFaceDetection(isActive, videoRef) {
         };
     }, [isActive, videoRef]);
 
-    return isSmiling;
+    return expression;
 }
 
 function App() {
@@ -323,7 +337,7 @@ function App() {
     const [isCameraActive, setIsCameraActive] = useState(false);
     const videoRef = useRef(null);
     const streamRef = useRef(null);
-    const isSmiling = useFaceDetection(isCameraActive, videoRef);
+    const faceExpression = useFaceDetection(isCameraActive, videoRef);
 
     const lenisRef = useRef(null);
     const fadeTrack = useAudioStore((state) => state.fadeTrack);
@@ -374,18 +388,24 @@ function App() {
     useEffect(() => {
         if (activeSectionId !== 4 || !isCameraActive) return;
 
-        if (isSmiling === true) {
+        // Audio routing differs by mode:
+        // - retail keeps its original binary behavior: smile → happy track, anything else
+        //   non-null → sad track (so the texture doesn't drop out on a neutral face).
+        // - wellness uses the three-state UI: happy / sad / neutral are distinct, and
+        //   neutral mutes both expression layers (drone keeps playing).
+        const isWellness = mode === 'wellness';
+        if (faceExpression === 'happy') {
             fadeTrack('happy', 0.5, 600);
             fadeTrack('sad', 0, 600);
-        } else if (isSmiling === false) {
+        } else if (faceExpression === 'sad' || (!isWellness && faceExpression === 'neutral')) {
             fadeTrack('happy', 0, 600);
             fadeTrack('sad', 0.5, 600);
         } else {
-            // No face detected
+            // wellness-neutral or no face detected: drop both expression layers.
             fadeTrack('happy', 0, 400);
             fadeTrack('sad', 0, 400);
         }
-    }, [isSmiling, isCameraActive, activeSectionId, fadeTrack]);
+    }, [faceExpression, isCameraActive, activeSectionId, fadeTrack, mode]);
 
     // Camera activation handler
     const handleCameraToggle = useCallback(async () => {
@@ -758,10 +778,15 @@ function App() {
                                             const partProgress = activeSection === index
                                                 ? Math.min(1, Math.max(0, (sectionProgress - partThreshold) / 0.15))
                                                 : 0;
+                                            // Mirror the non-intro renderer: withLineBreaks turns each
+                                            // span into a block so paragraphs separate visually.
+                                            const breakClasses = section.withLineBreaks
+                                                ? ` block${pi > 0 ? ' mt-4' : ''}`
+                                                : '';
                                             return (
                                                 <span
                                                     key={pi}
-                                                    className="transition-opacity duration-500"
+                                                    className={`transition-opacity duration-500${breakClasses}`}
                                                     style={{
                                                         opacity: partProgress,
                                                         color: partProgress > 0 && partProgress < 1 ? '#ffffff' : undefined,
@@ -770,7 +795,7 @@ function App() {
                                                             : 'none',
                                                     }}
                                                 >
-                                                    {pi > 0 ? ' ' : ''}{part}
+                                                    {pi > 0 && !section.withLineBreaks ? ' ' : ''}{part}
                                                 </span>
                                             );
                                         })}
@@ -833,15 +858,14 @@ function App() {
                                 );
                             })()}
 
-                            {/* Section 1: Isolation Toggle (auto-driven by scroll progress) */}
+                            {/* Section 1: Isolation status — auto-driven by scroll progress.
+                                Previously a pill-toggle, which read as interactive and frustrated users who tried
+                                to click it. Now a passive status indicator: pulsing dot + label, like the camera
+                                section's emotion readout. Nothing invites a click. */}
                             {section.hasIsolationToggle && (
-                                <div className="flex items-center gap-6 mt-8">
-                                    <div
-                                        className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors duration-700 ${isIsolationActive ? 'bg-white' : 'bg-tenbin-gray/40'}`}
-                                    >
-                                        <span className={`inline-block h-6 w-6 transform rounded-full bg-tenbin-black transition-transform duration-700 ${isIsolationActive ? 'translate-x-7' : 'translate-x-1'}`} />
-                                    </div>
-                                    <span className={`text-sm font-medium uppercase tracking-widest transition-all duration-700 ${isIsolationActive ? 'text-white' : 'text-tenbin-gray'}`}>
+                                <div className="flex items-center gap-3 mt-8 select-none" aria-live="polite">
+                                    <span className={`w-2.5 h-2.5 rounded-full transition-all duration-700 ${isIsolationActive ? 'bg-white animate-pulse' : 'bg-tenbin-gray/50'}`} />
+                                    <span className={`text-xs font-medium uppercase tracking-[0.28em] transition-all duration-700 ${isIsolationActive ? 'text-white' : 'text-tenbin-gray'}`}>
                                         {isIsolationActive ? t.isolation_on : t.isolation_off}
                                     </span>
                                 </div>
@@ -849,25 +873,60 @@ function App() {
 
                             {/* Section 5: density indicator
                                 — Retail: numeric counter (1 → 5 strates sonores)
-                                — Wellness: the 5 treatment phases sit side-by-side; the active one is white,
-                                  the rest are dimmed (same active/inactive pattern as the neuro section above). */}
+                                — Wellness: the 5 treatment phases sit side-by-side with massage-themed
+                                  icons; the active phase is white, the rest are dimmed. A "Treatment phases"
+                                  title sits above so the reader knows what they're looking at. */}
                             {section.hasDensityLabels && activeSection === index && densityExperienceProgress > 0 && (
                                 mode === 'wellness' ? (
-                                    <div className="mt-8 border-t border-tenbin-gray/20 pt-8 flex flex-wrap gap-6 md:gap-10">
-                                        {[1, 2, 3, 4, 5].map((phaseNum) => {
-                                            const isActive = phaseNum === densityBlobCount;
-                                            return (
-                                                <div
-                                                    key={phaseNum}
-                                                    className={`flex flex-col items-center gap-2 transition-all duration-500 ${isActive ? 'text-white opacity-100 scale-110' : 'text-tenbin-gray opacity-30 scale-100'}`}
-                                                >
-                                                    <span className={`w-2 h-2 rounded-full transition-colors duration-500 ${isActive ? 'bg-white' : 'bg-tenbin-gray/50'}`} />
-                                                    <span className="text-[10px] uppercase tracking-widest whitespace-nowrap">
-                                                        {t[`phase_${phaseNum}`]}
-                                                    </span>
-                                                </div>
-                                            );
-                                        })}
+                                    <div className="mt-8 border-t border-tenbin-gray/20 pt-8 flex flex-col gap-5">
+                                        <span className="text-[10px] uppercase tracking-[0.28em] text-white/70">
+                                            {t.phases_title}
+                                        </span>
+                                        <div className="flex flex-wrap gap-6 md:gap-10">
+                                            {[
+                                                // 1 — Welcome: open arc / threshold rising up.
+                                                (<svg key="i1" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M3 21V11a9 9 0 0 1 18 0v10" />
+                                                    <path d="M2 21h20" />
+                                                </svg>),
+                                                // 2 — Opening: two arcs unfurling outward from a stem.
+                                                (<svg key="i2" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M12 21V11" />
+                                                    <path d="M6 14C6 10 8 6 12 4" />
+                                                    <path d="M18 14C18 10 16 6 12 4" />
+                                                </svg>),
+                                                // 3 — Depth: pressure point (concentric rings with a solid centre).
+                                                (<svg key="i3" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <circle cx="12" cy="12" r="9" />
+                                                    <circle cx="12" cy="12" r="4.5" />
+                                                    <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" />
+                                                </svg>),
+                                                // 4 — Release: a slow exhale / drifting wave.
+                                                (<svg key="i4" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M3 10c2-3 4-3 6 0s4 3 6 0 4-3 6 0" />
+                                                    <path d="M3 16c2-3 4-3 6 0s4 3 6 0 4-3 6 0" />
+                                                </svg>),
+                                                // 5 — Return: closing circle with a return arrow.
+                                                (<svg key="i5" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <path d="M21 12a9 9 0 1 1-3-6.7" />
+                                                    <path d="M21 4v5h-5" />
+                                                </svg>),
+                                            ].map((icon, idx) => {
+                                                const phaseNum = idx + 1;
+                                                const isActive = phaseNum === densityBlobCount;
+                                                return (
+                                                    <div
+                                                        key={phaseNum}
+                                                        className={`flex flex-col items-center gap-2 transition-all duration-500 ${isActive ? 'text-white opacity-100 scale-110' : 'text-tenbin-gray opacity-30 scale-100'}`}
+                                                    >
+                                                        {icon}
+                                                        <span className="text-[10px] uppercase tracking-widest whitespace-nowrap">
+                                                            {t[`phase_${phaseNum}`]}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
                                 ) : (
                                     <div className="mt-8 border-t border-tenbin-gray/20 pt-8 flex flex-col items-center gap-2 w-fit">
@@ -1063,17 +1122,24 @@ function App() {
                                         {isCameraActive ? t.webcam_active : t.webcam_authorize}
                                     </button>
 
-                                    {/* Emotion indicator */}
+                                    {/* Emotion indicator.
+                                        Wellness: three labels (happy / sad / neutral) + analyzing.
+                                        Retail: keeps the original two-label readout (happy / neutral),
+                                        with the 'sad' expression collapsed into the neutral label so we
+                                        don't show an `undefined` for a key retail's translations never had. */}
                                     {isCameraActive && (
                                         <div className="flex items-center gap-3 mt-2">
-                                            <span className={`w-3 h-3 rounded-full transition-all duration-500 ${isSmiling === true ? 'bg-green-400 animate-pulse' :
-                                                    isSmiling === false ? 'bg-blue-400 animate-pulse' :
-                                                        'bg-tenbin-gray/50'
-                                                }`} />
+                                            <span className={`w-3 h-3 rounded-full transition-all duration-500 ${
+                                                faceExpression === 'happy' ? 'bg-green-400 animate-pulse' :
+                                                faceExpression === 'sad' ? 'bg-blue-400 animate-pulse' :
+                                                faceExpression === 'neutral' ? 'bg-white/60' :
+                                                'bg-tenbin-gray/50'
+                                            }`} />
                                             <span className="text-sm uppercase tracking-widest text-tenbin-gray">
-                                                {isSmiling === true ? t.webcam_happy :
-                                                    isSmiling === false ? t.webcam_neutral :
-                                                        t.webcam_analyzing}
+                                                {faceExpression === 'happy' ? t.webcam_happy :
+                                                    faceExpression === 'sad' ? (mode === 'wellness' ? t.webcam_sad : t.webcam_neutral) :
+                                                    faceExpression === 'neutral' ? t.webcam_neutral :
+                                                    t.webcam_analyzing}
                                             </span>
                                         </div>
                                     )}

@@ -78,9 +78,11 @@ html[data-mode="wellness"] .text-white:not(.spa-keep-white):not(.spa-panorama__t
   color: var(--text-deep);
 }
 
-/* tenbin-gray is too light on warm bg; lean into a warm mid-tone */
+/* tenbin-gray needs to read as body copy on the warm cream background.
+   Bumped from 0.62 → 0.85 for stronger contrast on the section paragraphs;
+   opt out with `.spa-keep-grey` for labels that should stay quiet. */
 html[data-mode="wellness"] .text-tenbin-gray:not(.spa-keep-grey) {
-  color: rgba(58, 40, 32, 0.62);
+  color: rgba(40, 26, 18, 0.85);
 }
 
 html[data-mode="wellness"] .text-tenbin-offwhite {
