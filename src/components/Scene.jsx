@@ -491,16 +491,19 @@ function WellnessSteam() {
 
 /**
  * WebcamMirrorBlob — replaces the OrganicBlob during the gesture section.
- * A smooth icosahedron with a polished, metallic material whose environment map
- * is the live webcam feed wrapped as an equirectangular texture. The visitor
- * literally sees themselves moving across the sphere as they wave at the
- * camera, which is what the section's narrative promises ("the music follows
- * your gesture") much more directly than a static blob would.
  *
- * We don't try to deform it — a clean mirror reads as the more elegant choice,
- * and the existing custom shader on OrganicBlob doesn't natively sample envMap.
+ * A polished sphere that uses the live webcam wrapped as an equirectangular
+ * env map. We sit it at the same position as the regular blob (right-of-centre,
+ * [3, 0, 0]) so the page layout doesn't jump, and we drive its scale + soft
+ * extra rotation from the shared motion ref. Big gesture -> the blob breathes
+ * outward; stillness -> it eases back to rest. Visually that doubles up on the
+ * audio (strings/bass swelling) so the gesture clearly has consequence.
+ *
+ * Reflection is tuned for "obvious self-reflection" rather than "subtle
+ * polish": roughness 0.05 + envMapIntensity 3.2 + pure-white tint so the
+ * webcam reads as a sharp image on the surface, not a tinted hint.
  */
-function WebcamMirrorBlob({ videoElRef }) {
+function WebcamMirrorBlob({ videoElRef, motionRef }) {
     const meshRef = useRef();
     const textureRef = useRef(null);
 
@@ -523,12 +526,21 @@ function WebcamMirrorBlob({ videoElRef }) {
             }
         }
 
-        // Slow drift so the reflection slides across the sphere rather than
-        // being a flat decal — feels like a moving sculpture.
-        if (meshRef.current) {
-            meshRef.current.rotation.y += 0.05 * delta;
-            meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.18) * 0.08;
-        }
+        if (!meshRef.current) return;
+
+        // Pulse with the gesture. Scale ranges 1.0 (still) → ~1.35 (vigorous).
+        const intensity = motionRef?.current?.intensity ?? 0;
+        const targetScale = 1 + Math.min(1, intensity) * 0.35;
+        const currentScale = meshRef.current.scale.x;
+        const nextScale = currentScale + (targetScale - currentScale) * 0.12;
+        meshRef.current.scale.set(nextScale, nextScale, nextScale);
+
+        // Slow drift so the reflection slides across the surface, plus a tiny
+        // motion-driven wobble so the user feels their gesture also "shakes"
+        // the surface, not just its size.
+        meshRef.current.rotation.y += (0.05 + intensity * 0.6) * delta;
+        meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.18) * 0.08
+            + intensity * 0.15;
     });
 
     useEffect(() => () => {
@@ -539,21 +551,21 @@ function WebcamMirrorBlob({ videoElRef }) {
     }, []);
 
     return (
-        <mesh ref={meshRef}>
-            <icosahedronGeometry args={[2.4, 8]} />
+        <mesh ref={meshRef} position={[3, 0, 0]}>
+            <icosahedronGeometry args={[2.0, 8]} />
             <meshPhysicalMaterial
-                color="#f4ead8"
-                metalness={1.0}
-                roughness={0.18}
-                envMapIntensity={1.6}
-                clearcoat={0.6}
-                clearcoatRoughness={0.12}
+                color="#ffffff"
+                metalness={0.95}
+                roughness={0.05}
+                envMapIntensity={3.2}
+                clearcoat={0.8}
+                clearcoatRoughness={0.05}
             />
         </mesh>
     );
 }
 
-export default function Scene({ scrollProgress, activeSection, activeSectionId, sectionProgress, densityBlobCount = 1, isIsolationActive = false, webcamMirrorActive = false, videoElRef }) {
+export default function Scene({ scrollProgress, activeSection, activeSectionId, sectionProgress, densityBlobCount = 1, isIsolationActive = false, webcamMirrorActive = false, videoElRef, motionRef }) {
     // The density visual + top-down camera are tied to the score *behavior* (id 5),
     // not its DOM position — wellness reorders the array so position 5 there is
     // the webcam, not the score.
@@ -592,7 +604,7 @@ export default function Scene({ scrollProgress, activeSection, activeSectionId, 
                 reflective sphere that uses the live webcam as its environment
                 map. They literally see themselves on the surface. */}
             {webcamMirrorActive ? (
-                <WebcamMirrorBlob videoElRef={videoElRef} />
+                <WebcamMirrorBlob videoElRef={videoElRef} motionRef={motionRef} />
             ) : (
                 <OrganicBlob
                     scrollProgress={scrollProgress}

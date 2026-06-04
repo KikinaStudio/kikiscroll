@@ -293,8 +293,12 @@ function useMotionDetection(isActive, videoRef, onMotion) {
                 const targetIntensity = Math.min(1, total / (W * H * 60));
                 const targetY = total > 0 ? (weightedY / total) / (H - 1) : 0.5;
 
-                smoothedIntensity += (targetIntensity - smoothedIntensity) * 0.08;
-                smoothedY += (targetY - smoothedY) * 0.08;
+                // Faster follow than the 0.08 we started with so the music responds
+                // to a gesture without lagging by ~half a second; still slow enough
+                // that stillness lets both layers ease down smoothly instead of
+                // cutting on the first quiet frame.
+                smoothedIntensity += (targetIntensity - smoothedIntensity) * 0.14;
+                smoothedY += (targetY - smoothedY) * 0.14;
                 onMotionRef.current(smoothedIntensity, smoothedY, data);
             } else {
                 // First valid frame — still expose it so the consumer can paint the ASCII view.
@@ -351,6 +355,11 @@ function App() {
     const videoRef = useRef(null);
     const streamRef = useRef(null);
 
+    // Shared motion state — the motion-detection callback writes here every frame
+    // and the 3D scene reads it inside its useFrame to pulse the webcam-mirror blob
+    // in sync with the music. A ref (not state) so it doesn't churn React.
+    const motionRef = useRef({ intensity: 0, y: 0.5 });
+
     const lenisRef = useRef(null);
     const fadeTrack = useAudioStore((state) => state.fadeTrack);
     const setVolume = useAudioStore((state) => state.setVolume);
@@ -404,8 +413,12 @@ function App() {
     // in useMotionDetection lets both layers decelerate to silence without cutting.
     const handleMotion = useCallback((intensity, y) => {
         if (activeSectionId !== 4 || !isCameraActive) return;
-        setVolume('strings', Math.min(1, intensity * 1.3));
-        setVolume('bass', Math.min(1, y * intensity * 1.6));
+        // Punchier audio: small gestures already lift the layers, big gestures saturate
+        // them. min() caps at 1.0 so we don't clip the Howler volume.
+        setVolume('strings', Math.min(1, intensity * 2.6));
+        setVolume('bass', Math.min(1, y * intensity * 2.8));
+        motionRef.current.intensity = intensity;
+        motionRef.current.y = y;
     }, [activeSectionId, isCameraActive, setVolume]);
 
     useMotionDetection(isCameraActive && activeSectionId === 4, videoRef, handleMotion);
@@ -692,6 +705,7 @@ function App() {
                     isIsolationActive={isIsolationActive}
                     webcamMirrorActive={mode === 'wellness' && activeSectionId === 4 && isCameraActive}
                     videoElRef={videoRef}
+                    motionRef={motionRef}
                 />
             </div>
 
