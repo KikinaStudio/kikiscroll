@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment, Points, PointMaterial } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
@@ -489,7 +489,71 @@ function WellnessSteam() {
     );
 }
 
-export default function Scene({ scrollProgress, activeSection, activeSectionId, sectionProgress, densityBlobCount = 1, isIsolationActive = false, hideMainBlob = false }) {
+/**
+ * WebcamMirrorBlob — replaces the OrganicBlob during the gesture section.
+ * A smooth icosahedron with a polished, metallic material whose environment map
+ * is the live webcam feed wrapped as an equirectangular texture. The visitor
+ * literally sees themselves moving across the sphere as they wave at the
+ * camera, which is what the section's narrative promises ("the music follows
+ * your gesture") much more directly than a static blob would.
+ *
+ * We don't try to deform it — a clean mirror reads as the more elegant choice,
+ * and the existing custom shader on OrganicBlob doesn't natively sample envMap.
+ */
+function WebcamMirrorBlob({ videoElRef }) {
+    const meshRef = useRef();
+    const textureRef = useRef(null);
+
+    useFrame((state, delta) => {
+        const video = videoElRef?.current;
+        if (!video) return;
+
+        // Lazy texture creation: we have to wait until the <video> has actual
+        // frames before we can wrap it as a VideoTexture.
+        if (!textureRef.current && video.readyState >= 2 && video.videoWidth > 0) {
+            const tex = new THREE.VideoTexture(video);
+            tex.mapping = THREE.EquirectangularReflectionMapping;
+            tex.colorSpace = THREE.SRGBColorSpace;
+            tex.minFilter = THREE.LinearFilter;
+            tex.magFilter = THREE.LinearFilter;
+            textureRef.current = tex;
+            if (meshRef.current?.material) {
+                meshRef.current.material.envMap = tex;
+                meshRef.current.material.needsUpdate = true;
+            }
+        }
+
+        // Slow drift so the reflection slides across the sphere rather than
+        // being a flat decal — feels like a moving sculpture.
+        if (meshRef.current) {
+            meshRef.current.rotation.y += 0.05 * delta;
+            meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.18) * 0.08;
+        }
+    });
+
+    useEffect(() => () => {
+        if (textureRef.current) {
+            textureRef.current.dispose();
+            textureRef.current = null;
+        }
+    }, []);
+
+    return (
+        <mesh ref={meshRef}>
+            <icosahedronGeometry args={[2.4, 8]} />
+            <meshPhysicalMaterial
+                color="#f4ead8"
+                metalness={1.0}
+                roughness={0.18}
+                envMapIntensity={1.6}
+                clearcoat={0.6}
+                clearcoatRoughness={0.12}
+            />
+        </mesh>
+    );
+}
+
+export default function Scene({ scrollProgress, activeSection, activeSectionId, sectionProgress, densityBlobCount = 1, isIsolationActive = false, webcamMirrorActive = false, videoElRef }) {
     // The density visual + top-down camera are tied to the score *behavior* (id 5),
     // not its DOM position — wellness reorders the array so position 5 there is
     // the webcam, not the score.
@@ -523,9 +587,13 @@ export default function Scene({ scrollProgress, activeSection, activeSectionId, 
                 </>
             )}
 
-            {/* Main Blob — visible everywhere except the wellness finale (webcam
-                section), where the page swaps to an ASCII webcam view. */}
-            {!hideMainBlob && (
+            {/* Main Blob OR webcam mirror — when the visitor is in the gesture
+                section with their camera on, the blob is replaced by a polished
+                reflective sphere that uses the live webcam as its environment
+                map. They literally see themselves on the surface. */}
+            {webcamMirrorActive ? (
+                <WebcamMirrorBlob videoElRef={videoElRef} />
+            ) : (
                 <OrganicBlob
                     scrollProgress={scrollProgress}
                     activeSection={activeSection}

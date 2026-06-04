@@ -67,10 +67,7 @@ function getSectionsData(t, mode) {
     };
 
     if (mode === 'wellness') {
-        // Wellness finale order: the score section (5-instrument build) lands
-        // *before* the camera so the experience peaks with the gesture-driven
-        // sound + ASCII view, which closes the page.
-        return [intro, zones, neuro, sculpting, score, webcam];
+        return [intro, zones, neuro, sculpting, webcam, score];
     }
     return [intro, sculpting, zones, neuro, webcam, score];
 }
@@ -110,28 +107,38 @@ function useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolation
                     : sectionProgress >= PARK_END
                         ? 1
                         : (sectionProgress - PARK_START) / (PARK_END - PARK_START);
-                // Crossfade midpoints: 1/6, 1/2, 5/6 (aligned with slide-active flips).
-                // Solo windows: mp in [0, 0.10] / [0.22, 0.45] / [0.55, 0.78] / [0.90, 1.0].
-                if (mp < 0.10) {
-                    entranceVol = 0.6;
-                } else if (mp < 0.22) {
-                    const t = (mp - 0.10) / 0.12;
-                    entranceVol = 0.6 * (1 - t);
-                    rayonVol = 0.6 * t;
-                } else if (mp < 0.45) {
-                    rayonVol = 0.6;
-                } else if (mp < 0.55) {
-                    const t = (mp - 0.45) / 0.10;
-                    rayonVol = 0.6 * (1 - t);
-                    cabineVol = 0.6 * t;
-                } else if (mp < 0.78) {
-                    cabineVol = 0.6;
-                } else if (mp < 0.90) {
-                    const t = (mp - 0.78) / 0.12;
-                    cabineVol = 0.6 * (1 - t);
-                    recuperationVol = 0.6 * t;
+                // Crossfade midpoints are anchored to the visual activeIndex flips
+                // (mp = 1/6, 3/6, 5/6). Half-width 0.05 keeps each fade tight enough
+                // that the "current" slide always has its track at full volume — that
+                // matters most for slide 4 (recuperation), which used to take until
+                // mp = 0.90 to reach full while it was already visually centered at
+                // mp = 0.833. Peak volume bumped from 0.6 → 0.7 so each zone is
+                // clearly present over the drone.
+                const X1 = 1 / 6;
+                const X2 = 3 / 6;
+                const X3 = 5 / 6;
+                const HW = 0.05;
+                const PEAK = 0.7;
+                if (mp < X1 - HW) {
+                    entranceVol = PEAK;
+                } else if (mp < X1 + HW) {
+                    const t = (mp - (X1 - HW)) / (2 * HW);
+                    entranceVol = PEAK * (1 - t);
+                    rayonVol = PEAK * t;
+                } else if (mp < X2 - HW) {
+                    rayonVol = PEAK;
+                } else if (mp < X2 + HW) {
+                    const t = (mp - (X2 - HW)) / (2 * HW);
+                    rayonVol = PEAK * (1 - t);
+                    cabineVol = PEAK * t;
+                } else if (mp < X3 - HW) {
+                    cabineVol = PEAK;
+                } else if (mp < X3 + HW) {
+                    const t = (mp - (X3 - HW)) / (2 * HW);
+                    cabineVol = PEAK * (1 - t);
+                    recuperationVol = PEAK * t;
                 } else {
-                    recuperationVol = 0.6;
+                    recuperationVol = PEAK;
                 }
                 // The 4 zone tracks should NOT play during the section's intro text
                 // phase — the user wants drone-only while they read the title and
@@ -216,28 +223,6 @@ function useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolation
             prevPalierRef.current = -1;
         }
     }, [activeSectionId, sectionProgress, fadeTrack, isIsolationActive]);
-}
-
-// ASCII ramp dark → light. The 10-character palette reads as a soft gradient at
-// monospace cell size and keeps the "elegant" feel the design calls for.
-const ASCII_RAMP = ' .:-=+*#%@';
-
-// Convert a 64×48 RGBA pixel buffer into an ASCII string with 64 cells per row.
-// Luminance is the simple (R+G+B)/3 used everywhere else in motion code so the
-// ASCII view and the motion math always agree on what "bright" means.
-function pixelsToAscii(data, W, H) {
-    const last = ASCII_RAMP.length - 1;
-    let out = '';
-    for (let y = 0; y < H; y++) {
-        const rowOffset = y * W * 4;
-        for (let x = 0; x < W; x++) {
-            const i = rowOffset + x * 4;
-            const lum = (data[i] + data[i + 1] + data[i + 2]) / 3;
-            out += ASCII_RAMP[Math.round((lum / 255) * last)];
-        }
-        if (y < H - 1) out += '\n';
-    }
-    return out;
 }
 
 // --- Motion detection: pure JS frame-diff on a hidden 64x48 canvas ---
@@ -366,11 +351,6 @@ function App() {
     const videoRef = useRef(null);
     const streamRef = useRef(null);
 
-    // ASCII renderer state — populated each motion frame so the JSX can paint the
-    // webcam feed as elegant monospace characters in the wellness finale.
-    const asciiCharsRef = useRef('');
-    const [asciiTick, setAsciiTick] = useState(0);
-
     const lenisRef = useRef(null);
     const fadeTrack = useAudioStore((state) => state.fadeTrack);
     const setVolume = useAudioStore((state) => state.setVolume);
@@ -422,20 +402,11 @@ function App() {
     //   the frame — typically a masseur's hands — opens the low end).
     // The drone keeps playing underneath. When the user stops moving, the smoothing
     // in useMotionDetection lets both layers decelerate to silence without cutting.
-    //
-    // The callback also takes the raw pixel buffer so the ASCII view can repaint
-    // from the same canvas read — no second getImageData per frame.
-    const handleMotion = useCallback((intensity, y, pixelData) => {
+    const handleMotion = useCallback((intensity, y) => {
         if (activeSectionId !== 4 || !isCameraActive) return;
         setVolume('strings', Math.min(1, intensity * 1.3));
         setVolume('bass', Math.min(1, y * intensity * 1.6));
-
-        // Repaint the ASCII feed (wellness only — retail keeps the blob).
-        if (mode === 'wellness' && pixelData) {
-            asciiCharsRef.current = pixelsToAscii(pixelData, 64, 48);
-            setAsciiTick(t => (t + 1) & 0xffff);
-        }
-    }, [activeSectionId, isCameraActive, setVolume, mode]);
+    }, [activeSectionId, isCameraActive, setVolume]);
 
     useMotionDetection(isCameraActive && activeSectionId === 4, videoRef, handleMotion);
 
@@ -594,23 +565,6 @@ function App() {
             {/* Hidden video element for webcam */}
             <video ref={videoRef} className="hidden" playsInline muted />
 
-            {/* Wellness finale: ASCII webcam feed. Renders behind the section copy
-                (z-[2]) so the prose stays legible, and replaces the 3D blob (which
-                we hide via the Scene `hideMainBlob` prop on this section). The
-                <pre> is keyed by `asciiTick` so React only repaints when the
-                motion hook hands us a new frame, not on every other render. */}
-            {mode === 'wellness' && activeSectionId === 4 && isCameraActive && (
-                <div className="fixed inset-0 z-[2] pointer-events-none flex items-center justify-center" aria-hidden="true">
-                    <pre
-                        key={asciiTick}
-                        className="font-mono text-tenbin-dark/85 select-none m-0 leading-[1em] tracking-[0.05em] text-[clamp(6px,1.2vw,12px)] whitespace-pre"
-                        style={{ filter: 'contrast(1.1) brightness(1.0)' }}
-                    >
-                        {asciiCharsRef.current}
-                    </pre>
-                </div>
-            )}
-
             {/* Zones panorama (fond, derrière le blob) - uniquement en section 2 */}
             {(activeSectionId === 2) && (() => {
                 if (mode === 'wellness') {
@@ -725,8 +679,9 @@ function App() {
                 (DOM position) for legacy visual transitions and `activeSectionId`
                 (stable behavior id) so the density clones / top-down camera stay
                 tied to the score section even when wellness reorders the array.
-                `hideMainBlob` mutes the centre blob during the wellness finale
-                where the page swaps to an ASCII webcam view. */}
+                `webcamMirrorActive` flips the blob into a polished, reflective
+                material that uses the live webcam as its environment map — the
+                visitor sees themselves in the blob during the gesture section. */}
             <div className="fixed top-0 left-0 w-full h-full z-[5] pointer-events-none">
                 <Scene
                     scrollProgress={scrollProgress}
@@ -735,7 +690,8 @@ function App() {
                     sectionProgress={sectionProgress}
                     densityBlobCount={densityBlobCount}
                     isIsolationActive={isIsolationActive}
-                    hideMainBlob={mode === 'wellness' && activeSectionId === 4}
+                    webcamMirrorActive={mode === 'wellness' && activeSectionId === 4 && isCameraActive}
+                    videoElRef={videoRef}
                 />
             </div>
 
