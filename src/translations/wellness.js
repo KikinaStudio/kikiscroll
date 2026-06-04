@@ -40,8 +40,8 @@ const wellness = {
 
     // Section 4 paragraphs — la musique suit le geste en temps réel (capteur spatial)
     s4_p1: "Dans la cabine de soin, la musique ne doit pas être un décor. Elle doit suivre les mains qui travaillent, en temps réel.",
-    s4_p2: "Un capteur spatial lit la pièce en temps réel : la position du praticien, le rythme du geste, le souffle du corps sur la table. La composition s'ajuste à ce qui se joue réellement. La praticienne n'est plus accompagnée par une playlist, mais associée à une composition qui l'écoute.",
-    s4_p3: "Essayez maintenant. Activez votre caméra et laissez-vous sourire, vous détendre, froncer les sourcils — peu importe. La musique lit votre visage en temps réel et glisse avec vous. En cabine, la même logique passe par des capteurs spatiaux qui suivent le geste, pas le visage. Une réponse calibrée, vivante, individuelle, sans intrusion.",
+    s4_p2: "Un capteur spatial lit la pièce : la position du praticien, le rythme du geste, le souffle du corps sur la table. La composition s'ajuste à ce qui se joue réellement. La praticienne n'est plus accompagnée par une playlist, mais associée à une composition qui l'écoute.",
+    s4_p3: "Essayez maintenant. Activez votre caméra et bougez lentement devant elle. Les couches sonores montent et descendent avec l'amplitude et la hauteur de votre geste. Une main qui descend ouvre les graves, l'immobilité ramène la musique au drone seul. En cabine, la même logique passe par des capteurs spatiaux qui suivent le geste, pas le visage. Une réponse calibrée, vivante, individuelle, sans intrusion.",
 
     // Section 5 paragraphs — la partition épouse l'arc du soin, le capteur ajoute la couche live.
     s5_p1: "Derrière cette adaptation en temps réel, chaque soin a sa propre partition composée. Un soin d'une heure a un arc : une arrivée, une prise de contact, une profondeur, un relâchement, un retour.",
@@ -83,13 +83,11 @@ const wellness = {
     neuro_regulation: "Régulation parasympathique",
     neuro_focus: "Ancrage attentionnel",
 
-    // Section 4: Webcam — trois états (joyeux / triste / neutre) + null = analyse
+    // Section 4: Webcam — détection de mouvement, pas d'émotion. Le label "lecture
+    // du geste" sert d'indicateur passif pendant que la musique suit le geste.
     webcam_active: "Caméra active",
     webcam_authorize: "Autoriser la caméra",
-    webcam_happy: "Joyeux",
-    webcam_sad: "Triste",
-    webcam_neutral: "Neutre",
-    webcam_analyzing: "Lecture en cours",
+    webcam_reading: "Lecture du geste",
 
     // Footer
     footer_about: "Qui sommes-nous",
@@ -117,7 +115,7 @@ const wellness = {
     legal_contact_label: "Contact :",
     legal_hosting_label: "Hébergement :",
     legal_hosting_value: "Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723",
-    legal_privacy: "Ce site utilise des technologies de détection d'expressions faciales (face-api.js). Aucune donnée d'image n'est enregistrée ou transmise à des serveurs tiers ; l'analyse est effectuée localement dans votre navigateur en temps réel.",
+    legal_privacy: "Ce site utilise une détection de mouvement par caméra implémentée en JavaScript natif (différence d'images sur canvas). Aucune donnée d'image n'est enregistrée ou transmise à des serveurs tiers ; l'analyse est effectuée localement dans votre navigateur en temps réel.",
     legal_close: "Fermer",
   },
 
@@ -162,8 +160,8 @@ const wellness = {
 
     // Section 4 paragraphs — music follows the hands in real time, via a spatial sensor
     s4_p1: "In the treatment room, music should not be a backdrop. It should follow the hands at work, in real time.",
-    s4_p2: "A spatial sensor reads the room in real time: the position of the practitioner, the rhythm of the gesture, the breath of the body on the table. The composition adjusts to what is actually unfolding. The practitioner is no longer accompanied by a playlist, but partnered by a composition that listens to her.",
-    s4_p3: "Try it now. Turn on your camera and let yourself smile, soften, frown — anything. The music will read your face in real time and shift with you. In the treatment room, the same logic runs through spatial sensors that follow the gesture, not the face. A calibrated response, alive, individual, without intrusion.",
+    s4_p2: "A spatial sensor reads the room: the position of the practitioner, the rhythm of the gesture, the breath of the body on the table. The composition adjusts to what is actually unfolding. The practitioner is no longer accompanied by a playlist, but partnered by a composition that listens to her.",
+    s4_p3: "Try it now. Turn on your camera and move slowly in front of it. The sound layers will rise and fall with the amplitude and the height of your gesture. A hand moving low opens the bass; stillness returns the music to the drone alone. In the treatment room, the same logic runs through spatial sensors that follow the gesture, not the face. A calibrated response, alive, individual, without intrusion.",
 
     // Section 5 paragraphs — composed score follows the treatment arc, sensor adds the live layer
     s5_p1: "Behind this real-time adaptation, every treatment has its own composed score. A one-hour treatment has an arc: an arrival, a first contact, a depth, a release, a return.",
@@ -205,13 +203,11 @@ const wellness = {
     neuro_regulation: "Parasympathetic regulation",
     neuro_focus: "Attentional grounding",
 
-    // Section 4: Webcam — three states (happy / sad / neutral) + null = analyzing
+    // Section 4: Webcam — motion detection, no emotion read-out. The "reading the
+    // gesture" label is a passive cue while the music follows the movement.
     webcam_active: "Camera active",
     webcam_authorize: "Allow camera",
-    webcam_happy: "Happy",
-    webcam_sad: "Sad",
-    webcam_neutral: "Neutral",
-    webcam_analyzing: "Reading",
+    webcam_reading: "Reading the gesture",
 
     // Footer
     footer_about: "About us",
@@ -239,7 +235,7 @@ const wellness = {
     legal_contact_label: "Contact:",
     legal_hosting_label: "Hosting:",
     legal_hosting_value: "Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723",
-    legal_privacy: "This site uses facial expression detection technologies (face-api.js). No image data is recorded or transmitted to third-party servers; analysis is performed locally in your browser in real time.",
+    legal_privacy: "This site uses webcam motion detection implemented in pure JavaScript (frame-difference on a canvas). No image data is recorded or transmitted to third-party servers; analysis is performed locally in your browser in real time.",
     legal_close: "Close",
   },
 };

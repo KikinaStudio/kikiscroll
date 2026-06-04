@@ -4,7 +4,6 @@ import Scene from './components/Scene';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAudioStore } from './store/useAudioStore';
-import * as faceapi from 'face-api.js';
 import { useTranslation } from './LanguageContext';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -14,7 +13,7 @@ gsap.registerPlugin(ScrollTrigger);
 //   1 = Isolation / Acoustic sculpting (crowd → toggle at ~40% progress)
 //   2 = Zones panorama (entrance / rayon / cabine / + recuperation in wellness)
 //   3 = Neuro-Sonore (jungle → pulsatingWave → focusCognitif)
-//   4 = Webcam / Neuro-Adaptative (HAPPY/SAD via face-api)
+//   4 = Webcam / Gesture-driven sound (motion detection drives strings + bass)
 //   5 = Density / Score (1→5 blobs + stems accumulate)
 //
 // Retail keeps the original 0→5 narrative order. Wellness reorders to
@@ -68,7 +67,10 @@ function getSectionsData(t, mode) {
     };
 
     if (mode === 'wellness') {
-        return [intro, zones, neuro, sculpting, webcam, score];
+        // Wellness finale order: the score section (5-instrument build) lands
+        // *before* the camera so the experience peaks with the gesture-driven
+        // sound + ASCII view, which closes the page.
+        return [intro, zones, neuro, sculpting, score, webcam];
     }
     return [intro, sculpting, zones, neuro, webcam, score];
 }
@@ -186,7 +188,8 @@ function useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolation
             fadeTrack('pulsatingWave', pulsatingVol, 150);
             fadeTrack('focusCognitif', focusVol, 150);
         } else if (activeSectionId === 4) {
-            // Neuro-Adaptative: happy/sad controlled by webcam state, handled in App
+            // Gesture-driven: strings + bass volumes are set per frame by the
+            // motion detector in handleMotion. Nothing to do here.
             prevPalierRef.current = -1;
         } else if (activeSectionId === 5) {
             // Density: progressive stem accumulation (1→5 layers, couche 1 = drone already playing)
@@ -215,91 +218,116 @@ function useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolation
     }, [activeSectionId, sectionProgress, fadeTrack, isIsolationActive]);
 }
 
-// --- Face detection using face-api.js for real expression recognition ---
+// ASCII ramp dark → light. The 10-character palette reads as a soft gradient at
+// monospace cell size and keeps the "elegant" feel the design calls for.
+const ASCII_RAMP = ' .:-=+*#%@';
 
-const FACE_API_MODELS_URL = import.meta.env.BASE_URL + 'models';
-let faceApiModelsLoaded = false;
-let faceApiModelsLoading = false;
-
-async function loadFaceApiModels() {
-    if (faceApiModelsLoaded || faceApiModelsLoading) return;
-    faceApiModelsLoading = true;
-    try {
-        await Promise.all([
-            faceapi.nets.tinyFaceDetector.loadFromUri(FACE_API_MODELS_URL),
-            faceapi.nets.faceExpressionNet.loadFromUri(FACE_API_MODELS_URL),
-        ]);
-        faceApiModelsLoaded = true;
-    } catch (err) {
-        console.error('Failed to load face-api.js models:', err);
+// Convert a 64×48 RGBA pixel buffer into an ASCII string with 64 cells per row.
+// Luminance is the simple (R+G+B)/3 used everywhere else in motion code so the
+// ASCII view and the motion math always agree on what "bright" means.
+function pixelsToAscii(data, W, H) {
+    const last = ASCII_RAMP.length - 1;
+    let out = '';
+    for (let y = 0; y < H; y++) {
+        const rowOffset = y * W * 4;
+        for (let x = 0; x < W; x++) {
+            const i = rowOffset + x * 4;
+            const lum = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            out += ASCII_RAMP[Math.round((lum / 255) * last)];
+        }
+        if (y < H - 1) out += '\n';
     }
-    faceApiModelsLoading = false;
+    return out;
 }
 
-// Returns 'happy' | 'sad' | 'neutral' | null. null = no face / analyzing.
-// We pick the dominant of {happy, sad}; if neither is strong enough we fall back to 'neutral'
-// (rather than burning a third audio track — neutral mutes the happy/sad layers).
-function useFaceDetection(isActive, videoRef) {
-    const [expression, setExpression] = useState(null);
-    const intervalRef = useRef(null);
-    const modelsReadyRef = useRef(false);
+// --- Motion detection: pure JS frame-diff on a hidden 64x48 canvas ---
+//
+// The webcam frame is drawn to a tiny offscreen canvas (64x48 = 3072 pixels) every
+// rAF tick. We compare luminance with the previous frame to estimate how much
+// movement is happening (motionIntensity, 0..1) and *where* the movement is
+// concentrated vertically (motionY, 0..1 from top to bottom of frame).
+//
+// Both values are smoothed by an exponential follow (0.08 / frame) so the audio
+// decelerates with the gesture instead of cutting on stillness — that slowness is
+// the whole point of mapping it to a masseur's hand.
+//
+// The hook calls onMotion(intensity, y) every frame; the caller decides what to
+// do with those values (in our case: drive Howler track volumes). The webcam
+// stream stays in the page; nothing leaves the browser.
+function useMotionDetection(isActive, videoRef, onMotion) {
+    const onMotionRef = useRef(onMotion);
+    useEffect(() => { onMotionRef.current = onMotion; }, [onMotion]);
 
     useEffect(() => {
-        if (!isActive || !videoRef.current) {
-            if (intervalRef.current) clearInterval(intervalRef.current);
-            setExpression(null);
-            return;
-        }
+        if (!isActive || !videoRef.current) return;
 
+        const W = 64;
+        const H = 48;
+        const canvas = document.createElement('canvas');
+        canvas.width = W;
+        canvas.height = H;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+        let prevData = null;
+        let smoothedIntensity = 0;
+        let smoothedY = 0.5;
+        let rafId = 0;
         let cancelled = false;
 
-        (async () => {
-            await loadFaceApiModels();
+        const tick = () => {
             if (cancelled) return;
-            modelsReadyRef.current = faceApiModelsLoaded;
-
-            if (!faceApiModelsLoaded) {
-                console.warn('face-api.js models could not be loaded');
+            const video = videoRef.current;
+            if (!video || video.readyState < 2) {
+                rafId = requestAnimationFrame(tick);
                 return;
             }
+            ctx.drawImage(video, 0, 0, W, H);
+            const { data } = ctx.getImageData(0, 0, W, H);
 
-            const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.4 });
-
-            intervalRef.current = setInterval(async () => {
-                const video = videoRef.current;
-                if (!video || video.readyState < 2) return;
-
-                try {
-                    const result = await faceapi
-                        .detectSingleFace(video, options)
-                        .withFaceExpressions();
-
-                    if (result) {
-                        const { expressions } = result;
-                        // Thresholds tuned so a clear smile or frown wins, otherwise neutral.
-                        if (expressions.happy > 0.5) {
-                            setExpression('happy');
-                        } else if (expressions.sad > 0.35) {
-                            setExpression('sad');
-                        } else {
-                            setExpression('neutral');
+            if (prevData) {
+                // Single pass: luminance diff, with anything above NOISE_FLOOR contributing
+                // both to the global intensity and to the y-centroid (weighted by diff).
+                const NOISE_FLOOR = 10; // 0..255, ignore sensor/compression noise
+                let total = 0;
+                let weightedY = 0;
+                for (let y = 0; y < H; y++) {
+                    const rowOffset = y * W * 4;
+                    for (let x = 0; x < W; x++) {
+                        const i = rowOffset + x * 4;
+                        const lumNow = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                        const lumPrev = (prevData[i] + prevData[i + 1] + prevData[i + 2]) / 3;
+                        const d = Math.abs(lumNow - lumPrev);
+                        if (d > NOISE_FLOOR) {
+                            total += d;
+                            weightedY += y * d;
                         }
-                    } else {
-                        setExpression(null);
                     }
-                } catch (e) {
-                    // Silently ignore transient detection errors
                 }
-            }, 500);
-        })();
+                // Intensity is normalised so a vigorous in-frame gesture saturates at ~1.
+                // Divisor tuned empirically: full-frame motion ~= W*H*60 of summed diff.
+                const targetIntensity = Math.min(1, total / (W * H * 60));
+                const targetY = total > 0 ? (weightedY / total) / (H - 1) : 0.5;
+
+                smoothedIntensity += (targetIntensity - smoothedIntensity) * 0.08;
+                smoothedY += (targetY - smoothedY) * 0.08;
+                onMotionRef.current(smoothedIntensity, smoothedY, data);
+            } else {
+                // First valid frame — still expose it so the consumer can paint the ASCII view.
+                onMotionRef.current(0, 0.5, data);
+            }
+
+            prevData = new Uint8ClampedArray(data);
+            rafId = requestAnimationFrame(tick);
+        };
+
+        rafId = requestAnimationFrame(tick);
 
         return () => {
             cancelled = true;
-            if (intervalRef.current) clearInterval(intervalRef.current);
+            cancelAnimationFrame(rafId);
+            prevData = null;
         };
     }, [isActive, videoRef]);
-
-    return expression;
 }
 
 function App() {
@@ -333,14 +361,19 @@ function App() {
         ? Math.min(Math.floor(densityExperienceProgress * 5) + 1, 5)
         : 1;
 
-    // Webcam state for Neuro-Adaptative section (section 4)
+    // Webcam state for the gesture-driven sound section (id 4)
     const [isCameraActive, setIsCameraActive] = useState(false);
     const videoRef = useRef(null);
     const streamRef = useRef(null);
-    const faceExpression = useFaceDetection(isCameraActive, videoRef);
+
+    // ASCII renderer state — populated each motion frame so the JSX can paint the
+    // webcam feed as elegant monospace characters in the wellness finale.
+    const asciiCharsRef = useRef('');
+    const [asciiTick, setAsciiTick] = useState(0);
 
     const lenisRef = useRef(null);
     const fadeTrack = useAudioStore((state) => state.fadeTrack);
+    const setVolume = useAudioStore((state) => state.setVolume);
 
     const NON_DRONE_TRACKS = [
         'strings',
@@ -351,8 +384,6 @@ function App() {
         'jungle',
         'pulsatingWave',
         'focusCognitif',
-        'happy',
-        'sad',
         'entrance',
         'rayon',
         'cabine',
@@ -384,40 +415,41 @@ function App() {
         }
     }, [activeSectionId, sectionProgress, isIsolationActive, fadeTrack]);
 
-    // Neuro-Adaptative: react to smile detection (webcam section, id 4)
-    useEffect(() => {
+    // Motion → audio (gesture-driven sound, webcam section, id 4).
+    // - strings volume tracks motionIntensity (a wider, more sustained gesture brings
+    //   the strings up).
+    // - bass volume tracks motionY × motionIntensity (movement in the lower half of
+    //   the frame — typically a masseur's hands — opens the low end).
+    // The drone keeps playing underneath. When the user stops moving, the smoothing
+    // in useMotionDetection lets both layers decelerate to silence without cutting.
+    //
+    // The callback also takes the raw pixel buffer so the ASCII view can repaint
+    // from the same canvas read — no second getImageData per frame.
+    const handleMotion = useCallback((intensity, y, pixelData) => {
         if (activeSectionId !== 4 || !isCameraActive) return;
+        setVolume('strings', Math.min(1, intensity * 1.3));
+        setVolume('bass', Math.min(1, y * intensity * 1.6));
 
-        // Audio routing differs by mode:
-        // - retail keeps its original binary behavior: smile → happy track, anything else
-        //   non-null → sad track (so the texture doesn't drop out on a neutral face).
-        // - wellness uses the three-state UI: happy / sad / neutral are distinct, and
-        //   neutral mutes both expression layers (drone keeps playing).
-        const isWellness = mode === 'wellness';
-        if (faceExpression === 'happy') {
-            fadeTrack('happy', 0.5, 600);
-            fadeTrack('sad', 0, 600);
-        } else if (faceExpression === 'sad' || (!isWellness && faceExpression === 'neutral')) {
-            fadeTrack('happy', 0, 600);
-            fadeTrack('sad', 0.5, 600);
-        } else {
-            // wellness-neutral or no face detected: drop both expression layers.
-            fadeTrack('happy', 0, 400);
-            fadeTrack('sad', 0, 400);
+        // Repaint the ASCII feed (wellness only — retail keeps the blob).
+        if (mode === 'wellness' && pixelData) {
+            asciiCharsRef.current = pixelsToAscii(pixelData, 64, 48);
+            setAsciiTick(t => (t + 1) & 0xffff);
         }
-    }, [faceExpression, isCameraActive, activeSectionId, fadeTrack, mode]);
+    }, [activeSectionId, isCameraActive, setVolume, mode]);
 
-    // Camera activation handler
+    useMotionDetection(isCameraActive && activeSectionId === 4, videoRef, handleMotion);
+
+    // Camera activation handler. We fade the motion-driven layers to silence on
+    // disable so the strings/bass don't linger on whatever the last frame held.
     const handleCameraToggle = useCallback(async () => {
         if (isCameraActive) {
-            // Stop camera
             if (streamRef.current) {
                 streamRef.current.getTracks().forEach(t => t.stop());
                 streamRef.current = null;
             }
             setIsCameraActive(false);
-            fadeTrack('happy', 0, 400);
-            fadeTrack('sad', 0, 400);
+            fadeTrack('strings', 0, 400);
+            fadeTrack('bass', 0, 400);
         } else {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -441,8 +473,8 @@ function App() {
                 streamRef.current = null;
             }
             setIsCameraActive(false);
-            fadeTrack('happy', 0, 300);
-            fadeTrack('sad', 0, 300);
+            fadeTrack('strings', 0, 300);
+            fadeTrack('bass', 0, 300);
         }
     }, [activeSectionId, isCameraActive, fadeTrack]);
 
@@ -562,6 +594,23 @@ function App() {
             {/* Hidden video element for webcam */}
             <video ref={videoRef} className="hidden" playsInline muted />
 
+            {/* Wellness finale: ASCII webcam feed. Renders behind the section copy
+                (z-[2]) so the prose stays legible, and replaces the 3D blob (which
+                we hide via the Scene `hideMainBlob` prop on this section). The
+                <pre> is keyed by `asciiTick` so React only repaints when the
+                motion hook hands us a new frame, not on every other render. */}
+            {mode === 'wellness' && activeSectionId === 4 && isCameraActive && (
+                <div className="fixed inset-0 z-[2] pointer-events-none flex items-center justify-center" aria-hidden="true">
+                    <pre
+                        key={asciiTick}
+                        className="font-mono text-tenbin-dark/85 select-none m-0 leading-[1em] tracking-[0.05em] text-[clamp(6px,1.2vw,12px)] whitespace-pre"
+                        style={{ filter: 'contrast(1.1) brightness(1.0)' }}
+                    >
+                        {asciiCharsRef.current}
+                    </pre>
+                </div>
+            )}
+
             {/* Zones panorama (fond, derrière le blob) - uniquement en section 2 */}
             {(activeSectionId === 2) && (() => {
                 if (mode === 'wellness') {
@@ -672,14 +721,21 @@ function App() {
                 );
             })()}
 
-            {/* 3D Blob (devant le panorama, opaque) */}
+            {/* 3D Blob (devant le panorama, opaque). We pass both `activeSection`
+                (DOM position) for legacy visual transitions and `activeSectionId`
+                (stable behavior id) so the density clones / top-down camera stay
+                tied to the score section even when wellness reorders the array.
+                `hideMainBlob` mutes the centre blob during the wellness finale
+                where the page swaps to an ASCII webcam view. */}
             <div className="fixed top-0 left-0 w-full h-full z-[5] pointer-events-none">
                 <Scene
                     scrollProgress={scrollProgress}
                     activeSection={activeSection}
+                    activeSectionId={activeSectionId}
                     sectionProgress={sectionProgress}
                     densityBlobCount={densityBlobCount}
                     isIsolationActive={isIsolationActive}
+                    hideMainBlob={mode === 'wellness' && activeSectionId === 4}
                 />
             </div>
 
@@ -1122,24 +1178,13 @@ function App() {
                                         {isCameraActive ? t.webcam_active : t.webcam_authorize}
                                     </button>
 
-                                    {/* Emotion indicator.
-                                        Wellness: three labels (happy / sad / neutral) + analyzing.
-                                        Retail: keeps the original two-label readout (happy / neutral),
-                                        with the 'sad' expression collapsed into the neutral label so we
-                                        don't show an `undefined` for a key retail's translations never had. */}
+                                    {/* Camera-active status. No emotion read-out: the audio is
+                                        driven continuously by movement, not by discrete labels. */}
                                     {isCameraActive && (
                                         <div className="flex items-center gap-3 mt-2">
-                                            <span className={`w-3 h-3 rounded-full transition-all duration-500 ${
-                                                faceExpression === 'happy' ? 'bg-green-400 animate-pulse' :
-                                                faceExpression === 'sad' ? 'bg-blue-400 animate-pulse' :
-                                                faceExpression === 'neutral' ? 'bg-white/60' :
-                                                'bg-tenbin-gray/50'
-                                            }`} />
-                                            <span className="text-sm uppercase tracking-widest text-tenbin-gray">
-                                                {faceExpression === 'happy' ? t.webcam_happy :
-                                                    faceExpression === 'sad' ? (mode === 'wellness' ? t.webcam_sad : t.webcam_neutral) :
-                                                    faceExpression === 'neutral' ? t.webcam_neutral :
-                                                    t.webcam_analyzing}
+                                            <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
+                                            <span className="text-[10px] uppercase tracking-[0.28em] text-tenbin-gray">
+                                                {t.webcam_reading}
                                             </span>
                                         </div>
                                     )}

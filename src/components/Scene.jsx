@@ -134,14 +134,14 @@ const DENSITY_SCALES = [0.65, 0.5, 0.45, 0.4, 0.38];
  * CameraController - smoothly transitions camera based on active section.
  * Section 4 (Density): moves to a high, almost top-down orbit to see the 5 blobs in pentagon.
  */
-function CameraController({ activeSection, sectionProgress }) {
+function CameraController({ isDensitySection, sectionProgress }) {
     useFrame((state, delta) => {
         const cam = state.camera;
         const lerpSpeed = 1 - Math.pow(0.01, delta);
 
         let targetPos, targetLookAt;
 
-        if (activeSection === 5) {
+        if (isDensitySection) {
             // Density: almost top-down view on the circle
             const t = Math.min(sectionProgress, 1);
             const height = THREE.MathUtils.lerp(6, 9, t);
@@ -489,7 +489,12 @@ function WellnessSteam() {
     );
 }
 
-export default function Scene({ scrollProgress, activeSection, sectionProgress, densityBlobCount = 1, isIsolationActive = false }) {
+export default function Scene({ scrollProgress, activeSection, activeSectionId, sectionProgress, densityBlobCount = 1, isIsolationActive = false, hideMainBlob = false }) {
+    // The density visual + top-down camera are tied to the score *behavior* (id 5),
+    // not its DOM position — wellness reorders the array so position 5 there is
+    // the webcam, not the score.
+    const effectiveSectionId = activeSectionId ?? activeSection;
+    const isDensitySection = effectiveSectionId === 5;
     return (
         <Canvas
                 camera={{ position: [0, 0, 12], fov: 45 }}
@@ -498,7 +503,7 @@ export default function Scene({ scrollProgress, activeSection, sectionProgress, 
                 style={{ background: 'transparent' }}
             >
             {/* Dynamic Camera */}
-            <CameraController activeSection={activeSection} sectionProgress={sectionProgress} />
+            <CameraController isDensitySection={isDensitySection} sectionProgress={sectionProgress} />
 
             {/* Lighting — wellness uses warm diffuse fills for a calm/spa feel,
                 retail keeps the cool monochrome key+rim. */}
@@ -518,23 +523,26 @@ export default function Scene({ scrollProgress, activeSection, sectionProgress, 
                 </>
             )}
 
-            {/* Main Blob (always visible) */}
-            <OrganicBlob
-                scrollProgress={scrollProgress}
-                activeSection={activeSection}
-                sectionProgress={sectionProgress}
-                isIsolationActive={isIsolationActive}
-                position={DENSITY_POSITIONS[0]}
-                scale={
-                    activeSection === 2
-                        ? (sectionProgress < 0.33 ? 1.2 : sectionProgress < 0.66 ? 1.0 : 0.8)
-                        : (activeSection === 5 ? DENSITY_SCALES[0] : 1.0)
-                }
-                blobIndex={0}
-            />
+            {/* Main Blob — visible everywhere except the wellness finale (webcam
+                section), where the page swaps to an ASCII webcam view. */}
+            {!hideMainBlob && (
+                <OrganicBlob
+                    scrollProgress={scrollProgress}
+                    activeSection={activeSection}
+                    sectionProgress={sectionProgress}
+                    isIsolationActive={isIsolationActive}
+                    position={DENSITY_POSITIONS[0]}
+                    scale={
+                        activeSection === 2
+                            ? (sectionProgress < 0.33 ? 1.2 : sectionProgress < 0.66 ? 1.0 : 0.8)
+                            : (isDensitySection ? DENSITY_SCALES[0] : 1.0)
+                    }
+                    blobIndex={0}
+                />
+            )}
 
-            {/* Density Clones (section 5 only) */}
-            {activeSection === 5 && densityBlobCount >= 2 && (
+            {/* Density Clones — tied to the score *behavior* (id 5). */}
+            {isDensitySection && densityBlobCount >= 2 && (
                 <OrganicBlob
                     scrollProgress={scrollProgress}
                     activeSection={activeSection}
@@ -546,7 +554,7 @@ export default function Scene({ scrollProgress, activeSection, sectionProgress, 
                     isDensityClone={true}
                 />
             )}
-            {activeSection === 5 && densityBlobCount >= 3 && (
+            {isDensitySection && densityBlobCount >= 3 && (
                 <OrganicBlob
                     scrollProgress={scrollProgress}
                     activeSection={activeSection}
@@ -558,7 +566,7 @@ export default function Scene({ scrollProgress, activeSection, sectionProgress, 
                     isDensityClone={true}
                 />
             )}
-            {activeSection === 5 && densityBlobCount >= 4 && (
+            {isDensitySection && densityBlobCount >= 4 && (
                 <OrganicBlob
                     scrollProgress={scrollProgress}
                     activeSection={activeSection}
@@ -570,7 +578,7 @@ export default function Scene({ scrollProgress, activeSection, sectionProgress, 
                     isDensityClone={true}
                 />
             )}
-            {activeSection === 5 && densityBlobCount >= 5 && (
+            {isDensitySection && densityBlobCount >= 5 && (
                 <OrganicBlob
                     scrollProgress={scrollProgress}
                     activeSection={activeSection}

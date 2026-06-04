@@ -70,12 +70,10 @@ const retail = {
     neuro_regulation: "Régulation émotionnelle",
     neuro_focus: "Focus cognitif",
 
-    // Section 4: Webcam
+    // Section 4: Webcam (motion-driven sound)
     webcam_active: "Caméra active",
     webcam_authorize: "Autoriser la caméra",
-    webcam_happy: "Joyeux",
-    webcam_neutral: "Neutre",
-    webcam_analyzing: "Analyse en cours...",
+    webcam_reading: "Lecture du geste",
 
     // Footer
     footer_about: "Qui sommes-nous",
@@ -97,7 +95,7 @@ const retail = {
     legal_contact_label: "Contact :",
     legal_hosting_label: "Hébergement :",
     legal_hosting_value: "Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723",
-    legal_privacy: "Ce site utilise des technologies de détection d'expressions faciales (face-api.js). Aucune donnée d'image n'est enregistrée ou transmise à des serveurs tiers ; l'Analyse est effectuée localement dans votre navigateur en temps réel.",
+    legal_privacy: "Ce site utilise une détection de mouvement par caméra implémentée en JavaScript natif (différence d'images sur canvas). Aucune donnée d'image n'est enregistrée ou transmise à des serveurs tiers ; l'analyse est effectuée localement dans votre navigateur en temps réel.",
     legal_close: "Fermer",
   },
 
@@ -175,9 +173,7 @@ const retail = {
     // Section 4: Webcam
     webcam_active: "Camera active",
     webcam_authorize: "Allow camera",
-    webcam_happy: "Happy",
-    webcam_neutral: "Neutral",
-    webcam_analyzing: "Analysing...",
+    webcam_reading: "Reading the gesture",
 
     // Footer
     footer_about: "About us",
@@ -199,7 +195,7 @@ const retail = {
     legal_contact_label: "Contact:",
     legal_hosting_label: "Hosting:",
     legal_hosting_value: "Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723",
-    legal_privacy: "This site uses facial expression detection technologies (face-api.js). No image data is recorded or transmitted to third-party servers; analysis is performed locally in your browser in real time.",
+    legal_privacy: "This site uses webcam motion detection implemented in pure JavaScript (frame-difference on a canvas). No image data is recorded or transmitted to third-party servers; analysis is performed locally in your browser in real time.",
     legal_close: "Close",
   },
 };

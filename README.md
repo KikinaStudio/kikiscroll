@@ -5,7 +5,7 @@ Site de démonstration scroll-driven pour **Kikina Lab**, décliné en **deux va
 - **Retail** — pour les boutiques, marques et lieux événementiels. URL : `/kikiscroll/<lang>`
 - **Wellness** — pour les spas, instituts et centres de soin. URL : `/kikiscroll/wellness/<lang>`
 
-Chacune se décline en français et en anglais (`fr` / `en`), soit 4 URLs au total. L'expérience reste la même : une narration scrollytelling en 6 sections, blob 3D Three.js, audio multi-pistes Howler.js, détection d'émotion par webcam (face-api.js), transition « nuit → aube » vers un footer de contact.
+Chacune se décline en français et en anglais (`fr` / `en`), soit 4 URLs au total. L'expérience reste la même : une narration scrollytelling en 6 sections, blob 3D Three.js, audio multi-pistes Howler.js, détection de mouvement par webcam (canvas + frame-diff, sans librairie), transition « nuit → aube » vers un footer de contact.
 
 | URL live | Variante | Langue |
 |---|---|---|
@@ -19,7 +19,7 @@ Chacune se décline en français et en anglais (`fr` / `en`), soit 4 URLs au tot
 ## Vue d’ensemble
 
 - **Objectif** : Présenter l'offre Kikina Lab (son vivant, neuroscience, storytelling) via une expérience immersive pilotée par le scroll, en l'adaptant au contexte d'usage du prospect (retail ou wellness).
-- **Stack** : React 18, Vite, Tailwind CSS, GSAP + ScrollTrigger, Lenis (smooth scroll), Three.js (R3F), Howler.js, face-api.js, Zustand.
+- **Stack** : React 18, Vite, Tailwind CSS, GSAP + ScrollTrigger, Lenis (smooth scroll), Three.js (R3F), Howler.js, Zustand. Détection de mouvement webcam en JS pur (frame-diff sur canvas 64×48, aucune librairie).
 - **Contenu** : Textes traduits par variante × langue dans `src/translations/`, apparition progressive par « parties » (3 par section), bouton « Lancer l'expérience » qui débloque le scroll et l'audio.
 
 ---
@@ -76,7 +76,6 @@ Kikiscroll/
 │   │   ├── retail_panorama.jpg    # Panorama 3 zones retail (section 2)
 │   │   └── wellness_panorama.jpg  # Panorama 3 zones wellness (placeholder)
 │   ├── MUSIC/                     # Pistes audio (voir liste ci-dessous)
-│   ├── models/                    # Modèles face-api.js (détection visage)
 │   └── Fonts/
 └── src/
     ├── main.jsx                   # Parse l'URL, monte ModeProvider + LanguageProvider
@@ -98,12 +97,29 @@ Kikiscroll/
         └── Overlay.jsx
 ```
 
-### Pistes audio (`public/MUSIC/`)
+### Pistes audio
+
+**Retail (`public/MUSIC/`)**
 
 - **Drone** : `0 Drone.mp3` (volume initial 0.5)
-- **Stems densité** : `1 Strings.mp3`, `2 Bass.mp3`, `3 Drums.mp3`, `4 Keyboard.mp3`
+- **Stems densité (5-instruments)** : `1 Strings.mp3`, `2 Bass.mp3`, `3 Drums.mp3`, `4 Keyboard.mp3`
 - **Environnements** : `Jungle.mp3`, `Pulsating Wave.mp3`, `Focus Cognitif.mp3`
-- **Autres** : `Crowd.mp3`, `HAPPY.mp3`, `SAD.mp3`
+- **Autres** : `Crowd.mp3`
+- `HAPPY.mp3` et `SAD.mp3` restent sur disque mais ne sont plus câblés (la section caméra est désormais pilotée par le mouvement, pas l'émotion).
+
+**Wellness (`public/MUSIC/wellness/`)** — priorise les pistes wellness sur les pistes retail partout, sauf pour les 4 stems de la section finale (5-instrument build) qui restent retail. Le drone wellness `01 Drone Wellness.mp3` remplace `0 Drone.mp3` partout en mode wellness, y compris pendant le 5-instrument finale.
+
+| Slot | Fichier wellness | Section |
+|---|---|---|
+| `drone` | `01 Drone Wellness.mp3` | base continue |
+| `entrance` | `keysy.mp3` | section 2 (accueil) |
+| `rayon` | `deep.mp3` | section 2 (soin) |
+| `cabine` | `less deep.mp3` | section 2 (chaleur) |
+| `recuperation` | `Instrumental (2).mp3` | section 2 (récupération) |
+| `jungle` | `flute guerlain.mp3` | section 3 (somatic release) |
+| `pulsatingWave` | `roulements de piano.mp3` | section 3 (régulation) |
+| `focusCognitif` | `ceremonial fusion voices.mp3` | section 3 (focus) |
+| `crowd` | retail `Crowd.mp3` | section 1 (pas d'équivalent wellness) |
 
 ---
 
@@ -114,8 +130,8 @@ Kikiscroll/
 | 0 | Un lieu a une âme. | Intro : drone seul, bouton « Lancer l’expérience », texte en 3 parties au scroll. Bloc centré en hauteur puis remonte. |
 | 1 | Elle s'entend. | Foule (Crowd) + toggle isolation à ~40 % du scroll (volume foule → 5 %). Blob : agité → calme bleu. |
 | 2 | Elle se ressent. | Crossfade Jungle → Pulsating Wave → Focus Cognitif. 3 icônes : Relaxation, Régulation émotionnelle, Focus cognitif. |
-| 3 | Elle vit avec vous. | Webcam + face-api.js : sourire → HAPPY, neutre → SAD. Bouton « Autoriser la caméra ». |
-| 4 | Et grandit avec vous. | 5 couches sonores (drone + 4 stems), 5 blobs en pentagone. Compteur « couches sonores » (chiffre gros + label petit). Scroll long (3.5× hauteur écran). |
+| 3 | Elle vit avec vous (wellness : avant-dernière) | 5 couches sonores (drone + 4 stems), 5 blobs en pentagone. Wellness : la section finit l'avant-dernier acte avant le finale caméra. |
+| 4 | Et grandit avec vous (wellness : finale) | Webcam + détection de mouvement JS pur (canvas 64×48, frame-diff). `motionIntensity` pilote les strings, `motionY` pilote la basse. Inertie exponentielle (0.08/frame) pour que la décélération suive le geste. Wellness : le blob disparaît et la caméra s'affiche en ASCII derrière le texte. Bouton « Autoriser la caméra ». |
 
 Après les sections : transition « aube » (dégradé noir → #f5f3f0) + footer (liens, formulaire mailto, mentions légales dépliantes).
 
@@ -166,7 +182,8 @@ Après les sections : transition « aube » (dégradé noir → #f5f3f0) + foote
 - **Audio par section** : Un `useEffect` qui réagit à `activeSection` fait un fade out de toutes les pistes non‑drone à chaque changement de section ; `useScrollAudio` applique ensuite les volumes de la section active. Évite les résidus sonores en remontant.
 - **Texte progressif** : Chaque section a `paragrapheParts` (tableau de 3 strings). Le rendu utilise `sectionProgress` et des seuils (0, 0.33, 0.66) pour l’opacité de chaque partie (formule du type `(sectionProgress - partThreshold) / 0.15`).
 - **Logo inversé** : SVG en `fill="currentColor"` + `mix-blend-difference` sur le header + `text-white` : le logo reste lisible sur fond sombre et s’inverse sur fond clair (ex. footer).
-- **Face-api.js** : Modèles dans `public/models/`, chargés via `BASE_URL + 'models'`. Détection au même rythme que les mises à jour d’émotion (ex. 500 ms). Pas d’envoi d’images à un serveur (RGPD).
+- **Détection de mouvement webcam** : implémentée à la main dans `src/App.jsx` (`useMotionDetection`). Le flux vidéo est dessiné dans un canvas caché 64×48 (= 3072 pixels) à chaque tick de `requestAnimationFrame`. La différence de luminance pixel-à-pixel avec la frame précédente donne `motionIntensity` (0–1) et `motionY` (0–1, centroïde vertical du mouvement). Les deux valeurs sont lissées par un suivi exponentiel (`smoothed += (target − smoothed) × 0.08`) avant d'être envoyées au store audio. Pas d'envoi réseau. Aucune librairie ni modèle ML.
+- **Rendu ASCII** : la même frame est repassée à `pixelsToAscii()` (palette à 10 caractères, `' .:-=+*#%@'`) et affichée dans un `<pre>` monospace pendant la section finale wellness. Le blob 3D est masqué via la prop `hideMainBlob` de `<Scene>` pour laisser la place à la vue caractères.
 
 ---
 
@@ -175,8 +192,8 @@ Après les sections : transition « aube » (dégradé noir → #f5f3f0) + foote
 ### Déploiement (ex. Vercel / Netlify)
 
 - Build : `npm run build` (sortie dans `dist/`).
-- Pas de variables d’environnement obligatoires pour le build. Les pistes et modèles sont servis depuis `public/`.
-- Vérifier que la base URL est correcte si le site est en sous‑chemin (pour `face-api.js` et éventuels assets).
+- Pas de variables d'environnement obligatoires pour le build. Les pistes audio sont servies depuis `public/MUSIC/`.
+- Vérifier que la base URL est correcte si le site est en sous-chemin (pour les assets et les pistes audio).
 
 ### Modifier les textes
 
@@ -188,7 +205,7 @@ Après les sections : transition « aube » (dégradé noir → #f5f3f0) + foote
 
 - Fichier dans `public/MUSIC/` (ou `public/MUSIC/wellness/` pour une piste spécifique au mode wellness).
 - Référence dans `src/store/useAudioStore.js` : ajouter ou modifier une entrée dans `RETAIL_TRACKS` ET/OU `WELLNESS_TRACKS` selon le scope. Si la clé doit exister dans les deux modes, mettre à jour les deux objets.
-- Si la piste ne doit pas rester en fond (comme le drone), l'ajouter dans `NON_DRONE_TRACKS` dans `App.jsx` (strings, bass, drums, keyboard, crowd, jungle, pulsatingWave, focusCognitif, happy, sad) pour qu'elle soit coupée à chaque changement de section. Adapter ensuite `useScrollAudio` et les callbacks ScrollTrigger (`onEnter` / `onLeave`) selon la section.
+- Si la piste ne doit pas rester en fond (comme le drone), l'ajouter dans `NON_DRONE_TRACKS` dans `App.jsx` pour qu'elle soit coupée à chaque changement de section. Adapter ensuite `useScrollAudio` et les callbacks ScrollTrigger (`onEnter` / `onLeave`) selon la section.
 - Pour le détail des assets wellness à produire / remplacer, voir [docs/wellness-assets-brief.md](docs/wellness-assets-brief.md).
 
 ### Contacts et liens
@@ -196,7 +213,7 @@ Après les sections : transition « aube » (dégradé noir → #f5f3f0) + foote
 - **Contact site** : bianca@kikinastudio.com (mailto, non affiché).
 - **Qui sommes-nous** : https://kikinalab.com
 - **LinkedIn** : https://www.linkedin.com/company/kikinastudio/
-- **Mentions légales** : panneau dépliant dans le footer (éditeur, siège, hébergement, note face-api.js).
+- **Mentions légales** : panneau dépliant dans le footer (éditeur, siège, hébergement, note RGPD sur la détection de mouvement webcam locale).
 
 ### Lint / format
 
