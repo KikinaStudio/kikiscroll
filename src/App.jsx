@@ -405,20 +405,16 @@ function App() {
     }, [activeSectionId, sectionProgress, isIsolationActive, fadeTrack]);
 
     // Motion → audio (gesture-driven sound, webcam section, id 4).
-    // - strings volume tracks motionIntensity (a wider, more sustained gesture brings
-    //   the strings up).
-    // - bass volume tracks motionY × motionIntensity (movement in the lower half of
-    //   the frame — typically a masseur's hands — opens the low end).
-    // The drone keeps playing underneath. When the user stops moving, the smoothing
-    // in useMotionDetection lets both layers decelerate to silence without cutting.
-    const handleMotion = useCallback((intensity, y) => {
+    // ONE parameter only: motionIntensity lifts a single layer (strings). The
+    // drone keeps playing underneath; bass stays silent. The user moves more,
+    // the music swells; they stop, it eases back down. That 1:1 relationship
+    // was the missing piece — the previous Y-driven bass made the mapping feel
+    // unpredictable because moving the *same* amount got a different result
+    // depending on hand height.
+    const handleMotion = useCallback((intensity /* , y */) => {
         if (activeSectionId !== 4 || !isCameraActive) return;
-        // Punchier audio: small gestures already lift the layers, big gestures saturate
-        // them. min() caps at 1.0 so we don't clip the Howler volume.
-        setVolume('strings', Math.min(1, intensity * 2.6));
-        setVolume('bass', Math.min(1, y * intensity * 2.8));
+        setVolume('strings', Math.min(1, intensity * 2.5));
         motionRef.current.intensity = intensity;
-        motionRef.current.y = y;
     }, [activeSectionId, isCameraActive, setVolume]);
 
     useMotionDetection(isCameraActive && activeSectionId === 4, videoRef, handleMotion);
@@ -692,9 +688,8 @@ function App() {
                 (DOM position) for legacy visual transitions and `activeSectionId`
                 (stable behavior id) so the density clones / top-down camera stay
                 tied to the score section even when wellness reorders the array.
-                `webcamMirrorActive` flips the blob into a polished, reflective
-                material that uses the live webcam as its environment map — the
-                visitor sees themselves in the blob during the gesture section. */}
+                `motionRef` lets the blob breathe a little with the visitor's
+                movement in the webcam section. */}
             <div className="fixed top-0 left-0 w-full h-full z-[5] pointer-events-none">
                 <Scene
                     scrollProgress={scrollProgress}
@@ -703,8 +698,6 @@ function App() {
                     sectionProgress={sectionProgress}
                     densityBlobCount={densityBlobCount}
                     isIsolationActive={isIsolationActive}
-                    webcamMirrorActive={mode === 'wellness' && activeSectionId === 4 && isCameraActive}
-                    videoElRef={videoRef}
                     motionRef={motionRef}
                 />
             </div>

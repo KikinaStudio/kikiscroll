@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment, Points, PointMaterial } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
@@ -168,7 +168,7 @@ function CameraController({ isDensitySection, sectionProgress }) {
 /**
  * OrganicBlob - single blob instance.
  */
-function OrganicBlob({ scrollProgress, activeSection, sectionProgress, isIsolationActive, position: pos, scale, blobIndex = 0, isDensityClone = false }) {
+function OrganicBlob({ scrollProgress, activeSection, sectionProgress, isIsolationActive, position: pos, scale, blobIndex = 0, isDensityClone = false, motionRef }) {
     const meshRef = useRef();
     const matRef = useRef();
     const isWellness = IS_WELLNESS;
@@ -178,6 +178,8 @@ function OrganicBlob({ scrollProgress, activeSection, sectionProgress, isIsolati
     const lerpedTransmission = useRef(0.0);
     const lerpedDeform = useRef(0.0);
     const lerpedRotSpeed = useRef(0.1);
+    // Smoothed motion-pulse multiplier (1.0 at rest, up to ~1.18 at saturation).
+    const motionPulse = useRef(1);
 
     const uniforms = useMemo(() => ({
         uTime: { value: 0 },
@@ -191,6 +193,17 @@ function OrganicBlob({ scrollProgress, activeSection, sectionProgress, isIsolati
             meshRef.current.rotation.y += lerpedRotSpeed.current * delta + rotOffset * 0.001;
             meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.2 + rotOffset) * 0.2;
             meshRef.current.position.y = (pos ? pos[1] : 0) + Math.sin(state.clock.elapsedTime * 0.5 + rotOffset) * 0.3;
+
+            // Optional motion pulse — only the webcam section passes a motionRef.
+            // The blob breathes outward as the visitor moves, eases back when
+            // they're still. Modest amplitude (+18%) so it acknowledges the
+            // gesture without becoming the focus.
+            if (motionRef && meshRef.current.scale) {
+                const target = 1 + Math.min(1, motionRef.current?.intensity ?? 0) * 0.18;
+                motionPulse.current += (target - motionPulse.current) * 0.1;
+                const base = typeof scale === 'number' ? scale : 1;
+                meshRef.current.scale.setScalar(base * motionPulse.current);
+            }
         }
         uniforms.uTime.value = state.clock.elapsedTime + blobIndex * 3;
 
@@ -489,83 +502,7 @@ function WellnessSteam() {
     );
 }
 
-/**
- * WebcamMirrorBlob — replaces the OrganicBlob during the gesture section.
- *
- * A polished sphere that uses the live webcam wrapped as an equirectangular
- * env map. We sit it at the same position as the regular blob (right-of-centre,
- * [3, 0, 0]) so the page layout doesn't jump, and we drive its scale + soft
- * extra rotation from the shared motion ref. Big gesture -> the blob breathes
- * outward; stillness -> it eases back to rest. Visually that doubles up on the
- * audio (strings/bass swelling) so the gesture clearly has consequence.
- *
- * Reflection is tuned for "obvious self-reflection" rather than "subtle
- * polish": roughness 0.05 + envMapIntensity 3.2 + pure-white tint so the
- * webcam reads as a sharp image on the surface, not a tinted hint.
- */
-function WebcamMirrorBlob({ videoElRef, motionRef }) {
-    const meshRef = useRef();
-    const textureRef = useRef(null);
-
-    useFrame((state, delta) => {
-        const video = videoElRef?.current;
-        if (!video) return;
-
-        // Lazy texture creation: we have to wait until the <video> has actual
-        // frames before we can wrap it as a VideoTexture.
-        if (!textureRef.current && video.readyState >= 2 && video.videoWidth > 0) {
-            const tex = new THREE.VideoTexture(video);
-            tex.mapping = THREE.EquirectangularReflectionMapping;
-            tex.colorSpace = THREE.SRGBColorSpace;
-            tex.minFilter = THREE.LinearFilter;
-            tex.magFilter = THREE.LinearFilter;
-            textureRef.current = tex;
-            if (meshRef.current?.material) {
-                meshRef.current.material.envMap = tex;
-                meshRef.current.material.needsUpdate = true;
-            }
-        }
-
-        if (!meshRef.current) return;
-
-        // Pulse with the gesture. Scale ranges 1.0 (still) → ~1.35 (vigorous).
-        const intensity = motionRef?.current?.intensity ?? 0;
-        const targetScale = 1 + Math.min(1, intensity) * 0.35;
-        const currentScale = meshRef.current.scale.x;
-        const nextScale = currentScale + (targetScale - currentScale) * 0.12;
-        meshRef.current.scale.set(nextScale, nextScale, nextScale);
-
-        // Slow drift so the reflection slides across the surface, plus a tiny
-        // motion-driven wobble so the user feels their gesture also "shakes"
-        // the surface, not just its size.
-        meshRef.current.rotation.y += (0.05 + intensity * 0.6) * delta;
-        meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.18) * 0.08
-            + intensity * 0.15;
-    });
-
-    useEffect(() => () => {
-        if (textureRef.current) {
-            textureRef.current.dispose();
-            textureRef.current = null;
-        }
-    }, []);
-
-    return (
-        <mesh ref={meshRef} position={[3, 0, 0]}>
-            <icosahedronGeometry args={[2.0, 8]} />
-            <meshPhysicalMaterial
-                color="#ffffff"
-                metalness={0.95}
-                roughness={0.05}
-                envMapIntensity={3.2}
-                clearcoat={0.8}
-                clearcoatRoughness={0.05}
-            />
-        </mesh>
-    );
-}
-
-export default function Scene({ scrollProgress, activeSection, activeSectionId, sectionProgress, densityBlobCount = 1, isIsolationActive = false, webcamMirrorActive = false, videoElRef, motionRef }) {
+export default function Scene({ scrollProgress, activeSection, activeSectionId, sectionProgress, densityBlobCount = 1, isIsolationActive = false, motionRef }) {
     // The density visual + top-down camera are tied to the score *behavior* (id 5),
     // not its DOM position — wellness reorders the array so position 5 there is
     // the webcam, not the score.
@@ -599,27 +536,23 @@ export default function Scene({ scrollProgress, activeSection, activeSectionId, 
                 </>
             )}
 
-            {/* Main Blob OR webcam mirror — when the visitor is in the gesture
-                section with their camera on, the blob is replaced by a polished
-                reflective sphere that uses the live webcam as its environment
-                map. They literally see themselves on the surface. */}
-            {webcamMirrorActive ? (
-                <WebcamMirrorBlob videoElRef={videoElRef} motionRef={motionRef} />
-            ) : (
-                <OrganicBlob
-                    scrollProgress={scrollProgress}
-                    activeSection={activeSection}
-                    sectionProgress={sectionProgress}
-                    isIsolationActive={isIsolationActive}
-                    position={DENSITY_POSITIONS[0]}
-                    scale={
-                        activeSection === 2
-                            ? (sectionProgress < 0.33 ? 1.2 : sectionProgress < 0.66 ? 1.0 : 0.8)
-                            : (isDensitySection ? DENSITY_SCALES[0] : 1.0)
-                    }
-                    blobIndex={0}
-                />
-            )}
+            {/* Main Blob — same in every section. In the camera section we hand
+                it the motion ref so it can breathe a little with the visitor's
+                movement, but the look stays the regular OrganicBlob. */}
+            <OrganicBlob
+                scrollProgress={scrollProgress}
+                activeSection={activeSection}
+                sectionProgress={sectionProgress}
+                isIsolationActive={isIsolationActive}
+                position={DENSITY_POSITIONS[0]}
+                scale={
+                    activeSection === 2
+                        ? (sectionProgress < 0.33 ? 1.2 : sectionProgress < 0.66 ? 1.0 : 0.8)
+                        : (isDensitySection ? DENSITY_SCALES[0] : 1.0)
+                }
+                blobIndex={0}
+                motionRef={activeSectionId === 4 ? motionRef : undefined}
+            />
 
             {/* Density Clones — tied to the score *behavior* (id 5). */}
             {isDensitySection && densityBlobCount >= 2 && (
