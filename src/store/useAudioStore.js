@@ -58,8 +58,69 @@ const WELLNESS_TRACKS = {
     recuperation: { src: `${BASE}MUSIC/wellness/Instrumental (2).mp3`, initialVolume: 0 },
 };
 
+// Per-track loudness compensation. The wellness mp3 pack arrived very unevenly
+// mastered — measuring peak amplitude in the browser:
+//
+//   01 Drone Wellness ........ 9 (retail 0 Drone is 26 for comparison)
+//   flute guerlain ........... 12
+//   roulements de piano ...... 10
+//   ceremonial fusion voices.. 39
+//   deep ..................... 8
+//   Instrumental (2) ......... 4
+//   keysy .................... 105   ← already very loud
+//   less deep ................ 93    ← already very loud
+//
+// Without this table the drone-only intro feels silent, the neuro section's two
+// quiet tracks drop out, and zones 1 and 3 (keysy / less deep) bury everything
+// else. We multiply the requested volume by `LOUDNESS_GAIN[key]` and rely on the
+// underlying Web Audio gain node, which Howler exposes via .gain — values above
+// 1.0 actually boost the signal, unlike Howler's clamped .volume() helper.
+const LOUDNESS_GAIN = {
+    drone: 4.5,
+    jungle: 3.0,
+    pulsatingWave: 3.2,
+    focusCognitif: 1.0,
+    rayon: 3.5,
+    cabine: 0.6,
+    entrance: 0.5,
+    recuperation: 4.5,
+};
+
+// Some wellness files have a very quiet intro (the drone is near-silent for
+// ~50s, then ~5× louder in the body). Seek the looped track past that intro
+// once it starts so the page doesn't *sound* silent at first load. Times are
+// in seconds; tracks not listed start at 0.
+const START_SEEK = {
+    drone: 55,
+};
+
+// Apply gain directly to the Howl's Web Audio gain node so we can go above 1.0.
+// Howler's `.volume()` clamps to [0, 1] AND schedules a gain ramp on the same
+// node we'd otherwise set above 1, so any value-at-time/ramp calls we make
+// would be overwritten on Howler's next tick. The escape hatch that DOES
+// stick is the bare `gain.value` setter (direct AudioParam value write), so
+// we use that. We still call .volume() first with the clamped value so that
+// Howler's internal bookkeeping (used by .fade(), .mute()) stays coherent.
+function applyGain(howlInstance, trackName, requestedVolume) {
+    if (!howlInstance) return;
+    const gain = ACTIVE_GAINS[trackName] ?? 1;
+    const desired = Math.max(0, requestedVolume * gain);
+    howlInstance.volume(Math.min(1, desired));
+    const sound = howlInstance._sounds && howlInstance._sounds[0];
+    const node = sound && sound._node;
+    if (node && node.gain) {
+        // Cancel any scheduled ramps Howler may have queued before clobbering.
+        if (typeof node.gain.cancelScheduledValues === 'function' && howlInstance._ctx) {
+            node.gain.cancelScheduledValues(howlInstance._ctx.currentTime);
+        }
+        node.gain.value = desired;
+    }
+}
+
 const { mode } = parseUrlMode();
 const TRACKS = mode === 'wellness' ? WELLNESS_TRACKS : RETAIL_TRACKS;
+// Retail tracks were mastered consistently; no compensation needed.
+const ACTIVE_GAINS = mode === 'wellness' ? LOUDNESS_GAIN : {};
 
 export const useAudioStore = create((set, get) => {
     const instances = {};
@@ -86,8 +147,17 @@ export const useAudioStore = create((set, get) => {
 
             Object.entries(tracks).forEach(([key, howlInstance]) => {
                 const initialVol = TRACKS[key].initialVolume;
-                howlInstance.volume(initialVol);
                 howlInstance.play();
+                const seek = START_SEEK[key];
+                if (typeof seek === 'number' && seek > 0) {
+                    howlInstance.seek(seek);
+                }
+                // Defer the gain write: when play() returns, Howler has
+                // queued sound-node creation but it can still overwrite the
+                // gain on its first internal tick. A microtask + small delay
+                // lets us land *after* Howler is done initialising, so our
+                // above-1.0 boost actually sticks.
+                setTimeout(() => applyGain(howlInstance, key, initialVol), 50);
             });
 
             set({ isPlaying: true });
@@ -97,14 +167,55 @@ export const useAudioStore = create((set, get) => {
             const { tracks } = get();
             const howlInstance = tracks[trackName];
 
-            if (howlInstance) {
+            if (!howlInstance) {
+                console.warn(`Track ${trackName} not found in audio store.`);
+                return;
+            }
+
+            const gain = ACTIVE_GAINS[trackName] ?? 1;
+            const sound = howlInstance._sounds && howlInstance._sounds[0];
+            const node = sound && sound._node;
+            if (!node || !node.gain) {
+                // Fallback for non-Web-Audio backends.
                 const currentVolume = howlInstance.volume();
                 if (Math.abs(currentVolume - targetVolume) > 0.01) {
-                    howlInstance.fade(currentVolume, targetVolume, duration);
+                    howlInstance.fade(currentVolume, Math.min(1, targetVolume), duration);
                 }
-            } else {
-                console.warn(`Track ${trackName} not found in audio store.`);
+                return;
             }
+
+            const fromGain = node.gain.value;
+            const toGain = Math.max(0, targetVolume * gain);
+            if (Math.abs(fromGain - toGain) < 0.005) return;
+
+            // We can't use Web Audio's setValueAtTime / linearRampToValueAtTime
+            // here: Howler runs an internal scheduler on this same gain node
+            // (its own fade/volume logic) and overwrites scheduled values on
+            // every tick. Manual rAF-stepped interpolation lands reliably and
+            // can park above 1.0, which is the whole point of this code path.
+            howlInstance.volume(Math.min(1, toGain));
+            if (typeof node.gain.cancelScheduledValues === 'function' && howlInstance._ctx) {
+                node.gain.cancelScheduledValues(howlInstance._ctx.currentTime);
+            }
+
+            // Each track has at most one active rAF fade — cancel the previous.
+            const fadeKey = '__kikiFade_' + trackName;
+            const prev = get()[fadeKey];
+            if (prev) cancelAnimationFrame(prev);
+
+            const start = performance.now();
+            const end = start + Math.max(1, duration);
+            const step = () => {
+                const now = performance.now();
+                const k = Math.min(1, (now - start) / (end - start));
+                node.gain.value = fromGain + (toGain - fromGain) * k;
+                if (k < 1) {
+                    set({ [fadeKey]: requestAnimationFrame(step) });
+                } else {
+                    set({ [fadeKey]: 0 });
+                }
+            };
+            set({ [fadeKey]: requestAnimationFrame(step) });
         },
 
         // Direct, per-frame volume set — used by the motion-detection loop where
@@ -114,7 +225,7 @@ export const useAudioStore = create((set, get) => {
             const { tracks } = get();
             const howlInstance = tracks[trackName];
             if (howlInstance) {
-                howlInstance.volume(Math.max(0, Math.min(1, volume)));
+                applyGain(howlInstance, trackName, Math.max(0, volume));
             }
         },
 
