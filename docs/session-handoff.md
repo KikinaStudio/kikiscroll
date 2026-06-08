@@ -2,7 +2,7 @@
 
 > Document destiné à une **autre session Claude Code** qui reprend ce projet sans contexte. Lis ce fichier **avant** d'agir. Il décrit l'état actuel du repo (pas l'historique). Pour l'historique, voir `git log`.
 
-Dernière mise à jour : **2026-05-19** (après pistes audio bespoke, drone-only intro, caption sync, line breaks, swap rooms 2↔3)
+Dernière mise à jour : **2026-06-08** (après refonte audio complète : normalisation LUFS + leveling des pistes, soft-clip master, moteur de gain sample-accurate ; section 4 passée en détection de mouvement + pad ambiant + meter ; suppression des em dashes dans la copie)
 
 ---
 
@@ -12,8 +12,9 @@ Dernière mise à jour : **2026-05-19** (après pistes audio bespoke, drone-only
 2. Le mode est résolu **une fois au chargement** depuis l'URL via `src/urlMode.js`, puis injecté dans `ModeContext` + lu par le store audio au module load. **Pas de switch runtime.**
 3. La version retail est **inchangée** depuis l'origine. **Règle d'or** : ne pas casser le retail en travaillant sur wellness — tout le code wellness est gated `mode === 'wellness'`.
 4. La version wellness « spa luxe 2026 » est complète : 4 chambres, palette warm, blob galet, vapeur, audio bespoke s2, sections réordonnées, phases du soin en s5.
-5. **Audio wellness** : `WELLNESS_TRACKS = { ...RETAIL_TRACKS, entrance/rayon/cabine/recuperation: bespoke MP3 }`. 4 pistes wellness pour les chambres (keysy, deep, less deep, Instrumental (2)). Le reste hérite du retail.
+5. **Audio wellness** : maintenant **9 pistes bespoke** (drone, neuro x3, zones x4, motion pad), toutes héritant du store retail pour les stems de la section 5. Les fichiers ont été **normalisés à -18 LUFS et levelés (LRA ~5-7)** sur disque — voir §"Architecture audio". `LOUDNESS_GAIN` est à l'unité pour ces fichiers ; seuls les stems retail réutilisés en wellness sont trimés en code.
 6. **Sections wellness réordonnées** (intro → zones → neuro → sculpting → webcam → score) ; retail garde l'ordre id 0→5. Le code identifie chaque section par son `id` stable, pas sa position. Voir §"Architecture des sections (id vs position)".
+7. **Section 4 (webcam)** : ne fait **plus** de reco faciale (happy/sad). Elle fait de la **détection de mouvement** (frame-diff avec rejet de l'auto-exposition) qui pilote la couche `strings`, par-dessus un pad ambiant constant (`motionPad` = Fender). Meter de mouvement live + instructions + message si caméra bloquée. Voir §"Section 4".
 
 ---
 
@@ -34,13 +35,20 @@ Kikiscroll/
 │   │   ├── wellness_zone_chaleur.jpg
 │   │   ├── wellness_zone_soin.jpg
 │   │   └── wellness_zone_recuperation.jpg
-│   ├── MUSIC/                              ← Pistes retail (14 fichiers, format MP3)
-│   │   └── wellness/                       ← 4 pistes bespoke wellness (MP3)
-│   │       ├── keysy.mp3
-│   │       ├── deep.mp3
-│   │       ├── less deep.mp3
-│   │       └── Instrumental (2).mp3
+│   ├── MUSIC/                              ← Pistes retail (MP3). HAPPY.mp3 / SAD.mp3 toujours présents mais PLUS câblés.
+│   │   └── wellness/                       ← 9 pistes bespoke wellness, toutes normalisées -18 LUFS + levelées
+│   │       ├── 01 Drone Wellness.mp3       ← drone (base layer, toujours playing)
+│   │       ├── flute guerlain.mp3          ← jungle (neuro phase 1)
+│   │       ├── roulements de piano.mp3     ← pulsatingWave (neuro phase 2)
+│   │       ├── ceremonial fusion voices.mp3← focusCognitif (neuro phase 3)
+│   │       ├── keysy.mp3                    ← entrance (zone 1)
+│   │       ├── deep.mp3                     ← rayon (zone 2)
+│   │       ├── less deep.mp3                ← cabine (zone 3)
+│   │       ├── Instrumental (2).mp3         ← recuperation (zone 4)
+│   │       └── Fender.mp3                   ← motionPad (bed de la section 4 webcam)
 │   └── logo-kikina.png                     ← Logo du footer (ATTENTION: référencer via BASE_URL)
+├── .audio-backup/                          ← GITIGNORED. Originaux pristine des 9 mp3 wellness AVANT normalisation/leveling.
+│                                              Reprocesser depuis ici pour retuner le leveling. Ne pas committer.
 └── src/
     ├── main.jsx                            ← Parsing URL + montage ModeProvider/LanguageProvider
     ├── urlMode.js                          ← parseUrlMode() — source unique URL → {mode, lang}
@@ -83,7 +91,7 @@ Branche `main` est ce qui est live. Le CI build + déploie automatiquement via `
 | 1 | 2 | One signature, many spaces. | Une signature, plusieurs espaces. | Panorama 4 zones |
 | 2 | 3 | Compose the state, not the ambience. | Composer l'état, pas l'ambiance. | Neuro labels, crossfade jungle→pulsating→focus |
 | 3 | 1 | The science of acoustic sculpting. | La science de la sculpture acoustique. | Isolation toggle, crowd track |
-| 4 | 4 | Sound that listens to the gesture. | Le son à l'écoute du geste. | Webcam + démo capteur spatial |
+| 4 | 4 | Sound that listens to the gesture. | Le son à l'écoute du geste. | Webcam → détection de mouvement pilote `strings` sur un pad ambiant (`motionPad`) + meter live |
 | 5 | 5 | A score for every treatment. | Une partition par soin. | 5 phases du soin (blobs + stems audio) |
 
 **Retail** garde l'ordre naturel id 0→5 (DOM position = id).
@@ -130,6 +138,38 @@ Tous les volumes sont multipliés par `zoneAudioRamp` (0→1 sur sectionProgress
 - Overlay gradient sombre bas pour readability sur n'importe quelle image
 - Captions blanc avec text-shadow
 - **Pas de counter "01/04"** (retiré)
+
+### Section 4 (Webcam, détection de mouvement) — détails
+
+**Plus de reco faciale.** `face-api` a été retiré ; les modèles dans
+`public/models/` ont été supprimés (asset mort). La section lit le **mouvement**.
+
+- **Détection** (`useMotionDetection` dans `App.jsx`) : la frame webcam est dessinée
+  sur un canvas caché 64×48, frame-diff de luminance. Deux étapes clés pour la
+  stabilité :
+  1. **Rejet de l'illumination globale** : on soustrait la variation moyenne de
+     luminance sur toute la frame (l'auto-exposition / balance des blancs du webcam
+     fait varier toute l'image d'un coup, ce que le frame-diff naïf lisait comme un
+     gros mouvement → réponse aléatoire). Seul le mouvement *local* passe le seuil.
+  2. **Fraction de pixels en mouvement** (plus stable que la somme des diffs).
+  Puis lissage asymétrique (montée rapide ATTACK 0.16, descente lente RELEASE 0.04)
+  + gate (<0.03 → 0). Constantes à tuner : `MOTION_FULL` (0.18, plus bas = plus
+  sensible), `NOISE_FLOOR` (16), ATTACK/RELEASE.
+- **Audio** : `handleMotion` mappe l'intensité (déjà lissée) sur la couche `strings`
+  (`min(1, intensity * 1.5)`) via `setVolume` (glissé par `setTargetAtTime`). Le
+  `motionPad` (Fender) joue en continu à **0.32** comme bed (drivé dans la branche
+  `activeSectionId === 4` de `useScrollAudio`, wellness uniquement). Le drone reste
+  dessous. → bouger ouvre la musique, l'immobilité revient au bed.
+- **UI** : bouton "Allow camera" → instructions (`webcam_hint`), puis pendant
+  l'activation un **meter de mouvement live** (`meterRef`, largeur écrite directement
+  au DOM par un rAF, pas de re-render React) + `webcam_move_hint`. Si la caméra est
+  refusée/indisponible : message (`webcam_denied` / `webcam_unavailable`).
+- L'élément `<video>` reste `hidden` (le blob 3D sert de reflet via `motionRef`).
+
+> **Limite de test connue** : la preview headless n'a pas de caméra ET reporte
+> `window.innerHeight = 0`, ce qui désactive tout le système ScrollTrigger (le pin
+> math est `innerHeight × N`). Impossible d'exercer la section 4 (ni aucune section
+> scroll-driven) dans la preview — tester dans un vrai navigateur.
 
 ### Section 5 (Score, phases du soin) — détails
 
@@ -212,7 +252,7 @@ Référence pour qui éditerait l'ordre, la copie ou les comportements de sectio
   - `id 1` → Sculpting / Isolation (crowd track, toggle automatique à 40 %)
   - `id 2` → Zones panorama (entrance/rayon/cabine/recuperation crossfade en wellness, entrance/rayon/cabine en retail)
   - `id 3` → Neuro (jungle → pulsatingWave → focusCognitif crossfade)
-  - `id 4` → Webcam / Neuro-adaptive (happy/sad via face-api)
+  - `id 4` → Webcam / détection de mouvement (pilote `strings` sur un pad `motionPad`)
   - `id 5` → Score / Density (1→5 stems accumulation)
 - **`activeSection`** — position dans le tableau `sectionsData`, qui correspond à la position DOM (= ordre de scroll). En retail, `activeSection === id`. En wellness, le tableau est réordonné, donc **non**.
 
@@ -229,40 +269,96 @@ Référence pour qui éditerait l'ordre, la copie ou les comportements de sectio
 
 ## Architecture audio (`useAudioStore.js`)
 
-### Pistes retail (14 entrées)
+> Refondue en 2026-06. Lis cette section **avant** de toucher à l'audio. Détails
+> techniques (pourquoi LUFS, le bug `_ctx`, la courbe soft-clip) dans `AI_LEARNINGS.md`.
+
+### Chaîne de signal
+
+```
+Howl (×N, html5:false, loop:true) → gain node par piste → Howler.masterGain
+   → WaveShaper soft-clip (Howler.__kikiMasterSoftClip) → ctx.destination
+```
+
+- **Soft-clip master** : `installMasterSoftClip()` insère un WaveShaper (courbe tanh
+  soft-knee, knee 0.7, plafond ~0.93, oversample 4x) entre `masterGain` et la
+  destination. Transparent en dessous de 0.7 ; ne fait que tucker les sommes les
+  plus denses. C1-continu au knee (un kink y injectait du "grésille" — voir
+  AI_LEARNINGS). Posé une fois, inoffensif en retail.
+- **Gain moves** : `rampGain()` fait des rampes **sample-accurate**
+  (`linearRampToValueAtTime`) — plus de `gain.value` écrit en boucle rAF (qui
+  cliquait). `fadeTrack` et `applyGain` passent par là ; `setVolume` (driver
+  per-frame de la section 4) utilise `setTargetAtTime`. **Tous utilisent
+  `Howler.ctx`** (les instances `Howl` n'exposent pas `_ctx` — un piège qui faisait
+  silencieusement retomber sur des écritures instantanées). `howlInstance._volume`
+  est resynchronisé à la main pour la cohérence de `mute()`.
+- **Drone** : démarre avec son gain appliqué sur l'événement `'play'` (déterministe),
+  pas via un `setTimeout` racy. Pas de seek.
+
+### Loudness (IMPORTANT)
+
+Tous les **9 fichiers wellness** sont **normalisés à -18 LUFS et levelés (LRA ~5-7)
+sur disque** (pas en code). Conséquence : `LOUDNESS_GAIN` est à **1.0** pour eux.
+Seuls les **stems retail réutilisés en wellness** sont trimés en code vers -18 LUFS :
+
+| stem | gain wellness |
+|---|---|
+| strings | 0.80 |
+| bass | 0.95 |
+| drums | 0.79 |
+| keyboard | 1.35 |
+| crowd | 0.68 |
+
+`LOUDNESS_GAIN` n'est appliqué qu'en wellness (`ACTIVE_GAINS = mode==='wellness' ? LOUDNESS_GAIN : {}`).
+
+**Pour (re)normaliser une piste** : reprocesser depuis `.audio-backup/` (originaux),
+`ffmpeg -af "dynaudnorm=f=200:g=13:m=8:s=6:p=0.9"` pour le leveling, puis mesurer le
+LUFS (`loudnorm=print_format=json`) et appliquer `volume=(-18 - mesuré)dB`. Vérifier
+LRA ~5-7. Si une piste paraît trop plate, baisser `s`/`m` ou viser une LUFS plus haute.
+
+### Pistes retail (slots)
 
 | Slot | Fichier | Usage |
 |---|---|---|
-| drone | `MUSIC/0 Drone.mp3` | Toujours playing à 0.5, base layer |
-| strings | `MUSIC/1 Strings.mp3` | Section 5 stem 2 |
+| drone | `MUSIC/0 Drone.mp3` | Base layer, toujours playing à 0.5 |
+| strings | `MUSIC/1 Strings.mp3` | Section 5 stem 2 + couche mouvement section 4 |
 | bass | `MUSIC/2 Bass.mp3` | Section 5 stem 3 |
 | drums | `MUSIC/3 Drums.mp3` | Section 5 stem 4 |
 | keyboard | `MUSIC/4 Keyboard.mp3` | Section 5 stem 5 |
 | crowd | `MUSIC/Crowd.mp3` | Section 1 (sculpting/isolation) |
-| jungle | `MUSIC/Jungle.mp3` | Section 3 phase 1 (relaxation) |
-| pulsatingWave | `MUSIC/Pulsating Wave.mp3` | Section 3 phase 2 (régulation) |
-| focusCognitif | `MUSIC/Focus Cognitif.mp3` | Section 3 phase 3 (focus) |
-| happy | `MUSIC/HAPPY.mp3` | Section 4 webcam smile detected |
-| sad | `MUSIC/SAD.mp3` | Section 4 webcam no smile |
-| entrance | `MUSIC/Synthwave_1.mp3` | Section 2 zone 1 (retail) |
-| rayon | `MUSIC/Rap_1.mp3` | Section 2 zone 2 (retail) |
-| cabine | `MUSIC/Bossa.mp3` | Section 2 zone 3 (retail) |
+| jungle | `MUSIC/Jungle.mp3` | Section 3 phase 1 |
+| pulsatingWave | `MUSIC/Pulsating Wave.mp3` | Section 3 phase 2 |
+| focusCognitif | `MUSIC/Focus Cognitif.mp3` | Section 3 phase 3 |
+| entrance/rayon/cabine | Synthwave/Rap/Bossa | Section 2 zones (retail) |
 
-### Pistes wellness
+> `HAPPY.mp3` / `SAD.mp3` existent encore sur disque mais **ne sont plus câblés**
+> (la section 4 ne fait plus de reco faciale). Pas d'entrées `happy`/`sad`.
+
+### Pistes wellness (overrides + nouveau slot)
 
 ```js
 WELLNESS_TRACKS = {
     ...RETAIL_TRACKS,
-    entrance: 'MUSIC/wellness/keysy.mp3',           // Reception & transitions
-    rayon:    'MUSIC/wellness/deep.mp3',            // Treatment rooms (room 2 visuel)
-    cabine:   'MUSIC/wellness/less deep.mp3',       // Heat rituals (room 3 visuel)
-    recuperation: 'MUSIC/wellness/Instrumental (2).mp3', // Recovery spaces (wellness-only slot)
+    drone:         'MUSIC/wellness/01 Drone Wellness.mp3', // base layer wellness
+    jungle:        'MUSIC/wellness/flute guerlain.mp3',    // neuro phase 1
+    pulsatingWave: 'MUSIC/wellness/roulements de piano.mp3', // neuro phase 2
+    focusCognitif: 'MUSIC/wellness/ceremonial fusion voices.mp3', // neuro phase 3
+    entrance:      'MUSIC/wellness/keysy.mp3',             // zone 1 (Reception)
+    rayon:         'MUSIC/wellness/deep.mp3',              // zone 2 (Treatment, room 2 visuel)
+    cabine:        'MUSIC/wellness/less deep.mp3',         // zone 3 (Heat, room 3 visuel)
+    recuperation:  'MUSIC/wellness/Instrumental (2).mp3',  // zone 4 (Recovery)
+    motionPad:     'MUSIC/wellness/Fender.mp3',            // bed section 4 (webcam), vol 0.32
 };
 ```
 
-Les autres slots (drone, strings, bass, drums, keyboard, crowd, jungle, pulsatingWave, focusCognitif, happy, sad) héritent des fichiers retail via spread.
+Les stems hérités du retail (strings, bass, drums, keyboard, crowd) gardent les
+fichiers retail via spread, trimés par `LOUDNESS_GAIN` (table ci-dessus).
 
-> **Note** : le mapping room→fichier dans le store est swappé par rapport à l'ordre des fichiers (keysy/less deep/deep/Instrumental 2) parce que l'ordre des slides en s2 a été swappé rooms 2↔3. Le résultat : Treatment rooms (room 2 dans l'ordre visuel) entend `deep.mp3` et Heat rituals (room 3) entend `less deep.mp3`. Cohérent avec le caractère de chaque chambre.
+> **Note mapping zones** : keysy/deep/less deep/Instrumental sont mappés sur
+> entrance/rayon/cabine/recuperation en gardant le caractère de chaque chambre
+> (rooms 2↔3 swappées visuellement, mapping audio cohérent). Fichiers non renommés.
+
+> **`motionPad`** est dans `NON_DRONE_TRACKS` (donc reset au changement de section),
+> mais uniquement en wellness (gardé hors retail pour éviter un warning fadeTrack).
 
 ---
 
@@ -270,14 +366,17 @@ Les autres slots (drone, strings, bass, drums, keyboard, crowd, jungle, pulsatin
 
 ### Audio (à la main de Jeremie)
 
-1. **Musiques wellness bespoke pour les autres sections** — Jeremie a livré 4 pistes pour la section 2 (zones) et 1 piste pour la section initial (`Instrumental.mp3` ancien, plus utilisée — supprimée). Les pistes wellness pour les sections suivantes héritent toujours du retail :
-   - `drone` (toujours playing) → retail's `0 Drone.mp3`
-   - `strings`, `bass`, `drums`, `keyboard` → retail (section 5 stems, mappées aux 5 phases du soin)
-   - `crowd` → retail (section 1 sculpting)
-   - `jungle`, `pulsatingWave`, `focusCognitif` → retail (section 3 neuro)
-   - `happy`, `sad` → retail (section 4 webcam)
-
-   Si Jeremie envoie d'autres pistes, déposer dans `public/MUSIC/wellness/` et changer la valeur correspondante dans `WELLNESS_TRACKS`.
+1. **Audio — à valider à l'oreille par Jeremie (la preview headless ne joue pas de son)** :
+   - Le **leveling** (dynaudnorm) rend les pistes plus uniformes mais un peu moins
+     dynamiques que les originaux du compositeur. Si ça sonne trop plat (ou une
+     piste précise paraît off), retuner depuis `.audio-backup/` (voir §"Architecture
+     audio" → Loudness). C'est un seul paramètre.
+   - Si un **grésille léger persiste** après tout ça, le dernier suspect est la
+     charge GPU des blobs en verre (`MeshTransmissionMaterial`, plusieurs passes de
+     rendu) qui famine le système → underruns audio. Fix = alléger le rendu, pas
+     l'audio. À investiguer seulement si confirmé à l'oreille.
+   - `Fender` (motionPad) a résisté au leveling (LRA ~12 vs ~6 pour les autres) ;
+     c'est un bed soft à 0.32 donc peu perceptible, laissé tel quel.
 
 ### Cleanup / dette technique
 
@@ -285,15 +384,20 @@ Les autres slots (drone, strings, bass, drums, keyboard, crowd, jungle, pulsatin
 
 3. **Dead code dans `App.jsx`** : le bloc des 4 SVG zones wellness à l'intérieur d'un `mode !== 'wellness'` est unreachable. À nettoyer. Cherche `mode === 'wellness' ? [` dans App.jsx.
 
-4. **Branche `wellness-spa-luxe-refonte`** : son contenu est intégralement sur `main`. Peut être supprimée localement et remote.
+4. **`HAPPY.mp3` / `SAD.mp3`** dans `public/MUSIC/` ne sont plus câblés (section 4 = mouvement). Supprimables si on veut alléger.
 
-5. **Docs à actualiser** :
-   - [docs/wellness-dev-handoff.md](./wellness-dev-handoff.md) — un peu stale (panorama unique → 4 slides, clés non strictement identiques entre modes, sections réordonnées, etc.)
-   - [docs/wellness-assets-brief.md](./wellness-assets-brief.md) — stale (3 zones devenues 4, brief musique partiellement obsolète maintenant que 4 pistes ont été livrées)
+5. **`.claude/` et `.audio-backup/`** sont gitignored (ajoutés cette session). `.audio-backup/` = ~13 Mo d'originaux pristine ; le garder localement pour pouvoir retuner le leveling.
+
+6. **Docs à actualiser** :
+   - [docs/wellness-dev-handoff.md](./wellness-dev-handoff.md) — stale (panorama unique → 4 slides, sections réordonnées, section 4 = mouvement maintenant).
+   - [docs/wellness-assets-brief.md](./wellness-assets-brief.md) — stale (3 zones → 4, brief musique obsolète, 9 pistes livrées).
 
 ### Non bloquant / observations conceptuelles
 
-6. **Section 4 : démo webcam vs narratif capteur spatial** — la section parle de capteurs spatiaux qui lisent les gestes du praticien, mais la démo interactive reste une webcam qui lit l'expression du visage. Le texte le présente comme proxy (*"What you see here through a webcam, we deploy in the treatment room with spatial sensors"*), ce qui fonctionne pour la prez. Si on veut pousser plus loin un jour : remplacer la détection happy/sad par autre chose (mouvement de la main, posture).
+7. **Section 4 : narratif capteur spatial** — la démo est une webcam qui lit le
+   *mouvement* (plus l'expression du visage), ce qui colle mieux au narratif
+   "capteur spatial qui suit le geste". Le `<video>` reste caché ; le blob 3D est
+   le reflet. Pousser plus loin un jour : posture/profondeur via une vraie lib.
 
 ---
 
@@ -326,6 +430,12 @@ Les autres slots (drone, strings, bass, drums, keyboard, crowd, jungle, pulsatin
 | Rooms 2 et 3 swappées visuellement | Demande Jeremie. Audio file mapping swappé en parallèle dans le store pour garder le caractère par chambre | — |
 | Line breaks : s4 (3 paragraphes, 2 breaks), s5 (5 paragraphes, 4 breaks) | Le user a demandé d'éviter les "big chunks of text". Flag `withLineBreaks: true` dans sectionsData | — |
 | Tous les paths d'assets via `import.meta.env.BASE_URL` | Sinon ils cassent à `/kikiscroll/wellness/en` (Howler + `<img>` résolvent contre l'URL du document) | — |
+| Loudness équalisée sur disque (LUFS) + leveling (dynaudnorm), pas en code | Les gains en code (peak puis RMS) ne matchent pas la loudness perçue ; les fichiers avaient 6 LUFS d'écart ET LRA 11-17 (passages quasi-silencieux). Normaliser les fichiers est le vrai fix. | session 2026-06 |
+| Soft-clip WaveShaper au master (pas un compresseur) | Un compresseur suit l'enveloppe du drone grave dans sa propre période → pumping/distortion. Courbe statique tanh, C1-continue au knee. | AI_LEARNINGS |
+| Rampes de gain sample-accurate (`linearRampToValueAtTime`), pas `gain.value` en rAF | Les écritures per-frame cliquaient et s'accumulaient en grésille sur les crossfades. `Howler.ctx` (pas `howlInstance._ctx`, qui est undefined). | AI_LEARNINGS |
+| Section 4 = détection de mouvement (plus face-api) | Colle au narratif "capteur qui suit le geste" ; reco faciale retirée, modèles supprimés | session 2026-06 |
+| Toutes les pistes wellness committées dans git | Le drone + neuro + Fender étaient untracked → absents du deploy (cause de "drone ne joue plus" en prod). Pas de `.gitignore` qui les exclut. | session 2026-06 |
+| Em dashes retirés de la copie visible (s0_p1/p3) | Demande Jeremie + convention projet. Comments/code/doc OK. | session 2026-06 |
 
 ---
 
@@ -357,7 +467,7 @@ npm run dev   # Vite démarre sur :5173
 2. **Section 2** : titre + paragraphe Guerlain visibles. Pendant l'intro, **seul le drone joue** (pas les 4 pistes zonales). Les chambres apparaissent en fade vers ~25% du scroll de la section. Quatre cards défilent dans l'ordre **Reception → Treatment rooms → Heat rituals → Recovery**. Pas de counter "01/04". Captions tracking le scroll (pas de lag perceptible).
 3. **Section 3** : neuro labels (Somatic release / Parasympathetic regulation / Attentional grounding) avec crossfade audio jungle → pulsatingWave → focusCognitif.
 4. **Section 1 (= sculpting, vient APRÈS s3 en wellness)** : titre "The science of acoustic sculpting", isolation toggle (passe de "Ambient noise" à "Situated listening active" à ~40% du scroll).
-5. **Section 4** : bouton "Allow camera", texte sur le capteur spatial + gestes. 3 paragraphes (2 sauts de ligne visuels). En activant la caméra : indicateur d'émotion (relaxed / arriving / reading).
+5. **Section 4** : bouton "Allow camera" + instructions sous le bouton. 3 paragraphes (2 sauts de ligne visuels). En activant la caméra : un **meter de mouvement** se remplit quand on bouge la main devant la caméra, et la couche `strings` monte avec le mouvement (au-dessus du pad `motionPad` + drone) puis redescend à l'immobilité. Caméra refusée → message d'erreur lisible. (À tester dans un vrai navigateur : la preview headless n'a pas de caméra.)
 6. **Section 5** : titre "A score for every treatment". 5 paragraphes (4 sauts de ligne visuels). Les 5 phases (Arrival → First contact → Depth → Release → Return) s'enchaînent avec le compteur "N / 5 — treatment phase" et les blobs qui s'accumulent. Audio : drone + stems progressifs.
 7. **Footer wellness** : bloc CTA "What does your house sound like?" + body + invite + mailto bianca@kikinastudio.com. Compact (max-w-2xl).
 
@@ -372,7 +482,7 @@ npm run dev   # Vite démarre sur :5173
 
 - **« Ajoute un troisième mode (hospitality / etc.) »** → recette dans [docs/wellness-dev-handoff.md](./wellness-dev-handoff.md) section "Comment ajouter un troisième mode". ~2h dev + production assets.
 - **« Change un texte »** → `src/translations/{retail,wellness}.js`. Garder le format des clés. Si tu ajoutes une clé spécifique à un mode, vérifier qu'aucun consommateur ne suppose qu'elle existe partout.
-- **« Remplace une musique »** → Déposer le `.mp3` dans `public/MUSIC/wellness/` (pour scope wellness) ou `public/MUSIC/` (retail), mettre à jour `useAudioStore.js`. Vérifier que la piste loop seamlessly (`loop: true` dans Howler), niveau cohérent (cible −14 LUFS).
+- **« Remplace une musique »** → Déposer le `.mp3` dans `public/MUSIC/wellness/` (scope wellness) ou `public/MUSIC/` (retail), mettre à jour `useAudioStore.js`. **Normaliser à -18 LUFS + leveler** (voir §"Architecture audio" → Loudness) pour rester cohérent avec les autres pistes, garder une copie de l'original dans `.audio-backup/`, et **committer le mp3** (rien dans `.gitignore` ne les protège, et un fichier non committé = absent du deploy). Vérifier le loop (`loop: true`).
 - **« Déploie en prod »** → push sur `main`. CI déploie automatiquement. **Demande confirmation explicite avant `git push origin main`**.
 - **« Crée une PR »** → `gh pr create --base main --head <branche>`. Titre court (< 70 chars), corps détaillé en bullets si besoin.
 - **« Réordonne les sections »** → Éditer `getSectionsData(t, mode)` dans `App.jsx`. Garder les `id` constants. Vérifier que `getSectionsData` retourne la même longueur (6 sections).
@@ -385,7 +495,7 @@ npm run dev   # Vite démarre sur :5173
 - **Réponses en français** quand c'est pertinent (l'utilisateur écrit en français)
 - **Pas d'em dash (—) dans les textes visibles utilisateur** ; préférer virgules, deux-points ou tirets courts. (Exception : OK dans le code, commentaires, doc, commits.)
 - **Pas d'emojis** sauf demande explicite
-- **Commits style** : titre concis (< 70 chars) + corps multi-lignes en bullet points si besoin. Toujours inclure le trailer `Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>`
+- **Commits style** : titre concis (< 70 chars) + corps multi-lignes en bullet points si besoin. Inclure le trailer `Co-Authored-By: Claude <model> <noreply@anthropic.com>` (mettre le modèle courant).
 - **Ne PAS push sur `main` sans confirmation explicite** (action partagée, harness peut bloquer)
 - **Ne PAS toucher au retail** en travaillant sur wellness — la garantie d'isolation est un asset
 

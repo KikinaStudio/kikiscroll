@@ -34,7 +34,7 @@ Le mode (retail ou wellness) est résolu **une seule fois au chargement** depuis
 - L'image panoramique de fond section 2 : `public/IMAGES/retail_panorama.jpg` vs `wellness_panorama.jpg`
 - Les pistes audio « de zone » section 2 (`entrance`, `rayon`, `cabine` dans le store)
 
-**Statut wellness** : sous-page en ligne, contenu rédactionnel finalisé. L'image panoramique et la majorité des pistes audio sont des **placeholders pointant vers les assets retail** en attendant la production des assets définitifs. Chaque ligne à remplacer est marquée `// TODO` dans [src/store/useAudioStore.js](src/store/useAudioStore.js). Brief de production : [docs/wellness-assets-brief.md](docs/wellness-assets-brief.md).
+**Statut wellness** : sous-page en ligne, contenu rédactionnel finalisé. **9 pistes audio bespoke** livrées (drone, neuro ×3, zones ×4, pad section 4), toutes **normalisées à -18 LUFS et levelées** sur disque ; seuls les stems de la section finale (5-instrument build) et la nappe `crowd` restent retail (trimés en code). L'image panoramique de la section 2 utilise les 4 visuels `wellness_zone_*.jpg`. Détails audio : [docs/session-handoff.md](docs/session-handoff.md) → « Architecture audio » ; pièges techniques : [AI_LEARNINGS.md](AI_LEARNINGS.md).
 
 **Documentation détaillée** :
 - [docs/wellness-assets-brief.md](docs/wellness-assets-brief.md) — spec image + musiques à commissionner (dimensions, ambiance, niveau de mix, références)
@@ -119,7 +119,10 @@ Kikiscroll/
 | `jungle` | `flute guerlain.mp3` | section 3 (somatic release) |
 | `pulsatingWave` | `roulements de piano.mp3` | section 3 (régulation) |
 | `focusCognitif` | `ceremonial fusion voices.mp3` | section 3 (focus) |
+| `motionPad` | `Fender.mp3` | section 4 (bed ambiant sous le mouvement, vol 0.32) |
 | `crowd` | retail `Crowd.mp3` | section 1 (pas d'équivalent wellness) |
+
+> Les 9 fichiers wellness sont **normalisés à -18 LUFS + levelés** (LRA ~5-7) sur disque ; originaux pristine dans `.audio-backup/` (gitignored). Voir [docs/session-handoff.md](docs/session-handoff.md) → « Architecture audio ».
 
 ---
 
@@ -131,7 +134,7 @@ Kikiscroll/
 | 1 | Elle s'entend. | Foule (Crowd) + toggle isolation à ~40 % du scroll (volume foule → 5 %). Blob : agité → calme bleu. |
 | 2 | Elle se ressent. | Crossfade Jungle → Pulsating Wave → Focus Cognitif. 3 icônes : Relaxation, Régulation émotionnelle, Focus cognitif. |
 | 3 | Elle vit avec vous (wellness : avant-dernière) | 5 couches sonores (drone + 4 stems), 5 blobs en pentagone. Wellness : la section finit l'avant-dernier acte avant le finale caméra. |
-| 4 | Et grandit avec vous (wellness : finale) | Webcam + détection de mouvement JS pur (canvas 64×48, frame-diff). `motionIntensity` pilote les strings, `motionY` pilote la basse. Inertie exponentielle (0.08/frame) pour que la décélération suive le geste. Wellness : le blob disparaît et la caméra s'affiche en ASCII derrière le texte. Bouton « Autoriser la caméra ». |
+| 4 | Et grandit avec vous (wellness : finale) | Webcam + détection de mouvement JS pur (canvas 64×48, frame-diff avec rejet de l'auto-exposition). `motionIntensity` pilote **une seule** couche (`strings`) au-dessus d'un pad ambiant continu (`motionPad`) ; lissage asymétrique + gate. Meter de mouvement live + instructions sous le bouton « Autoriser la caméra ». |
 
 Après les sections : transition « aube » (dégradé noir → #f5f3f0) + footer (liens, formulaire mailto, mentions légales dépliantes).
 
@@ -182,7 +185,7 @@ Après les sections : transition « aube » (dégradé noir → #f5f3f0) + foote
 - **Audio par section** : Un `useEffect` qui réagit à `activeSection` fait un fade out de toutes les pistes non‑drone à chaque changement de section ; `useScrollAudio` applique ensuite les volumes de la section active. Évite les résidus sonores en remontant.
 - **Texte progressif** : Chaque section a `paragrapheParts` (tableau de 3 strings). Le rendu utilise `sectionProgress` et des seuils (0, 0.33, 0.66) pour l’opacité de chaque partie (formule du type `(sectionProgress - partThreshold) / 0.15`).
 - **Logo inversé** : SVG en `fill="currentColor"` + `mix-blend-difference` sur le header + `text-white` : le logo reste lisible sur fond sombre et s’inverse sur fond clair (ex. footer).
-- **Détection de mouvement webcam** : implémentée à la main dans `src/App.jsx` (`useMotionDetection`). Le flux vidéo est dessiné dans un canvas caché 64×48 (= 3072 pixels) à chaque tick de `requestAnimationFrame`. La différence de luminance pixel-à-pixel avec la frame précédente donne `motionIntensity` (0–1) et `motionY` (0–1, centroïde vertical du mouvement). Les deux valeurs sont lissées par un suivi exponentiel (`smoothed += (target − smoothed) × 0.08`) avant d'être envoyées au store audio. Pas d'envoi réseau. Aucune librairie ni modèle ML.
+- **Détection de mouvement webcam** : implémentée à la main dans `src/App.jsx` (`useMotionDetection`). Le flux vidéo est dessiné dans un canvas caché 64×48 (= 3072 pixels) à chaque tick de `requestAnimationFrame`, puis frame-diff de luminance en **deux passes** : (1) on soustrait la variation moyenne de toute la frame pour rejeter l'auto-exposition / balance des blancs du webcam (sinon lue comme un gros mouvement aléatoire) ; (2) on compte la **fraction de pixels en mouvement** (plus stable qu'une somme de diffs). Résultat lissé asymétriquement (montée rapide, descente lente) + gate, puis envoyé au store audio (couche `strings`). Pas d'envoi réseau, aucune librairie ni modèle ML. Détails et pièges : [AI_LEARNINGS.md](AI_LEARNINGS.md).
 - **Rendu ASCII** : la même frame est repassée à `pixelsToAscii()` (palette à 10 caractères, `' .:-=+*#%@'`) et affichée dans un `<pre>` monospace pendant la section finale wellness. Le blob 3D est masqué via la prop `hideMainBlob` de `<Scene>` pour laisser la place à la vue caractères.
 
 ---
