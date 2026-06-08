@@ -60,42 +60,43 @@ const WELLNESS_TRACKS = {
     motionPad: { src: `${BASE}MUSIC/wellness/Fender.mp3`, initialVolume: 0 },
 };
 
-// Per-track loudness compensation. The wellness mp3 pack is unevenly mastered, so
-// each track is brought to a consistent perceived level. The earlier version of
-// this table was calibrated from a bad set of "peak amplitude" figures (it had
-// Instrumental="4", Drone="9") and pushed several tracks WAY past full scale at
-// their section volumes — e.g. deep 0.60peak × 0.7vol × 3.5 = 1.47, Instrumental
-// 0.68 × 0.7 × 4.5 = 2.14. That constant overshoot is what made the master
-// distort / "frétille": the limiter had to crush huge bass peaks on every section.
+// Per-track loudness compensation.
 //
-// These gains are recomputed from the files' real RMS (perceived loudness) so that
-// filePeak × sectionVol × gain stays ≤ ~0.86 for every track — i.e. no single
-// track clips, and only occasional correlated sums (the density stack, big webcam
-// gestures) ever reach the master soft-clip. Measured RMS / peak (dBFS):
+// Loudness is now fixed at the SOURCE: every wellness mp3 has been gain-adjusted
+// on disk to a uniform -18 LUFS integrated loudness (see public/MUSIC/wellness;
+// the pristine originals are kept in public/MUSIC/wellness/_pre-loudnorm/). They
+// are all equal-loudness now, so they play at unity here — no more multiplying
+// quiet files up (which amplified artifacts and forced the master to distort) and
+// no more wild differences between tracks. Earlier attempts to balance this in
+// code with peak- and then RMS-derived gains failed because neither matches
+// perceived loudness; LUFS normalization of the files is the correct fix.
 //
-//   track          file                     RMS     peak    sectionVol
-//   drone          01 Drone Wellness       -20.0   -5.5     0.50
-//   jungle         flute guerlain          -18.0   -2.3     0.60
-//   pulsatingWave  roulements de piano     -20.8   -3.4     0.60
-//   focusCognitif  ceremonial fusion v.    -16.2   -2.2     0.60
-//   rayon          deep                    -22.4   -4.5     0.70
-//   cabine         less deep               -19.0   -2.6     0.70
-//   entrance       keysy                   -18.5   -0.8     0.70
-//   recuperation   Instrumental (2)        -16.5   -3.4     0.70
-//   motionPad      Fender                  -18.6   -1.6     0.32 (kept softer: it's a bed)
+// The ONLY non-unity entries are the RETAIL stems reused inside wellness (the
+// density-section stems, the gesture `strings`, the sculpting `crowd`). Those
+// files are shared with retail mode, so we can't re-encode them — instead we trim
+// them in code to the same -18 LUFS. Measured retail-stem loudness (LUFS) → gain:
+//   1 Strings  -16.0 -> 0.80    2 Bass  -17.6 -> 0.95    3 Drums -16.0 -> 0.79
+//   4 Keyboard -20.6 -> 1.35    Crowd   -14.7 -> 0.68
 //
-// We multiply the requested volume by LOUDNESS_GAIN[key] and write it to the Web
-// Audio gain node (Howler's .volume() clamps to [0,1]); see applyGain.
+// Net result: no track exceeds ~0.8 at its section volume, the mix has real
+// headroom, and the master soft-clip only ever touches the densest sums.
 const LOUDNESS_GAIN = {
-    drone: 1.6,
-    jungle: 1.25,
-    pulsatingWave: 1.7,
+    // Wellness files — normalized to -18 LUFS on disk, so unity here.
+    drone: 1.0,
+    jungle: 1.0,
+    pulsatingWave: 1.0,
     focusCognitif: 1.0,
-    rayon: 2.05,
-    cabine: 1.4,
-    entrance: 1.35,
-    recuperation: 1.05,
-    motionPad: 1.2,
+    rayon: 1.0,
+    cabine: 1.0,
+    entrance: 1.0,
+    recuperation: 1.0,
+    motionPad: 1.0,
+    // Retail stems reused in wellness — trimmed in code to the same -18 LUFS.
+    strings: 0.8,
+    bass: 0.95,
+    drums: 0.79,
+    keyboard: 1.35,
+    crowd: 0.68,
 };
 
 // NOTE: the previous build seeked the drone to 55s on start, on the assumption
@@ -106,55 +107,78 @@ const LOUDNESS_GAIN = {
 // seek has been removed; the drone now simply plays from the top with its
 // loudness gain applied on the `play` event (see startAllTracks).
 
-// Apply gain directly to the Howl's Web Audio gain node so we can go above 1.0.
-// Howler's `.volume()` clamps to [0, 1] AND schedules a gain ramp on the same
-// node we'd otherwise set above 1, so any value-at-time/ramp calls we make
-// would be overwritten on Howler's next tick. The escape hatch that DOES
-// stick is the bare `gain.value` setter (direct AudioParam value write), so
-// we use that. We still call .volume() first with the clamped value so that
-// Howler's internal bookkeeping (used by .fade(), .mute()) stays coherent.
+// Smoothly move a Howl's Web Audio gain toward `target` over `durationMs` using a
+// SAMPLE-ACCURATE scheduled ramp. This replaces an earlier approach that wrote
+// node.gain.value ~60×/second from a requestAnimationFrame loop: each per-frame
+// write is a tiny step discontinuity (a click), and across the constant zone /
+// density crossfades that stacked into audible "grésille" while scrolling. A
+// linearRampToValueAtTime is continuous at audio rate, so it never clicks.
+//
+// Because the files are now loudness-normalized, every effective volume is ≤ ~0.8,
+// so we no longer need to push the node above 1.0 (which is what forced the old
+// gain.value hack in the first place). We keep Howler's own _volume field in sync
+// so mute() restores the right level, but we never call Howler's volume()/fade()
+// here (those would schedule a competing ramp on the same node).
+function rampGain(howlInstance, target, durationMs) {
+    if (!howlInstance) return;
+    const t = Math.max(0, target);
+    const sound = howlInstance._sounds && howlInstance._sounds[0];
+    const node = sound && sound._node;
+    const ctx = Howler.ctx; // the live AudioContext (Howl instances don't expose _ctx)
+    if (node && node.gain && ctx && typeof node.gain.linearRampToValueAtTime === 'function') {
+        const now = ctx.currentTime;
+        const from = node.gain.value;
+        node.gain.cancelScheduledValues(now);
+        node.gain.setValueAtTime(from, now); // anchor at the current value (no jump)
+        node.gain.linearRampToValueAtTime(t, now + Math.max(0.005, durationMs / 1000));
+        howlInstance._volume = Math.min(1, t);
+    } else if (node && node.gain) {
+        node.gain.value = t;
+    } else {
+        howlInstance.volume(Math.min(1, t));
+    }
+}
+
+// Instant-ish gain set (track's requested volume × its loudness gain), used at
+// startup. A 15 ms ramp keeps even the first set click-free.
 function applyGain(howlInstance, trackName, requestedVolume) {
     if (!howlInstance) return;
     const gain = ACTIVE_GAINS[trackName] ?? 1;
-    const desired = Math.max(0, requestedVolume * gain);
-    howlInstance.volume(Math.min(1, desired));
-    const sound = howlInstance._sounds && howlInstance._sounds[0];
-    const node = sound && sound._node;
-    if (node && node.gain) {
-        // Cancel any scheduled ramps Howler may have queued before clobbering.
-        if (typeof node.gain.cancelScheduledValues === 'function' && howlInstance._ctx) {
-            node.gain.cancelScheduledValues(howlInstance._ctx.currentTime);
-        }
-        node.gain.value = desired;
-    }
+    rampGain(howlInstance, requestedVolume * gain, 15);
 }
 
 // --- Master soft-clip safety -------------------------------------------------
 // A WaveShaper soft-clip on Howler's master bus is the final guard against the
-// output ever hard-clipping. With the recalibrated LOUDNESS_GAIN above, no single
-// track exceeds ~0.86, so this stage is transparent (unity) almost all the time;
-// it only rounds the occasional correlated SUM peak (the 5-layer density stack, a
-// vigorous webcam gesture over the drone + pad). We deliberately use a soft-clip
-// rather than a DynamicsCompressor here: a compressor's envelope follows the
-// bass-heavy drone within its own waveform period and adds the gritty distortion /
-// pumping ("frétille") the user heard. A static waveshaping curve has no time
-// constant, so it never pumps and never distorts low frequencies by envelope
-// tracking — it just smoothly tucks peaks under the ceiling. 4x oversampling keeps
-// the curve from aliasing. Wired once; harmless to retail (it sits at unity there).
+// output ever hard-clipping. With the normalized files + LOUDNESS_GAIN above, no
+// single track exceeds ~0.5 at its section volume, so this stage is fully
+// transparent almost all the time; it only rounds the occasional correlated SUM
+// peak (the 5-layer density stack, a vigorous webcam gesture over the bed). We use
+// a soft-clip rather than a DynamicsCompressor on purpose: a compressor's envelope
+// follows the bass-heavy drone within its own waveform period and adds gritty
+// distortion / pumping. A static waveshaping curve has no time constant, so it
+// never pumps and never distorts low frequencies by envelope tracking.
+//
+// CRITICAL: the curve must be smooth (C1-continuous) at the knee. An earlier
+// version bent UPWARD just past the knee (slope jumped 1.0 → 1.34), and that kink
+// injected harmonic distortion ("grésille") on any signal that reached it. The
+// tanh soft-knee below is tangent to the unity line at the knee (slope exactly 1),
+// then bends monotonically toward the ceiling — no kink. 4x oversampling keeps the
+// curve from aliasing. Wired once; harmless to retail (it sits at unity there).
 let masterSoftClipInstalled = false;
 function makeSoftClipCurve() {
     const N = 2048;
     const curve = new Float32Array(N);
-    const knee = 0.8; // |input| below this passes through at unity (transparent)
-    const ceil = 0.97; // asymptotic output ceiling for hot peaks
+    const knee = 0.7; // |input| below this passes through at unity (transparent)
     for (let i = 0; i < N; i++) {
         const x = (i / (N - 1)) * 2 - 1; // -1 .. 1
         const ax = Math.abs(x);
         if (ax <= knee) {
             curve[i] = x;
         } else {
+            // tanh, tangent to y=x at the knee (slope 1 → no kink), asymptotic
+            // toward ~0.93 at |input|=1; inputs beyond 1 clamp to that ceiling.
             const over = (ax - knee) / (1 - knee); // 0 .. 1 across the knee→1 region
-            const shaped = knee + (ceil - knee) * (Math.tanh(over * 2) / Math.tanh(2));
+            const shaped = knee + (1 - knee) * Math.tanh(over);
             curve[i] = Math.sign(x) * shaped;
         }
     }
@@ -240,56 +264,16 @@ export const useAudioStore = create((set, get) => {
         fadeTrack: (trackName, targetVolume, duration = 1000) => {
             const { tracks } = get();
             const howlInstance = tracks[trackName];
-
             if (!howlInstance) {
                 console.warn(`Track ${trackName} not found in audio store.`);
                 return;
             }
-
             const gain = ACTIVE_GAINS[trackName] ?? 1;
-            const sound = howlInstance._sounds && howlInstance._sounds[0];
-            const node = sound && sound._node;
-            if (!node || !node.gain) {
-                // Fallback for non-Web-Audio backends.
-                const currentVolume = howlInstance.volume();
-                if (Math.abs(currentVolume - targetVolume) > 0.01) {
-                    howlInstance.fade(currentVolume, Math.min(1, targetVolume), duration);
-                }
-                return;
-            }
-
-            const fromGain = node.gain.value;
-            const toGain = Math.max(0, targetVolume * gain);
-            if (Math.abs(fromGain - toGain) < 0.005) return;
-
-            // We can't use Web Audio's setValueAtTime / linearRampToValueAtTime
-            // here: Howler runs an internal scheduler on this same gain node
-            // (its own fade/volume logic) and overwrites scheduled values on
-            // every tick. Manual rAF-stepped interpolation lands reliably and
-            // can park above 1.0, which is the whole point of this code path.
-            howlInstance.volume(Math.min(1, toGain));
-            if (typeof node.gain.cancelScheduledValues === 'function' && howlInstance._ctx) {
-                node.gain.cancelScheduledValues(howlInstance._ctx.currentTime);
-            }
-
-            // Each track has at most one active rAF fade — cancel the previous.
-            const fadeKey = '__kikiFade_' + trackName;
-            const prev = get()[fadeKey];
-            if (prev) cancelAnimationFrame(prev);
-
-            const start = performance.now();
-            const end = start + Math.max(1, duration);
-            const step = () => {
-                const now = performance.now();
-                const k = Math.min(1, (now - start) / (end - start));
-                node.gain.value = fromGain + (toGain - fromGain) * k;
-                if (k < 1) {
-                    set({ [fadeKey]: requestAnimationFrame(step) });
-                } else {
-                    set({ [fadeKey]: 0 });
-                }
-            };
-            set({ [fadeKey]: requestAnimationFrame(step) });
+            // Sample-accurate scheduled ramp (no per-frame stepping → no clicks).
+            // Safe to call repeatedly from the scroll handler: each call re-anchors
+            // at the current value and ramps toward the latest target, so a moving
+            // crossfade is followed smoothly.
+            rampGain(howlInstance, targetVolume * gain, duration);
         },
 
         // Per-frame volume set — used by the motion-detection loop (~60 Hz). The
@@ -307,10 +291,11 @@ export const useAudioStore = create((set, get) => {
             const desired = Math.max(0, volume) * gainMul;
             const sound = howlInstance._sounds && howlInstance._sounds[0];
             const node = sound && sound._node;
-            const ctx = howlInstance._ctx;
+            const ctx = Howler.ctx;
             if (node && node.gain && ctx && typeof node.gain.setTargetAtTime === 'function') {
                 // ~40 ms time constant: smooth but still responsive.
                 node.gain.setTargetAtTime(desired, ctx.currentTime, 0.04);
+                howlInstance._volume = Math.min(1, desired); // keep mute() coherent
             } else {
                 applyGain(howlInstance, trackName, Math.max(0, volume));
             }
