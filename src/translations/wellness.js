@@ -19,9 +19,9 @@ const wellness = {
 
     // Section 0 paragraphs — guide le lecteur dès l'intro à prêter l'oreille, en posant la page
     // elle-même comme démonstration : le son change avec chaque section, comme il changera dans son espace.
-    s0_p1: "Prêtez l'oreille. Sur cette page, la musique se transforme à chaque section que vous traversez — une démonstration discrète de ce que nous composons pour votre futur espace : un son qui dialogue avec la pièce, le moment, le geste.",
+    s0_p1: "Prêtez l'oreille. Sur cette page, la musique se transforme à chaque section que vous traversez, une démonstration discrète de ce que nous composons pour votre futur espace : un son qui dialogue avec la pièce, le moment, le geste.",
     s0_p2: "Chaque spa porte un climat sonore qui agit sur le système nerveux avant le premier soin. Il est souvent la première sensation reçue par le client, et l'une des dernières impressions qu'il emporte.",
-    s0_p3: "Hôtels, instituts, thermes, retraites de longévité — nous composons cette signature, espace par espace, du seuil de l'accueil aux derniers instants de récupération. Une musique vivante, écrite par des compositeurs, guidée par les neurosciences.",
+    s0_p3: "Hôtels, instituts, thermes, retraites de longévité : nous composons cette signature, espace par espace, du seuil de l'accueil aux derniers instants de récupération. Une musique vivante, écrite par des compositeurs, guidée par les neurosciences.",
 
     // Section 1 paragraphs — piste nue continue + chaque espace s'accorde avec elle
     s1_p1: "Sous chaque espace du spa, une seule piste nue joue en continu. Une signature dénudée, présente partout, qui ancre l'expérience et porte la marque.",
@@ -41,7 +41,7 @@ const wellness = {
     // Section 4 paragraphs — la musique suit le geste en temps réel (capteur spatial)
     s4_p1: "Dans la cabine de soin, la musique ne doit pas être un décor. Elle doit suivre les mains qui travaillent, en temps réel.",
     s4_p2: "Un capteur spatial lit la pièce : la position du praticien, le rythme du geste, le souffle du corps sur la table. La composition s'ajuste à ce qui se joue réellement. La praticienne n'est plus accompagnée par une playlist, mais associée à une composition qui l'écoute.",
-    s4_p3: "Essayez maintenant. Activez votre caméra et bougez lentement devant elle. Les couches sonores montent et descendent avec l'amplitude et la hauteur de votre geste. Une main qui descend ouvre les graves, l'immobilité ramène la musique au drone seul. En cabine, la même logique passe par des capteurs spatiaux qui suivent le geste, pas le visage. Une réponse calibrée, vivante, individuelle, sans intrusion.",
+    s4_p3: "Essayez maintenant. Activez votre caméra et bougez lentement devant elle. La musique s'ouvre avec votre mouvement et revient à la couche de fond dès que vous vous immobilisez. En cabine, la même logique passe par des capteurs spatiaux qui suivent le geste, pas le visage. Une réponse calibrée, vivante, individuelle, sans intrusion.",
 
     // Section 5 paragraphs — la partition épouse l'arc du soin, le capteur ajoute la couche live.
     s5_p1: "Derrière cette adaptation en temps réel, chaque soin a sa propre partition composée. Un soin d'une heure a un arc : une arrivée, une prise de contact, une profondeur, un relâchement, un retour.",
@@ -88,6 +88,10 @@ const wellness = {
     webcam_active: "Caméra active",
     webcam_authorize: "Autoriser la caméra",
     webcam_reading: "Lecture du geste",
+    webcam_hint: "Autorisez la caméra, placez-vous face à elle en pleine lumière, puis bougez lentement. La musique s'ouvre avec le mouvement et revient au calme dès que vous vous immobilisez.",
+    webcam_move_hint: "Bougez la main devant la caméra : la barre suit votre geste.",
+    webcam_denied: "Caméra bloquée. Autorisez l'accès dans les réglages du navigateur, puis réessayez.",
+    webcam_unavailable: "Caméra indisponible. Vérifiez qu'aucune autre application ne l'utilise, puis réessayez.",
 
     // Footer
     footer_about: "Qui sommes-nous",
@@ -139,9 +143,9 @@ const wellness = {
 
     // Section 0 paragraphs — opens by guiding the user to listen, framing the page itself
     // as a small demonstration of context-aware sound (each section = a different climate).
-    s0_p1: "Listen closely. On this page, the music shifts with every section you scroll into — a quiet demonstration of how, in your future space, sound will live in dialogue with the room, the moment, the gesture.",
+    s0_p1: "Listen closely. On this page, the music shifts with every section you scroll into, a quiet demonstration of how, in your future space, sound will live in dialogue with the room, the moment, the gesture.",
     s0_p2: "Every spa carries a sonic climate that shapes the nervous system before the first treatment. It is often the first sensation a guest receives, and one of the last impressions they carry away.",
-    s0_p3: "Hotels, day spas, thermal baths, longevity retreats — we compose that signature, space by space, from the threshold of reception to the final moments of recovery. Living music, written by composers, guided by neuroscience.",
+    s0_p3: "Hotels, day spas, thermal baths, longevity retreats: we compose that signature, space by space, from the threshold of reception to the final moments of recovery. Living music, written by composers, guided by neuroscience.",
 
     // Section 1 paragraphs — a continuous naked track + each space scored to harmonize with it
     s1_p1: "Beneath every space of the spa, a single bare track plays continuously. A naked signature, present everywhere, that anchors the experience and carries the brand.",
@@ -161,7 +165,7 @@ const wellness = {
     // Section 4 paragraphs — music follows the hands in real time, via a spatial sensor
     s4_p1: "In the treatment room, music should not be a backdrop. It should follow the hands at work, in real time.",
     s4_p2: "A spatial sensor reads the room: the position of the practitioner, the rhythm of the gesture, the breath of the body on the table. The composition adjusts to what is actually unfolding. The practitioner is no longer accompanied by a playlist, but partnered by a composition that listens to her.",
-    s4_p3: "Try it now. Turn on your camera and move slowly in front of it. The sound layers will rise and fall with the amplitude and the height of your gesture. A hand moving low opens the bass; stillness returns the music to the drone alone. In the treatment room, the same logic runs through spatial sensors that follow the gesture, not the face. A calibrated response, alive, individual, without intrusion.",
+    s4_p3: "Try it now. Turn on your camera and move slowly in front of it. The music opens up with your movement and settles back to the underlying layer the moment you hold still. In the treatment room, the same logic runs through spatial sensors that follow the gesture, not the face. A calibrated response, alive, individual, without intrusion.",
 
     // Section 5 paragraphs — composed score follows the treatment arc, sensor adds the live layer
     s5_p1: "Behind this real-time adaptation, every treatment has its own composed score. A one-hour treatment has an arc: an arrival, a first contact, a depth, a release, a return.",
@@ -208,6 +212,10 @@ const wellness = {
     webcam_active: "Camera active",
     webcam_authorize: "Allow camera",
     webcam_reading: "Reading the gesture",
+    webcam_hint: "Allow the camera, face it in good light, then move slowly. The music opens up with your movement and settles back the moment you hold still.",
+    webcam_move_hint: "Move your hand in front of the camera — the bar follows your gesture.",
+    webcam_denied: "Camera blocked. Allow access in your browser settings, then try again.",
+    webcam_unavailable: "Camera unavailable. Make sure no other app is using it, then try again.",
 
     // Footer
     footer_about: "About us",

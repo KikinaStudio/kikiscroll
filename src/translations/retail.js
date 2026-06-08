@@ -74,6 +74,10 @@ const retail = {
     webcam_active: "Caméra active",
     webcam_authorize: "Autoriser la caméra",
     webcam_reading: "Lecture du geste",
+    webcam_hint: "Autorisez la caméra, placez-vous face à elle en pleine lumière, puis bougez lentement. La musique réagit à votre présence et à votre mouvement.",
+    webcam_move_hint: "Bougez devant la caméra : la barre suit votre mouvement.",
+    webcam_denied: "Caméra bloquée. Autorisez l'accès dans les réglages du navigateur, puis réessayez.",
+    webcam_unavailable: "Caméra indisponible. Vérifiez qu'aucune autre application ne l'utilise, puis réessayez.",
 
     // Footer
     footer_about: "Qui sommes-nous",
@@ -174,6 +178,10 @@ const retail = {
     webcam_active: "Camera active",
     webcam_authorize: "Allow camera",
     webcam_reading: "Reading the gesture",
+    webcam_hint: "Allow the camera, face it in good light, then move slowly. The music responds to your presence and your movement.",
+    webcam_move_hint: "Move in front of the camera — the bar follows your movement.",
+    webcam_denied: "Camera blocked. Allow access in your browser settings, then try again.",
+    webcam_unavailable: "Camera unavailable. Make sure no other app is using it, then try again.",
 
     // Footer
     footer_about: "About us",

@@ -195,9 +195,17 @@ function useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolation
             fadeTrack('pulsatingWave', pulsatingVol, 150);
             fadeTrack('focusCognitif', focusVol, 150);
         } else if (activeSectionId === 4) {
-            // Gesture-driven: strings + bass volumes are set per frame by the
-            // motion detector in handleMotion. Nothing to do here.
+            // Gesture-driven: the `strings` volume is set per frame by the motion
+            // detector in handleMotion. Underneath it we hold a soft ambient pad
+            // (motionPad / Fender) at a constant low level so the section has a
+            // warm bed even when the visitor is still — movement then lifts the
+            // strings on top of that atmosphere, which is what makes the gesture
+            // feel magical instead of toggling sound against silence. The drone
+            // keeps playing below both. Wellness-only (no motionPad in retail).
             prevPalierRef.current = -1;
+            if (isWellness) {
+                fadeTrack('motionPad', 0.32, 700);
+            }
         } else if (activeSectionId === 5) {
             // Density: progressive stem accumulation (1→5 layers, couche 1 = drone already playing)
             prevPalierRef.current = -1;
@@ -232,9 +240,20 @@ function useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolation
 // movement is happening (motionIntensity, 0..1) and *where* the movement is
 // concentrated vertically (motionY, 0..1 from top to bottom of frame).
 //
-// Both values are smoothed by an exponential follow (0.08 / frame) so the audio
-// decelerates with the gesture instead of cutting on stillness — that slowness is
-// the whole point of mapping it to a masseur's hand.
+// Two things make the reading STABLE instead of jumpy:
+//   1. Global-illumination rejection. A webcam constantly retunes its exposure and
+//      white balance, which shifts the brightness of the WHOLE frame at once. The
+//      naive frame-diff reads that as a big burst of "motion" even when the visitor
+//      is perfectly still — that was the random, twitchy response. We measure the
+//      average brightness change across the frame and subtract it, so only LOCAL
+//      movement (a hand, a body) clears the threshold.
+//   2. Fraction-of-moving-pixels, not sum-of-diffs. Counting how much of the frame
+//      moved is far steadier than summing raw luminance deltas (which a few bright
+//      edges or a flicker can dominate).
+//
+// The result is then smoothed asymmetrically (quick to rise, slow to fall) and
+// gated, so the music answers a gesture promptly and eases back to the bed when the
+// visitor stills, without chattering on residual noise.
 //
 // The hook calls onMotion(intensity, y) every frame; the caller decides what to
 // do with those values (in our case: drive Howler track volumes). The webcam
@@ -270,10 +289,23 @@ function useMotionDetection(isActive, videoRef, onMotion) {
             const { data } = ctx.getImageData(0, 0, W, H);
 
             if (prevData) {
-                // Single pass: luminance diff, with anything above NOISE_FLOOR contributing
-                // both to the global intensity and to the y-centroid (weighted by diff).
-                const NOISE_FLOOR = 10; // 0..255, ignore sensor/compression noise
-                let total = 0;
+                const PX = W * H;
+
+                // Pass 1: average signed luminance change across the frame. This is
+                // the global exposure / white-balance drift we want to cancel.
+                let sumDelta = 0;
+                for (let i = 0; i < PX; i++) {
+                    const o = i * 4;
+                    const lumNow = (data[o] + data[o + 1] + data[o + 2]) / 3;
+                    const lumPrev = (prevData[o] + prevData[o + 1] + prevData[o + 2]) / 3;
+                    sumDelta += lumNow - lumPrev;
+                }
+                const meanDelta = sumDelta / PX;
+
+                // Pass 2: count pixels whose LOCAL change (global drift removed)
+                // clears the noise floor, and track their vertical centroid.
+                const NOISE_FLOOR = 16; // 0..255; post-rejection, rejects sensor noise
+                let movedPixels = 0;
                 let weightedY = 0;
                 for (let y = 0; y < H; y++) {
                     const rowOffset = y * W * 4;
@@ -281,25 +313,34 @@ function useMotionDetection(isActive, videoRef, onMotion) {
                         const i = rowOffset + x * 4;
                         const lumNow = (data[i] + data[i + 1] + data[i + 2]) / 3;
                         const lumPrev = (prevData[i] + prevData[i + 1] + prevData[i + 2]) / 3;
-                        const d = Math.abs(lumNow - lumPrev);
+                        const d = Math.abs(lumNow - lumPrev - meanDelta);
                         if (d > NOISE_FLOOR) {
-                            total += d;
-                            weightedY += y * d;
+                            movedPixels++;
+                            weightedY += y;
                         }
                     }
                 }
-                // Intensity is normalised so a vigorous in-frame gesture saturates at ~1.
-                // Divisor tuned empirically: full-frame motion ~= W*H*60 of summed diff.
-                const targetIntensity = Math.min(1, total / (W * H * 60));
-                const targetY = total > 0 ? (weightedY / total) / (H - 1) : 0.5;
 
-                // Faster follow than the 0.08 we started with so the music responds
-                // to a gesture without lagging by ~half a second; still slow enough
-                // that stillness lets both layers ease down smoothly instead of
-                // cutting on the first quiet frame.
-                smoothedIntensity += (targetIntensity - smoothedIntensity) * 0.14;
-                smoothedY += (targetY - smoothedY) * 0.14;
-                onMotionRef.current(smoothedIntensity, smoothedY, data);
+                // Fraction of the frame in motion (0..1), normalised so a vigorous
+                // in-frame gesture reaches ~1. Steadier than summed raw diffs.
+                const MOTION_FULL = 0.18;
+                const targetIntensity = Math.min(1, (movedPixels / PX) / MOTION_FULL);
+                const targetY = movedPixels > 0 ? (weightedY / movedPixels) / (H - 1) : 0.5;
+
+                // Asymmetric one-pole follow: rise quickly enough to feel responsive,
+                // fall slowly so the music eases back to the bed (and so leftover
+                // jitter is averaged out rather than passed straight through).
+                const ATTACK = 0.16;
+                const RELEASE = 0.04;
+                const k = targetIntensity > smoothedIntensity ? ATTACK : RELEASE;
+                smoothedIntensity += (targetIntensity - smoothedIntensity) * k;
+                smoothedY += (targetY - smoothedY) * 0.08;
+
+                // Gate: below this the reading is indistinguishable from noise, so we
+                // pin the output to 0 and let the bed (drone + pad) sit clean. The
+                // internal smoothedIntensity is kept so it can rise again gracefully.
+                const out = smoothedIntensity < 0.03 ? 0 : smoothedIntensity;
+                onMotionRef.current(out, smoothedY, data);
             } else {
                 // First valid frame — still expose it so the consumer can paint the ASCII view.
                 onMotionRef.current(0, 0.5, data);
@@ -352,8 +393,15 @@ function App() {
 
     // Webcam state for the gesture-driven sound section (id 4)
     const [isCameraActive, setIsCameraActive] = useState(false);
+    // 'denied' if the browser/user refused the camera, 'unavailable' if no device /
+    // other error, null otherwise. Surfaced to the visitor so a blocked camera
+    // doesn't look identical to "broken".
+    const [cameraError, setCameraError] = useState(null);
     const videoRef = useRef(null);
     const streamRef = useRef(null);
+    // The live motion-intensity meter is updated by a rAF that writes directly to
+    // this element's style (no React re-render at 60 Hz).
+    const meterRef = useRef(null);
 
     // Shared motion state — the motion-detection callback writes here every frame
     // and the 3D scene reads it inside its useFrame to pulse the webcam-mirror blob
@@ -364,20 +412,27 @@ function App() {
     const fadeTrack = useAudioStore((state) => state.fadeTrack);
     const setVolume = useAudioStore((state) => state.setVolume);
 
-    const NON_DRONE_TRACKS = [
-        'strings',
-        'bass',
-        'drums',
-        'keyboard',
-        'crowd',
-        'jungle',
-        'pulsatingWave',
-        'focusCognitif',
-        'entrance',
-        'rayon',
-        'cabine',
-        'recuperation',
-    ];
+    // Everything except the drone, which is the continuous base layer. These are
+    // hard-reset to silence on every section change. `motionPad` only exists in
+    // the wellness track set, so it's appended there (and left out of retail to
+    // avoid fadeTrack warning about a missing track).
+    const NON_DRONE_TRACKS = useMemo(() => {
+        const base = [
+            'strings',
+            'bass',
+            'drums',
+            'keyboard',
+            'crowd',
+            'jungle',
+            'pulsatingWave',
+            'focusCognitif',
+            'entrance',
+            'rayon',
+            'cabine',
+            'recuperation',
+        ];
+        return mode === 'wellness' ? [...base, 'motionPad'] : base;
+    }, [mode]);
 
     // Hard-reset all non-drone tracks on every section change
     const prevSectionRef = useRef(activeSection);
@@ -405,15 +460,15 @@ function App() {
     }, [activeSectionId, sectionProgress, isIsolationActive, fadeTrack]);
 
     // Motion → audio (gesture-driven sound, webcam section, id 4).
-    // ONE parameter only: motionIntensity lifts a single layer (strings). The
-    // drone keeps playing underneath; bass stays silent. The user moves more,
-    // the music swells; they stop, it eases back down. That 1:1 relationship
-    // was the missing piece — the previous Y-driven bass made the mapping feel
-    // unpredictable because moving the *same* amount got a different result
-    // depending on hand height.
+    // ONE parameter only: motionIntensity lifts a single layer (strings) over the
+    // drone + pad bed. The visitor moves more, the music swells; they still, it
+    // eases back to the bed. The intensity arriving here is already de-noised and
+    // smoothed (see useMotionDetection), and setVolume glides the gain so the swell
+    // is continuous rather than stepping per frame. The 1.5× just lets a solid
+    // (not maximal) gesture reach the top of the strings layer.
     const handleMotion = useCallback((intensity /* , y */) => {
         if (activeSectionId !== 4 || !isCameraActive) return;
-        setVolume('strings', Math.min(1, intensity * 2.5));
+        setVolume('strings', Math.min(1, intensity * 1.5));
         motionRef.current.intensity = intensity;
     }, [activeSectionId, isCameraActive, setVolume]);
 
@@ -432,15 +487,21 @@ function App() {
             fadeTrack('bass', 0, 400);
         } else {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+                });
                 streamRef.current = stream;
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;
-                    videoRef.current.play();
+                    await videoRef.current.play().catch(() => {});
                 }
+                setCameraError(null);
                 setIsCameraActive(true);
             } catch (err) {
-                console.warn('Camera access denied:', err);
+                // NotAllowedError / SecurityError → the user or browser blocked it.
+                const denied = err && (err.name === 'NotAllowedError' || err.name === 'SecurityError');
+                setCameraError(denied ? 'denied' : 'unavailable');
+                console.warn('Camera unavailable:', err && err.name, err && err.message);
             }
         }
     }, [isCameraActive, fadeTrack]);
@@ -457,6 +518,27 @@ function App() {
             fadeTrack('bass', 0, 300);
         }
     }, [activeSectionId, isCameraActive, fadeTrack]);
+
+    // Live "movement detected" meter. Reads the already-smoothed motion intensity
+    // every frame and writes the bar width straight to the DOM — gives the visitor
+    // visible feedback that their gesture is being read, without re-rendering React
+    // at 60 Hz. Only runs while the camera is on in the webcam section.
+    useEffect(() => {
+        if (!isCameraActive || activeSectionId !== 4) return;
+        let rafId = 0;
+        let cancelled = false;
+        const loop = () => {
+            if (cancelled) return;
+            const el = meterRef.current;
+            if (el) {
+                const pct = Math.round(Math.min(1, motionRef.current.intensity || 0) * 100);
+                el.style.width = pct + '%';
+            }
+            rafId = requestAnimationFrame(loop);
+        };
+        rafId = requestAnimationFrame(loop);
+        return () => { cancelled = true; cancelAnimationFrame(rafId); if (meterRef.current) meterRef.current.style.width = '0%'; };
+    }, [isCameraActive, activeSectionId]);
 
     // Initial setup for Lenis
     useEffect(() => {
@@ -1141,13 +1223,39 @@ function App() {
                                         {isCameraActive ? t.webcam_active : t.webcam_authorize}
                                     </button>
 
-                                    {/* Camera-active status. No emotion read-out: the audio is
-                                        driven continuously by movement, not by discrete labels. */}
+                                    {/* Before activation: tell the visitor exactly what to do. */}
+                                    {!isCameraActive && !cameraError && (
+                                        <p className="text-[11px] leading-relaxed text-tenbin-gray max-w-xs">
+                                            {t.webcam_hint}
+                                        </p>
+                                    )}
+
+                                    {/* Camera blocked / unavailable — so it doesn't look "broken". */}
+                                    {cameraError && (
+                                        <p className="text-[11px] leading-relaxed text-tenbin-gray max-w-xs">
+                                            {cameraError === 'denied' ? t.webcam_denied : t.webcam_unavailable}
+                                        </p>
+                                    )}
+
+                                    {/* Active: reading status + live movement meter (visible feedback
+                                        that the gesture is being read). Driven straight to the DOM. */}
                                     {isCameraActive && (
-                                        <div className="flex items-center gap-3 mt-2">
-                                            <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
-                                            <span className="text-[10px] uppercase tracking-[0.28em] text-tenbin-gray">
-                                                {t.webcam_reading}
+                                        <div className="flex flex-col gap-2 mt-2 max-w-xs">
+                                            <div className="flex items-center gap-3">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
+                                                <span className="text-[10px] uppercase tracking-[0.28em] text-tenbin-gray">
+                                                    {t.webcam_reading}
+                                                </span>
+                                            </div>
+                                            <div className="h-1 w-full rounded-full bg-white/15 overflow-hidden">
+                                                <div
+                                                    ref={meterRef}
+                                                    className="h-full rounded-full bg-white"
+                                                    style={{ width: '0%', transition: 'width 90ms linear' }}
+                                                />
+                                            </div>
+                                            <span className="text-[10px] leading-relaxed text-tenbin-gray">
+                                                {t.webcam_move_hint}
                                             </span>
                                         </div>
                                     )}
