@@ -18,7 +18,50 @@ const vertexShader = `
   uniform float uTime;
   uniform float uScroll;
   uniform float uDeform;
-  
+  uniform float uShape;        // index continu de forme 0..5
+  uniform float uShapeEdge;    // durcissement des aretes du cube (0..1)
+  uniform float uDropTilt;     // inclinaison de la goutte (radians)
+  uniform float uDropStretch;  // etirement vertical de la goutte (0..~0.25)
+  uniform float uExcite;       // gate d'excitation du bruit (0 = calme, 1 = vif)
+
+  // --- Projection radiale vers une forme cible (slot 0..5) ---
+  // 0 = sphere | 1 = cube arrondi | 2 = galet | 3 = octaedre | 4 = goutte | 5 = sphere
+  vec3 shapePos(vec3 d, int s) {
+    if (s == 1) {                       // cube arrondi (p-norm)
+      float p = mix(4.0, 7.0, uShapeEdge);
+      float k = pow(pow(abs(d.x), p) + pow(abs(d.y), p) + pow(abs(d.z), p), 1.0 / p);
+      return d * (1.5 / max(k, 1e-4));
+    } else if (s == 2) {                // zones (4 pieces) : sphere excitee (remplace le galet)
+      return d * 1.5;
+    } else if (s == 3) {                // octaedre (norme L1)
+      float k = abs(d.x) + abs(d.y) + abs(d.z);
+      return d * (1.5 / max(k, 1e-4));
+    } else if (s == 4) {                // goutte
+      vec3 p = d * 1.5;
+      float h = d.y;
+      float taper = 1.0 - smoothstep(-0.1, 1.0, h) * 0.8;
+      p.x *= taper;
+      p.z *= taper;
+      p.y *= (1.35 + uDropStretch);
+      float c = cos(uDropTilt);
+      float sn = sin(uDropTilt);
+      vec2 yz = p.yz;
+      p.y = c * yz.x - sn * yz.y;       // rotation autour de X (inclinaison geste)
+      p.z = sn * yz.x + c * yz.y;
+      return p;
+    }
+    return d * 1.5;                     // s == 0 ou s == 5 -> sphere
+  }
+
+  // Attenuation du noise par forme (les formes anguleuses gardent leurs facettes)
+  float dampFor(int s) {
+    if (s == 1) return 0.38;            // cube (facettes resistent au bruit)
+    if (s == 2) return 1.0;             // zones : bruit plein (forme excitee d'origine)
+    if (s == 3) return 0.42;            // octaedre (reference, texture conservee)
+    if (s == 4) return 0.26;            // goutte (forme lisse)
+    return 1.0;                         // sphere
+  }
+
   // Simplex 3D Noise
   vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
   vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -71,17 +114,62 @@ const vertexShader = `
                                   dot(p2,x2), dot(p3,x3) ) );
   }
 
+  // Position de la forme morphee pour une direction donnee (blend slot s0->s1)
+  vec3 morphedShape(vec3 d, int s0, int s1, float f) {
+    return mix(shapePos(d, s0), shapePos(d, s1), f);
+  }
+
   void main() {
+    vec3 dir = normalize(position);
+
+    // Decomposition de l'index continu en deux slots voisins + fraction
+    float idx = clamp(uShape, 0.0, 5.0);
+    int s0 = int(floor(idx));
+    int s1 = int(min(float(s0) + 1.0, 5.0));
+    float f = idx - float(s0);
+
+    float yStretch = 1.2 + uScroll * 0.5;
+
+    // Base tangente pour les differences finies
+    vec3 up = abs(dir.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);
+    vec3 t1 = normalize(cross(up, dir));
+    vec3 t2 = cross(dir, t1);
+    float eps = 0.015;
+
+    // Trois echantillons de la forme (centre + 2 voisins) pour la normale
+    vec3 sC  = morphedShape(dir, s0, s1, f);
+    vec3 sT1 = morphedShape(normalize(dir + t1 * eps), s0, s1, f);
+    vec3 sT2 = morphedShape(normalize(dir + t2 * eps), s0, s1, f);
+
+    // Applique l'etirement vertical global avant de deriver la normale
+    vec3 pC  = vec3(sC.x,  sC.y  * yStretch, sC.z);
+    vec3 pT1 = vec3(sT1.x, sT1.y * yStretch, sT1.z);
+    vec3 pT2 = vec3(sT2.x, sT2.y * yStretch, sT2.z);
+
+    vec3 nrm = normalize(cross(pT1 - pC, pT2 - pC));
+    if (dot(nrm, dir) < 0.0) nrm = -nrm;
+
+    // Noise applique PAR-DESSUS la forme, fortement attenue sur les formes definies :
+    // c'est le terme "volatile" (scroll/deform) qui noyait la silhouette, on le coupe
+    // presque entierement pour tout ce qui n'est pas une sphere. uExcite calme en plus
+    // la section zones tant que les cards / la musique ne sont pas la.
     float noise1 = snoise(position * 0.8 + uTime * 0.4);
     float noise2 = snoise(position * 1.5 - uTime * 0.8) * 0.5;
-    
-    float morphIntensity = 0.5 + (uScroll * 2.0) + (uDeform * 1.5); 
-    float displacement = (noise1 + noise2) * morphIntensity;
-    
-    vec3 newPos = position + normal * displacement * 0.5;
-    newPos.y *= 1.2 + uScroll * 0.5;
-    
+    float noiseDamp = mix(dampFor(s0), dampFor(s1), f);
+    float volatileAmt = uScroll * 2.0 + uDeform * 1.5;
+    // La sphere garde la pulsation scroll/deform d'origine ; les formes definies
+    // utilisent une intensite calme FIXE (independante du uDeform de section) pour que
+    // le bruit ne suive plus les gros deform qui les noyaient.
+    float sphereW = smoothstep(0.5, 0.9, noiseDamp);
+    float morphIntensity = mix(1.0, 0.5 + volatileAmt, sphereW);
+    float displacement = (noise1 + noise2) * morphIntensity * noiseDamp * uExcite;
+
+    // Position finale : forme + noise le long de la normale recalculee, puis etirement
+    vec3 newPos = sC + nrm * displacement * 0.5;
+    newPos.y *= yStretch;
+
     csm_Position = newPos;
+    csm_Normal = nrm;
   }
 `;
 
@@ -168,7 +256,7 @@ function CameraController({ isDensitySection, sectionProgress }) {
 /**
  * OrganicBlob - single blob instance.
  */
-function OrganicBlob({ scrollProgress, activeSection, sectionProgress, isIsolationActive, position: pos, scale, blobIndex = 0, isDensityClone = false, motionRef }) {
+function OrganicBlob({ scrollProgress, activeSection, sectionId, sectionProgress, isIsolationActive, position: pos, scale, blobIndex = 0, isDensityClone = false, motionRef }) {
     const meshRef = useRef();
     const matRef = useRef();
     const isWellness = IS_WELLNESS;
@@ -180,11 +268,22 @@ function OrganicBlob({ scrollProgress, activeSection, sectionProgress, isIsolati
     const lerpedRotSpeed = useRef(0.1);
     // Smoothed motion-pulse multiplier (1.0 at rest, up to ~1.18 at saturation).
     const motionPulse = useRef(1);
+    // Shape morph (continuous slot index), cube edge hardening, and gesture tilt/stretch.
+    const lerpedShape = useRef(0);
+    const lerpedEdge = useRef(0);
+    const lerpedDropTilt = useRef(0);
+    const lerpedDropStretch = useRef(0);
+    const lerpedExcite = useRef(1);
 
     const uniforms = useMemo(() => ({
         uTime: { value: 0 },
         uScroll: { value: 0 },
         uDeform: { value: 0 },
+        uShape: { value: 0 },
+        uShapeEdge: { value: 0 },
+        uDropTilt: { value: 0 },
+        uDropStretch: { value: 0 },
+        uExcite: { value: 1 },
     }), []);
 
     useFrame((state, delta) => {
@@ -379,6 +478,55 @@ function OrganicBlob({ scrollProgress, activeSection, sectionProgress, isIsolati
 
         uniforms.uDeform.value = lerpedDeform.current;
 
+        // --- Shape morph dispatch (par id de behavior stable, PAS par position DOM) ---
+        // slots shader : 0 sphere | 1 cube | 2 sphere excitee (zones) | 3 octaedre | 4 goutte | 5 sphere
+        let targetShape = 0;
+        let targetEdge = 0;
+        if (!isDensityClone) {
+            if (sectionId === 1) {
+                targetShape = 1;                       // cube arrondi
+                targetEdge = isIsolationActive ? 1 : 0; // arêtes plus dures en isolation
+            } else if (sectionId === 2) {
+                targetShape = 2;                       // zones (4 pièces) : sphère excitée d'origine
+            } else if (sectionId === 3) {
+                targetShape = 3;                       // octaedre
+            } else if (sectionId === 4) {
+                targetShape = 4;                       // goutte
+            } else if (sectionId === 5) {
+                targetShape = 5;                       // sphere (adjacence avec la goutte → morph court)
+            } else {
+                targetShape = 0;                       // id 0 + fallback → sphere
+            }
+        }
+        lerpedShape.current = THREE.MathUtils.lerp(lerpedShape.current, targetShape, lerpSpeed);
+        lerpedEdge.current = THREE.MathUtils.lerp(lerpedEdge.current, targetEdge, lerpSpeed);
+        uniforms.uShape.value = lerpedShape.current;
+        uniforms.uShapeEdge.value = lerpedEdge.current;
+
+        // Goutte (id 4) réactive au geste : inclinaison via motionY + léger étirement sur l'intensité.
+        let targetTilt = 0;
+        let targetStretch = 0;
+        if (sectionId === 4 && motionRef) {
+            const motionY = motionRef.current?.y ?? 0.5;            // 0 = haut du cadre, 1 = bas
+            targetTilt = (0.5 - motionY) * 0.6;                     // le bout penche vers la zone de mouvement
+            targetStretch = Math.min(1, motionRef.current?.intensity ?? 0) * 0.25;
+        }
+        lerpedDropTilt.current += (targetTilt - lerpedDropTilt.current) * 0.1;
+        lerpedDropStretch.current += (targetStretch - lerpedDropStretch.current) * 0.1;
+        uniforms.uDropTilt.value = lerpedDropTilt.current;
+        uniforms.uDropStretch.value = lerpedDropStretch.current;
+
+        // Excitation du bruit. La section zones (id 2) reste calme pendant le texte
+        // d'intro et ne s'excite qu'à l'arrivée des cards + musique (sectionProgress
+        // ~0.20→0.28, cf. ZONE_AUDIO_RAMP dans App.jsx). Ailleurs, excitation pleine.
+        let targetExcite = 1;
+        if (sectionId === 2 && !isDensityClone) {
+            const ramp = Math.max(0, Math.min(1, ((sectionProgress || 0) - 0.18) / (0.30 - 0.18)));
+            targetExcite = 0.22 + 0.78 * ramp; // plancher calme → vif
+        }
+        lerpedExcite.current = THREE.MathUtils.lerp(lerpedExcite.current, targetExcite, lerpSpeed);
+        uniforms.uExcite.value = lerpedExcite.current;
+
         if (matRef.current) {
             matRef.current.color.copy(lerpedColor.current);
             matRef.current.roughness = lerpedRoughness.current;
@@ -542,6 +690,7 @@ export default function Scene({ scrollProgress, activeSection, activeSectionId, 
             <OrganicBlob
                 scrollProgress={scrollProgress}
                 activeSection={activeSection}
+                sectionId={effectiveSectionId}
                 sectionProgress={sectionProgress}
                 isIsolationActive={isIsolationActive}
                 position={DENSITY_POSITIONS[0]}
@@ -559,6 +708,7 @@ export default function Scene({ scrollProgress, activeSection, activeSectionId, 
                 <OrganicBlob
                     scrollProgress={scrollProgress}
                     activeSection={activeSection}
+                    sectionId={effectiveSectionId}
                     sectionProgress={sectionProgress}
                     isIsolationActive={isIsolationActive}
                     position={DENSITY_POSITIONS[1]}
@@ -571,6 +721,7 @@ export default function Scene({ scrollProgress, activeSection, activeSectionId, 
                 <OrganicBlob
                     scrollProgress={scrollProgress}
                     activeSection={activeSection}
+                    sectionId={effectiveSectionId}
                     sectionProgress={sectionProgress}
                     isIsolationActive={isIsolationActive}
                     position={DENSITY_POSITIONS[2]}
@@ -583,6 +734,7 @@ export default function Scene({ scrollProgress, activeSection, activeSectionId, 
                 <OrganicBlob
                     scrollProgress={scrollProgress}
                     activeSection={activeSection}
+                    sectionId={effectiveSectionId}
                     sectionProgress={sectionProgress}
                     isIsolationActive={isIsolationActive}
                     position={DENSITY_POSITIONS[3]}
@@ -595,6 +747,7 @@ export default function Scene({ scrollProgress, activeSection, activeSectionId, 
                 <OrganicBlob
                     scrollProgress={scrollProgress}
                     activeSection={activeSection}
+                    sectionId={effectiveSectionId}
                     sectionProgress={sectionProgress}
                     isIsolationActive={isIsolationActive}
                     position={DENSITY_POSITIONS[4]}
