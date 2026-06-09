@@ -90,8 +90,19 @@ function useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolation
             // Intro: only drone plays (already at 0.5 from init)
             prevPalierRef.current = -1;
         } else if (activeSectionId === 1) {
-            // Isolation / acoustic sculpting: crowd controlled by auto-toggle logic based on progress
+            // Isolation / acoustic sculpting. Drive the ambient-noise (crowd) bed HERE,
+            // from the continuous scroll handler — NOT only from onEnter. The per-section
+            // reset fades every non-drone track to 0 right after onEnter fires, so (exactly
+            // like jungle in the neuro section) the crowd has to be restored from here or it
+            // never starts when you scroll in. It used to "work" only after scrolling back
+            // up, when the auto-toggle's < 0.4 branch re-raised it. Loud until "situated
+            // listening" engages at 0.4, then it drops to a near-silent bed.
             prevPalierRef.current = -1;
+            if (sectionProgress < 0.4) {
+                fadeTrack('crowd', 0.6, 500);
+            } else {
+                fadeTrack('crowd', 0.05, 800);
+            }
         } else if (activeSectionId === 2) {
             // Zones audio. Retail = 3 zones crossfaded (thirds).
             // Wellness = 4 distinct zone tracks. Each track has a clear "solo" window
@@ -421,6 +432,11 @@ function App() {
     const motionRef = useRef({ intensity: 0, y: 0.5 });
 
     const lenisRef = useRef(null);
+
+    // Footer region (dawn gradient + footer). Observed so the bottom scroll prompt
+    // disappears once the user reaches it — the experience sections are over by then.
+    const footerRegionRef = useRef(null);
+    const [inFooterRegion, setInFooterRegion] = useState(false);
     const fadeTrack = useAudioStore((state) => state.fadeTrack);
     const setVolume = useAudioStore((state) => state.setVolume);
 
@@ -465,18 +481,18 @@ function App() {
     // Continuous scroll-driven audio
     useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolationActive, mode === 'wellness');
 
-    // Auto-toggle isolation at 40% progress in the sculpting/isolation section (id 1)
+    // Auto-toggle the "situated listening" indicator at 40% progress in the
+    // sculpting/isolation section (id 1). The crowd-noise level is driven by
+    // useScrollAudio (single source of truth); here we only flip the visual state.
     useEffect(() => {
         if (activeSectionId === 1) {
             if (sectionProgress >= 0.4 && !isIsolationActive) {
                 setIsIsolationActive(true);
-                fadeTrack('crowd', 0.05, 800);
             } else if (sectionProgress < 0.4 && isIsolationActive) {
                 setIsIsolationActive(false);
-                fadeTrack('crowd', 0.6, 400);
             }
         }
-    }, [activeSectionId, sectionProgress, isIsolationActive, fadeTrack]);
+    }, [activeSectionId, sectionProgress, isIsolationActive]);
 
     // Motion → audio (gesture-driven sound, webcam section, id 4).
     // ONE parameter only: motionIntensity lifts a single layer (strings) over the
@@ -584,6 +600,14 @@ function App() {
             const maxScroll = document.body.scrollHeight - window.innerHeight;
             const progress = maxScroll > 0 ? e.animatedScroll / maxScroll : 0;
             setScrollProgress(progress);
+            // Hide the bottom scroll prompt once the footer region enters the viewport.
+            // (A scroll-driven check rather than IntersectionObserver so it tracks the
+            // live position alongside the rest of the scroll-driven UI.)
+            const footerEl = footerRegionRef.current;
+            if (footerEl) {
+                const reached = footerEl.getBoundingClientRect().top < window.innerHeight;
+                setInFooterRegion((prev) => (prev === reached ? prev : reached));
+            }
         });
 
         lenis.stop();
@@ -859,8 +883,8 @@ function App() {
 
             {/* Scroll encouragement - double chevron. Visible on every section including
                 the last (score) so the phase strip invites the user to keep scrolling through
-                all five phases. */}
-            {hasStarted && (
+                all five phases. Hidden once the footer region is reached. */}
+            {hasStarted && !inFooterRegion && (
                 <div className="fixed bottom-8 left-0 right-0 z-40 flex justify-center pointer-events-none">
                     <div className="flex flex-col items-center gap-2">
                         <span className="scroll-prompt-text text-[10px] md:text-xs uppercase tracking-[0.28em] text-white/80">
@@ -1323,7 +1347,7 @@ function App() {
             </main>
 
             {/* Dawn transition + Footer */}
-            <div className="relative z-20">
+            <div className="relative z-20" ref={footerRegionRef}>
                 {/* Dawn transition vers footer — adapté au mode (sombre en retail, chaud en wellness) */}
                 <div className="h-[60vh] relative" style={{
                     background: mode === 'wellness'

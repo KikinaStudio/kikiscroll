@@ -40,8 +40,12 @@ const RETAIL_TRACKS = {
 //
 // Section 3 neuro (3 states crossfaded):
 //   jungle (somatic release)            → flute guerlain        (breathy, organic)
-//   pulsatingWave (parasympathetic)     → roulements de piano   (gentle rhythmic pulse)
-//   focusCognitif (attentional ground)  → ceremonial fusion voices (anchored, vocal)
+//   pulsatingWave (parasympathetic)     → ceremonial fusion voices (anchored, vocal)
+//   focusCognitif (attentional ground)  → roulements de piano   (gentle rhythmic pulse)
+// NOTE: parasympathetic + attentional tracks were swapped — "roulements de piano"
+// read as nearly identical to the flute it followed, so the middle state had no
+// audible change. Voices now mark the parasympathetic shift clearly; the piano
+// moves to attentional grounding where it contrasts against the voices before it.
 //
 // Section 4 camera (motion-driven): the gesture detector lifts the `strings`
 // stem per-frame, and `motionPad` (Fender) plays underneath at a low constant
@@ -51,8 +55,8 @@ const WELLNESS_TRACKS = {
     ...RETAIL_TRACKS,
     drone: { src: `${BASE}MUSIC/wellness/01 Drone Wellness.mp3`, initialVolume: 0.5 },
     jungle: { src: `${BASE}MUSIC/wellness/flute guerlain.mp3`, initialVolume: 0 },
-    pulsatingWave: { src: `${BASE}MUSIC/wellness/roulements de piano.mp3`, initialVolume: 0 },
-    focusCognitif: { src: `${BASE}MUSIC/wellness/ceremonial fusion voices.mp3`, initialVolume: 0 },
+    pulsatingWave: { src: `${BASE}MUSIC/wellness/ceremonial fusion voices.mp3`, initialVolume: 0 },
+    focusCognitif: { src: `${BASE}MUSIC/wellness/roulements de piano.mp3`, initialVolume: 0 },
     entrance: { src: `${BASE}MUSIC/wellness/keysy.mp3`, initialVolume: 0 },
     rayon: { src: `${BASE}MUSIC/wellness/deep.mp3`, initialVolume: 0 },
     cabine: { src: `${BASE}MUSIC/wellness/less deep.mp3`, initialVolume: 0 },
