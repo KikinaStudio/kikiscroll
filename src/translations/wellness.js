@@ -145,7 +145,7 @@ const wellness = {
 
     // Section titles
     s0_title: "Sound, as a signature of care.",
-    s1_title: "The science of acoustic sculpting.",
+    s1_title: "Sound that cancels the room.",
     s2_title: "One signature, many spaces.",
     s3_title: "Compose the state, not the ambience.",
     s4_title: "Sound that listens to the gesture.",
@@ -158,9 +158,9 @@ const wellness = {
     s0_p3: "Hotels, day spas, thermal baths, longevity retreats: we compose that signature, space by space, from the threshold of reception to the final moments of recovery. Living music, written by composers, guided by neuroscience.",
 
     // Section 1 paragraphs — a continuous naked track + each space scored to harmonize with it
-    s1_p1: "Beneath every space of the spa, a single bare track plays continuously. A naked signature, present everywhere, that anchors the experience and carries the brand.",
-    s1_p2: "Around it, each room writes its own music in conversation with that bare track. Reception, hammam, treatment cabin, lounge: every piece is composed to settle into the same harmonic ground.",
-    s1_p3: "The guest moves from one space to the next and never hears a cut. The composition shifts in texture, not in identity. One long evolution, not a playlist of rooms.",
+    s1_p1: "Our system listens to the room in real time and adapts the music to mask ambient noise.",
+    s1_p2: "The result feels like noise-cancelling headphones, except no one is wearing any.",
+    s1_p3: "Pure immersion, nothing in the way.",
 
     // Section 2 paragraphs
     s2_p1: "Guests forget most of what they hear. But they remember how a place sounded.",
