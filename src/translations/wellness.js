@@ -221,10 +221,10 @@ const wellness = {
 
     // Section 4: Webcam — motion detection, no emotion read-out. The "reading the
     // gesture" label is a passive cue while the music follows the movement.
-    webcam_active: "Camera active",
-    webcam_authorize: "Allow camera",
+    webcam_active: "Motion sensor active",
+    webcam_authorize: "Allow motion sensor",
     webcam_reading: "Reading the gesture",
-    webcam_hint: "Allow the camera, face it in good light, then move slowly. The music opens up with your movement and settles back the moment you hold still.",
+    webcam_hint: "Motion sensor only. No recording.",
     webcam_move_hint: "Move your hand in front of the camera — the bar follows your gesture.",
     webcam_denied: "Camera blocked. Allow access in your browser settings, then try again.",
     webcam_unavailable: "Camera unavailable. Make sure no other app is using it, then try again.",
