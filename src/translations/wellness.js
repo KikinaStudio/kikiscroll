@@ -7,7 +7,7 @@ const wellness = {
     // Intro section
     intro_eyebrow: "Composer la présence.",
     intro_start: "Lancer l'expérience sonore",
-    intro_scroll: "Scrollez lentement pour explorer",
+    intro_scroll: "Faites défiler lentement pour explorer",
 
     // Section titles
     s0_title: "Le son, signature du soin.",
@@ -19,37 +19,37 @@ const wellness = {
 
     // Section 0 paragraphs — guide le lecteur dès l'intro à prêter l'oreille, en posant la page
     // elle-même comme démonstration : le son change avec chaque section, comme il changera dans son espace.
-    s0_p1: "Prêtez l'oreille. Sur cette page, la musique se transforme à chaque section que vous traversez, une démonstration discrète de ce que nous composons pour votre futur espace : un son qui dialogue avec la pièce, le moment, le geste.",
-    s0_p2: "Chaque spa porte un climat sonore qui agit sur le système nerveux avant le premier soin. Il est souvent la première sensation reçue par le client, et l'une des dernières impressions qu'il emporte.",
+    s0_p1: "Tendez l'oreille. Ici, la musique se transforme à mesure que vous avancez : un aperçu de ce que nous composons pour votre futur espace, un son qui dialogue avec le lieu, l'instant et le geste.",
+    s0_p2: "Chaque spa possède son climat sonore, qui agit sur le système nerveux avant même le premier soin. C'est souvent la première chose que ressent le client, et l'une des dernières qu'il emporte.",
     s0_p3: "Hôtels, instituts, thermes, retraites de longévité : nous composons cette signature, espace par espace, du seuil de l'accueil aux derniers instants de récupération. Une musique vivante, écrite par des compositeurs, guidée par les neurosciences.",
 
     // Section 1 paragraphs — piste nue continue + chaque espace s'accorde avec elle
-    s1_p1: "Sous chaque espace du spa, une seule piste nue joue en continu. Une signature dénudée, présente partout, qui ancre l'expérience et porte la marque.",
-    s1_p2: "Autour d'elle, chaque pièce écrit sa propre musique en dialogue avec cette piste de fond. Réception, hammam, cabine, salon : chaque morceau est composé pour épouser le même socle harmonique.",
-    s1_p3: "Le client passe d'un espace à l'autre sans entendre de coupure. La composition change de texture, pas d'identité. Une longue évolution, pas une playlist de pièces.",
+    s1_p1: "Sous tous les espaces du spa, une même trame épurée joue sans interruption. Une signature dépouillée, présente partout, qui ancre l'expérience et porte l'identité de la marque.",
+    s1_p2: "Autour d'elle, chaque espace compose sa propre musique, en dialogue avec cette trame de fond. Réception, hammam, cabine, salon : chaque morceau épouse le même socle harmonique.",
+    s1_p3: "Le client passe d'un espace à l'autre sans jamais percevoir de rupture. La composition change de texture, jamais d'identité. Une longue évolution, et non une succession de morceaux.",
 
     // Section 2 paragraphs
-    s2_p1: "Le client oublie l'essentiel de ce qu'il entend. Mais il se souvient de comment un lieu a sonné.",
-    s2_p2: "De l'accueil à la récupération, un spa est une suite de moments, chacun avec son rôle et son intensité. Nous composons une signature sonore qui traverse chaque espace, prend une forme différente dans chacun, et reste en mémoire longtemps après le dernier soin.",
-    s2_p3: "Le client ne se souvient jamais d'un morceau. Il se souvient du lieu.",
+    s2_p1: "Le client oublie l'essentiel de ce qu'il entend. Mais il se souvient de la façon dont un lieu sonnait.",
+    s2_p2: "De l'accueil à la récupération, un spa est une succession de moments, chacun avec son rôle, sa propre intensité. Nous composons une signature sonore qui traverse tous les espaces, prend une forme propre à chacun, et demeure en mémoire longtemps après le dernier soin.",
+    s2_p3: "Le client ne retient jamais un morceau. Il retient le lieu.",
 
     // Section 3 paragraphs
-    s3_p1: "Un soin n'a pas une seule intention. Relâchement somatique, régulation parasympathique, ancrage attentionnel : ces états physiologiques sont aussi précis qu'un dosage.",
-    s3_p2: "À chaque registre correspond une trame sonore distincte. Nos compositions glissent d'un état à l'autre selon le moment du soin, sans transition perceptible.",
-    s3_p3: "Le praticien guide le geste, la signature sonore guide le système nerveux. Les deux convergent sans concertation.",
+    s3_p1: "Un soin n'a jamais une seule intention. Relâchement somatique, régulation parasympathique, ancrage attentionnel : ces états physiologiques sont aussi précis qu'un dosage.",
+    s3_p2: "À chaque registre répond une trame sonore distincte. Nos compositions glissent d'un état à l'autre au fil du soin, sans transition perceptible.",
+    s3_p3: "Le praticien guide le geste, la signature sonore guide le système nerveux. Les deux convergent sans jamais se concerter.",
 
     // Section 4 paragraphs — la musique suit le geste en temps réel (capteur spatial)
-    s4_p1: "Dans la cabine de soin, la musique ne doit pas être un décor. Elle doit suivre les mains qui travaillent, en temps réel.",
-    s4_p2: "Un capteur spatial lit la pièce : la position du praticien, le rythme du geste, le souffle du corps sur la table. La composition s'ajuste à ce qui se joue réellement. La praticienne n'est plus accompagnée par une playlist, mais associée à une composition qui l'écoute.",
-    s4_p3: "Essayez maintenant. Activez votre caméra et bougez lentement devant elle. La musique s'ouvre avec votre mouvement et revient à la couche de fond dès que vous vous immobilisez. En cabine, la même logique passe par des capteurs spatiaux qui suivent le geste, pas le visage. Une réponse calibrée, vivante, individuelle, sans intrusion.",
+    s4_p1: "Dans la cabine de soin, la musique ne doit pas être un décor. Elle doit suivre les mains au travail, en temps réel.",
+    s4_p2: "Un capteur spatial perçoit la pièce : la position du praticien, le rythme du geste, le souffle du corps sur la table. La composition s'ajuste à ce qui se joue vraiment. La praticienne n'est plus accompagnée d'une playlist, mais portée par une composition qui l'écoute.",
+    s4_p3: "Essayez maintenant. Activez votre caméra et bougez lentement devant elle. La musique s'ouvre avec votre mouvement, puis retombe vers la trame de fond dès que vous vous immobilisez. En cabine, la même logique passe par des capteurs spatiaux qui suivent le geste, non le visage. Une réponse calibrée, vivante, propre à chacun, sans intrusion.",
 
     // Section 5 paragraphs — la partition épouse l'arc du soin, le capteur ajoute la couche live.
-    s5_p1: "Derrière cette adaptation en temps réel, chaque soin a sa propre partition originale. Un soin d'une heure a un arc : une arrivée, une prise de contact, une profondeur, un relâchement, un retour.",
-    s5_p2: "La musique peut ignorer cet arc, ou l'épouser. Nous composons à côté : cinq strates écrites pour cinq phases, qui entrent et se retirent au fur et à mesure que le corps se dépose.",
-    s5_p3: "La composition s'adapte au soin d'elle-même. Le capteur, lorsqu'il est présent, ajoute une réponse vive au geste du praticien. Le corps se détend. Le système nerveux se souvient de la précision.",
+    s5_p1: "Derrière cette adaptation en temps réel, chaque soin a sa propre partition. Un soin d'une heure suit un arc : une arrivée, une prise de contact, une profondeur, un relâchement, un retour.",
+    s5_p2: "La musique peut ignorer cet arc, ou l'épouser. Nous composons avec lui : cinq strates écrites pour cinq phases, qui entrent et s'effacent à mesure que le corps s'abandonne.",
+    s5_p3: "La composition s'adapte au soin d'elle-même. Le capteur, lorsqu'il est présent, ajoute une réponse en temps réel au geste du praticien. Le corps se détend, et le système nerveux en garde la mémoire.",
 
     // Scroll prompt
-    scroll_prompt: "Continuez de scroller lentement",
+    scroll_prompt: "Continuez de faire défiler lentement",
 
     // Section 1: Isolation toggle
     isolation_on: "Écoute située active",
@@ -65,18 +65,18 @@ const wellness = {
     phase_5: "Retour",
 
     // Section 2: Zones (3 clés existantes réutilisées avec valeurs spa, + 4e clé recuperation)
-    zone_entree: "Accueil & transitions",
+    zone_entree: "Accueil et transitions",
     zone_entree_sub: "Le seuil",
-    zone_entree_body: "Réception, vestiaires, couloirs, tisanerie. La zone la plus bruyante du spa, où l'état urbain est encore présent. Notre composition masque les sons parasites sans s'imposer, et prépare le système nerveux avant le premier soin.",
+    zone_entree_body: "Réception, vestiaires, couloirs, tisanerie. La zone la plus bruyante du spa, là où l'agitation de la ville est encore présente. Notre composition masque les bruits parasites sans s'imposer, et prépare le système nerveux avant le premier soin.",
     zone_rayon: "Rituels de chaleur",
     zone_rayon_sub: "L'enveloppe",
-    zone_rayon_body: "Hammam, sauna, douches sensorielles, parcours kneipp. Acoustique extrême, surfaces dures, vapeur. Notre composition épouse le volume avec des basses chaudes et des textures organiques. L'objectif n'est pas la sédation mais la relaxation alerte, soutien de la circulation et du souffle.",
+    zone_rayon_body: "Hammam, sauna, douches sensorielles, parcours kneipp. Acoustique extrême, surfaces dures, vapeur. Notre composition épouse l'espace avec des basses chaudes et des textures organiques. L'objectif n'est pas la sédation, mais une détente éveillée, qui soutient la circulation et le souffle.",
     zone_equipe: "Cabines de soin",
     zone_equipe_sub: "Le geste",
-    zone_equipe_body: "Modelage, drainage, soin du visage, énergétique. La main du praticien dialogue avec un système nerveux à vif. Nos trames sonores soutiennent le geste sans aléatoire ni surprise. Le client s'abandonne, le praticien travaille en confiance.",
+    zone_equipe_body: "Modelage, drainage, soin du visage, soin énergétique. La main du praticien dialogue avec un système nerveux à vif. Nos trames sonores soutiennent le geste, sans hasard ni surprise. Le client s'abandonne, le praticien travaille en confiance.",
     zone_recuperation: "Espaces de récupération",
     zone_recuperation_sub: "L'empreinte",
-    zone_recuperation_body: "Salles de détente, tisanerie, espaces calmes. L'étape la plus sous-estimée du parcours, et l'une des plus puissantes. Nos compositions étirent l'état parasympathique et prolongent le soin bien au-delà de la porte de la cabine. Le souvenir d'un spa n'est rarement visuel. Il est sonore.",
+    zone_recuperation_body: "Salles de détente, tisanerie, espaces calmes. L'étape la plus sous-estimée du parcours, et l'une des plus puissantes. Nos compositions prolongent l'état parasympathique et étendent le soin bien au-delà de la porte de la cabine. Le souvenir d'un spa est rarement visuel. Il est sonore.",
 
     // Section 3: Neuro labels
     neuro_relaxation: "Relâchement somatique",
