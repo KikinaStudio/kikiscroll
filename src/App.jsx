@@ -187,20 +187,31 @@ function useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolation
                 fadeTrack('cabine', cabineVol, 150);
             }
         } else if (activeSectionId === 3) {
-            // Neuro-sonore: Crossfade jungle (relaxation) → pulsatingWave (régulation) → focusCognitif (focus)
+            // Neuro-sonore: jungle (relaxation) → pulsatingWave (régulation) → focusCognitif (focus).
+            // Each state now gets a PLATEAU at full volume, with tight crossfades at the
+            // boundaries — like the zones section. The previous continuous ramp only let the
+            // middle track (pulsatingWave) hit full for a single instant at p=0.66 before
+            // ramping straight back down, so it never stood out and the section read as just
+            // two ambiences. Holding each state solo for a window makes all three audible.
             prevPalierRef.current = -1;
             let jungleVol = 0, pulsatingVol = 0, focusVol = 0;
-
-            if (sectionProgress < 0.33) {
-                jungleVol = 0.6;
-            } else if (sectionProgress < 0.66) {
-                const t = (sectionProgress - 0.33) / 0.33;
-                jungleVol = 0.6 * (1 - t);
-                pulsatingVol = 0.6 * t;
-            } else {
-                const t = (sectionProgress - 0.66) / 0.34;
-                pulsatingVol = 0.6 * (1 - t);
-                focusVol = 0.6 * t;
+            {
+                const X1 = 1 / 3, X2 = 2 / 3, HW = 0.08, PEAK = 0.6;
+                if (sectionProgress < X1 - HW) {
+                    jungleVol = PEAK;
+                } else if (sectionProgress < X1 + HW) {
+                    const t = (sectionProgress - (X1 - HW)) / (2 * HW);
+                    jungleVol = PEAK * (1 - t);
+                    pulsatingVol = PEAK * t;
+                } else if (sectionProgress < X2 - HW) {
+                    pulsatingVol = PEAK;            // middle state held solo
+                } else if (sectionProgress < X2 + HW) {
+                    const t = (sectionProgress - (X2 - HW)) / (2 * HW);
+                    pulsatingVol = PEAK * (1 - t);
+                    focusVol = PEAK * t;
+                } else {
+                    focusVol = PEAK;
+                }
             }
 
             // Longer ramp (was 150 ms) so the first stem doesn't snap in when the
@@ -502,10 +513,11 @@ function App() {
     // smoothed (see useMotionDetection), and setVolume glides the gain so the swell
     // is continuous rather than stepping per frame. The 1.5× just lets a solid
     // (not maximal) gesture reach the top of the strings layer.
-    const handleMotion = useCallback((intensity /* , y */) => {
+    const handleMotion = useCallback((intensity, y) => {
         if (activeSectionId !== 4 || !isCameraActive) return;
         setVolume('strings', Math.min(1, intensity * 1.5));
         motionRef.current.intensity = intensity;
+        motionRef.current.y = y; // motionY (0 = haut du cadre, 1 = bas) — lu par la goutte du blob
     }, [activeSectionId, isCameraActive, setVolume]);
 
     useMotionDetection(isCameraActive && activeSectionId === 4, videoRef, handleMotion);
@@ -642,11 +654,16 @@ function App() {
             // 80% of the section (cutoff = 0.20) instead of 18% — without extending the
             // scroll length each phase would feel rushed and out of sync with the audio.
             const sectionLength5 = isWellness ? window.innerHeight * 5 : window.innerHeight * 3.5;
+            // Neuro section (3 sonic states + 4 text parts): give it room so each state
+            // gets an audible plateau and the 3rd isn't cut off at the section exit.
+            const sectionLength3 = isWellness ? window.innerHeight * 4 : window.innerHeight * 1.5;
             const scrollLength = sd?.hasZonesPanorama
                 ? sectionLength2
                 : sd?.hasDensityLabels
                     ? sectionLength5
-                    : window.innerHeight * 1.5;
+                    : sd?.hasEnvironmentLabels
+                        ? sectionLength3
+                        : window.innerHeight * 1.5;
             ScrollTrigger.create({
                 trigger: section,
                 start: 'top top',
