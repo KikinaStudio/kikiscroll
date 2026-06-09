@@ -40,8 +40,9 @@ const wellness = {
 
     // Section 3 paragraphs
     s3_p1: "Un soin n'a jamais une seule intention. Relâchement somatique, régulation parasympathique, ancrage attentionnel : ces états physiologiques sont aussi précis qu'un dosage.",
-    s3_p2: "À chaque registre répond une trame sonore distincte. Nos compositions glissent d'un état à l'autre au fil du soin, sans transition perceptible.",
-    s3_p3: "Le praticien guide le geste, la signature sonore guide le système nerveux. Les deux convergent sans jamais se concerter.",
+    s3_p2: "À chaque registre répond une trame sonore distincte.",
+    s3_p3: "Nos compositions glissent d'un état à l'autre au fil du soin, sans transition perceptible.",
+    s3_p4: "Le praticien guide le geste, la signature sonore guide le système nerveux. Les deux convergent sans jamais se concerter.",
 
     // Section 4 paragraphs — la musique suit le geste en temps réel (capteur spatial)
     s4_p1: "Dans la cabine de soin, la musique ne doit pas être un décor. Elle doit suivre les mains au travail, en temps réel.",
@@ -169,8 +170,9 @@ const wellness = {
 
     // Section 3 paragraphs
     s3_p1: "A treatment has more than one intention. Somatic release, parasympathetic regulation, attentional grounding: these physiological states are as precise as a dosage.",
-    s3_p2: "Each register has its own sonic fabric. Our compositions slide from one state to the next as the treatment unfolds, without perceptible transition.",
-    s3_p3: "The practitioner guides the gesture, the sonic signature guides the nervous system. Both converge without coordination.",
+    s3_p2: "Each register has its own sonic fabric.",
+    s3_p3: "Our compositions slide from one state to the next as the treatment unfolds, without perceptible transition.",
+    s3_p4: "The practitioner guides the gesture, the sonic signature guides the nervous system. Both converge without coordination.",
 
     // Section 4 paragraphs — music follows the hands in real time, via a spatial sensor
     s4_p1: "In the treatment room, music should not be a backdrop. It should follow the hands at work, in real time.",

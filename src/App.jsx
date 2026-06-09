@@ -48,7 +48,7 @@ function getSectionsData(t, mode) {
     const neuro = {
         id: 3,
         title: t.s3_title,
-        paragrapheParts: [t.s3_p1, t.s3_p2, t.s3_p3],
+        paragrapheParts: [t.s3_p1, t.s3_p2, t.s3_p3, t.s3_p4],
         hasEnvironmentLabels: true,
         withLineBreaks: true,
     };
