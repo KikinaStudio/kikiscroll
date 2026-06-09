@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import Lenis from '@studio-freight/lenis';
 import Scene from './components/Scene';
+import IntroScreen from './components/IntroScreen';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAudioStore } from './store/useAudioStore';
@@ -695,6 +696,9 @@ function App() {
 
     return (
         <div className={`min-h-screen font-sans selection:bg-white/20 ${mode === 'wellness' ? 'bg-transparent text-[#3a2820]' : 'bg-[#0a0a0a] text-tenbin-offwhite'}`}>
+            {/* Full-screen intro screen — wellness only. Begins the experience (audio +
+                scroll) on the first interaction, then fades out. */}
+            {mode === 'wellness' && <IntroScreen onBegin={handleStartExperience} />}
             {/* Grain overlay */}
             <div className="grain-overlay" aria-hidden="true" />
             {/* Hidden video element for webcam */}

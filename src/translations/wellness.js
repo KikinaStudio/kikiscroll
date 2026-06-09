@@ -9,6 +9,11 @@ const wellness = {
     intro_start: "Lancer l'expérience sonore",
     intro_scroll: "Faites défiler lentement pour explorer",
 
+    // Full-screen intro screen (avant le scroll)
+    intro_line_1: "Ceci n'est pas un site web.",
+    intro_line_2: "C'est une expérience d'une minute.",
+    intro_line_3: "Faites défiler lentement. Son activé.",
+
     // Section titles
     s0_title: "Le son, signature du soin.",
     s1_title: "La science de la sculpture acoustique.",
@@ -132,6 +137,11 @@ const wellness = {
     intro_eyebrow: "Composing presence.",
     intro_start: "Start the sound experience",
     intro_scroll: "Scroll slowly to explore",
+
+    // Full-screen intro screen (before the scroll)
+    intro_line_1: "This is not a website.",
+    intro_line_2: "It's a one-minute experience.",
+    intro_line_3: "Scroll slowly. Sound on.",
 
     // Section titles
     s0_title: "Sound, as a signature of care.",
