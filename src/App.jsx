@@ -191,9 +191,16 @@ function useScrollAudio(activeSectionId, sectionProgress, fadeTrack, isIsolation
                 focusVol = 0.6 * t;
             }
 
-            fadeTrack('jungle', jungleVol, 150);
-            fadeTrack('pulsatingWave', pulsatingVol, 150);
-            fadeTrack('focusCognitif', focusVol, 150);
+            // Longer ramp (was 150 ms) so the first stem doesn't snap in when the
+            // section opens — the visitor felt the sound "arrive abruptly". A ~600 ms
+            // ramp gives a gentle fade-in; because each scroll tick re-anchors at the
+            // current gain, the steady state and the in-section crossfades just read as
+            // smoother, never laggy. Mirrors the 600 ms onEnter jungle fade so the two
+            // agree on entry instead of the short ramp overriding the long one.
+            const NEURO_FADE_MS = 600;
+            fadeTrack('jungle', jungleVol, NEURO_FADE_MS);
+            fadeTrack('pulsatingWave', pulsatingVol, NEURO_FADE_MS);
+            fadeTrack('focusCognitif', focusVol, NEURO_FADE_MS);
         } else if (activeSectionId === 4) {
             // Gesture-driven: the `strings` volume is set per frame by the motion
             // detector in handleMotion. Underneath it we hold a soft ambient pad
@@ -367,6 +374,11 @@ function App() {
     const [sectionProgress, setSectionProgress] = useState(0);
     const [hasStarted, setHasStarted] = useState(false);
     const [showMentions, setShowMentions] = useState(false);
+    // Live viewport width — the zones panorama pan geometry depends on the real
+    // rendered slide width (60vw, but capped at 720px on wide screens), so the
+    // translateX math below must know the actual width to land each slide dead
+    // center at its movingProgress fraction. Tracked in state so a resize recomputes.
+    const [viewportW, setViewportW] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1440));
     const sectionsData = useMemo(() => getSectionsData(t, mode), [t, mode]);
 
     // Map the currently-pinned section position (DOM order) to its stable behavior id.
@@ -433,6 +445,13 @@ function App() {
         ];
         return mode === 'wellness' ? [...base, 'motionPad'] : base;
     }, [mode]);
+
+    // Keep the panorama pan geometry honest when the window is resized.
+    useEffect(() => {
+        const onResize = () => setViewportW(window.innerWidth);
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
 
     // Hard-reset all non-drone tracks on every section change
     const prevSectionRef = useRef(activeSection);
@@ -612,8 +631,9 @@ function App() {
                     setActiveSection(i);
                     // Sculpting/Isolation section: start crowd
                     if (sd?.hasIsolationToggle) fadeTrack('crowd', 0.6, 500);
-                    // Neuro section: start jungle
-                    if (sd?.hasEnvironmentLabels) fadeTrack('jungle', 0.6, 500);
+                    // Neuro section: start jungle with a gentle fade-in (matches the
+                    // 600 ms ramp in useScrollAudio so the entry isn't abrupt).
+                    if (sd?.hasEnvironmentLabels) fadeTrack('jungle', 0.6, 600);
                     // Zones section: tracks faded in by useScrollAudio
                     // Webcam section: non-drone tracks reset just before via onLeave
                     // Score section: stems handled by useScrollAudio
@@ -683,7 +703,22 @@ function App() {
                         : sectionProgress >= PARK_END
                             ? 1
                             : (sectionProgress - PARK_START) / (PARK_END - PARK_START);
-                    const translateX = 12 - 192 * movingProgress; // vw
+                    // Pan geometry. Each slide is 60vw wide but capped at 720px (see
+                    // .spa-panorama__slide), with a 4vw gap and 8vw track padding. The
+                    // caption fade (slideCenter = i/3) and the audio crossfades (mp =
+                    // 1/6, 3/6, 5/6) both assume slide i lands dead center at mp = i/3.
+                    // A fixed `12 - 192*mp` only achieves that when the slide is exactly
+                    // 60vw — i.e. below 1200px viewport. Once the 720px cap kicks in, the
+                    // slides drift and every later card (heat rituals, recovery) centers
+                    // increasingly ahead of its caption/audio. Deriving the start offset
+                    // and travel from the real slide width re-aligns all of them: solving
+                    // (offset + i*(W+G) + W/2) + translateX = 50 gives mp = i/3 for any W.
+                    const slideW = Math.min(60, (720 / viewportW) * 100); // vw
+                    const GAP = 4;   // vw, matches .spa-panorama__track gap
+                    const PAD = 8;   // vw, matches .spa-panorama__track padding
+                    const startX = 50 - PAD - slideW / 2;        // centers slide 0 at mp = 0
+                    const travelX = 3 * (slideW + GAP);          // slide 0 → slide 3 center distance
+                    const translateX = startX - travelX * movingProgress; // vw
                     const activeIndex = movingProgress < 1/6 ? 0
                                       : movingProgress < 3/6 ? 1
                                       : movingProgress < 5/6 ? 2
@@ -1211,8 +1246,28 @@ function App() {
                             )}
 
                             {/* Section 3: Webcam Button + Status */}
-                            {section.hasWebcamButton && (
-                                <div className="mt-8 flex flex-col gap-4">
+                            {section.hasWebcamButton && (() => {
+                                // Hold the camera CTA back until the section's LAST paragraph
+                                // (s4_p3) has started to appear, so the visitor reads the whole
+                                // explanation before being tempted to act. Mirrors that block's
+                                // reveal (threshold 0.66, ramp 0.15 — see the paragraph renderer).
+                                // Stays visible once the camera is on, and clicks are disabled
+                                // until it's fully revealed so it can't be hit early.
+                                const reveal = isCameraActive
+                                    ? 1
+                                    : activeSection === index
+                                        ? Math.min(1, Math.max(0, (sectionProgress - 0.66) / 0.15))
+                                        : 0;
+                                return (
+                                <div
+                                    className="mt-8 flex flex-col gap-4"
+                                    style={{
+                                        opacity: reveal,
+                                        transform: `translateY(${(1 - reveal) * 8}px)`,
+                                        pointerEvents: reveal >= 1 ? 'auto' : 'none',
+                                        transition: 'opacity 500ms ease-out, transform 500ms ease-out',
+                                    }}
+                                >
                                     <button
                                         onClick={handleCameraToggle}
                                         className={`px-8 py-4 border transition-all duration-500 font-sans text-xs uppercase tracking-widest rounded-full cursor-pointer ${isCameraActive
@@ -1260,7 +1315,8 @@ function App() {
                                         </div>
                                     )}
                                 </div>
-                            )}
+                                );
+                            })()}
                         </div>
                     </section>
                 ))}
@@ -1306,12 +1362,7 @@ function App() {
                         <div className="flex flex-col md:flex-row gap-8 md:gap-12 text-sm flex-1 md:justify-end">
                             <div className="flex flex-col gap-3 flex-shrink-0 md:w-36">
                                 <a href="https://kikinalab.com" target="_blank" rel="noopener noreferrer" className="text-[#555] hover:text-[#1a1a1a] transition-colors">{t.footer_about}</a>
-                                <button
-                                    onClick={() => setShowMentions(!showMentions)}
-                                    className="text-left text-[#555] hover:text-[#1a1a1a] transition-colors focus:outline-none"
-                                >
-                                    {t.footer_legal}
-                                </button>
+                                <a href="https://www.instagram.com/kikinastudio/" target="_blank" rel="noopener noreferrer" className="text-[#555] hover:text-[#1a1a1a] transition-colors">Instagram</a>
                                 <a href="https://www.linkedin.com/company/kikinastudio/" target="_blank" rel="noopener noreferrer" className="text-[#555] hover:text-[#1a1a1a] transition-colors">LinkedIn</a>
                             </div>
                             {mode !== 'wellness' && (

@@ -15,7 +15,7 @@ const wellness = {
     s2_title: "Une signature, plusieurs espaces.",
     s3_title: "Composer l'état, pas l'ambiance.",
     s4_title: "Le son à l'écoute du geste.",
-    s5_title: "Une partition par soin.",
+    s5_title: "Une composition par soin.",
 
     // Section 0 paragraphs — guide le lecteur dès l'intro à prêter l'oreille, en posant la page
     // elle-même comme démonstration : le son change avec chaque section, comme il changera dans son espace.
@@ -44,9 +44,9 @@ const wellness = {
     s4_p3: "Essayez maintenant. Activez votre caméra et bougez lentement devant elle. La musique s'ouvre avec votre mouvement et revient à la couche de fond dès que vous vous immobilisez. En cabine, la même logique passe par des capteurs spatiaux qui suivent le geste, pas le visage. Une réponse calibrée, vivante, individuelle, sans intrusion.",
 
     // Section 5 paragraphs — la partition épouse l'arc du soin, le capteur ajoute la couche live.
-    s5_p1: "Derrière cette adaptation en temps réel, chaque soin a sa propre partition composée. Un soin d'une heure a un arc : une arrivée, une prise de contact, une profondeur, un relâchement, un retour.",
+    s5_p1: "Derrière cette adaptation en temps réel, chaque soin a sa propre partition originale. Un soin d'une heure a un arc : une arrivée, une prise de contact, une profondeur, un relâchement, un retour.",
     s5_p2: "La musique peut ignorer cet arc, ou l'épouser. Nous composons à côté : cinq strates écrites pour cinq phases, qui entrent et se retirent au fur et à mesure que le corps se dépose.",
-    s5_p3: "La partition s'adapte au soin d'elle-même. Le capteur, lorsqu'il est présent, ajoute une réponse vive au geste du praticien. Le corps se détend. Le système nerveux se souvient de la précision.",
+    s5_p3: "La composition s'adapte au soin d'elle-même. Le capteur, lorsqu'il est présent, ajoute une réponse vive au geste du praticien. Le corps se détend. Le système nerveux se souvient de la précision.",
 
     // Scroll prompt
     scroll_prompt: "Continuez de scroller lentement",
@@ -139,7 +139,7 @@ const wellness = {
     s2_title: "One signature, many spaces.",
     s3_title: "Compose the state, not the ambience.",
     s4_title: "Sound that listens to the gesture.",
-    s5_title: "A score for every treatment.",
+    s5_title: "A composition for every treatment.",
 
     // Section 0 paragraphs — opens by guiding the user to listen, framing the page itself
     // as a small demonstration of context-aware sound (each section = a different climate).
@@ -168,9 +168,9 @@ const wellness = {
     s4_p3: "Try it now. Turn on your camera and move slowly in front of it. The music opens up with your movement and settles back to the underlying layer the moment you hold still. In the treatment room, the same logic runs through spatial sensors that follow the gesture, not the face. A calibrated response, alive, individual, without intrusion.",
 
     // Section 5 paragraphs — composed score follows the treatment arc, sensor adds the live layer
-    s5_p1: "Behind this real-time adaptation, every treatment has its own composed score. A one-hour treatment has an arc: an arrival, a first contact, a depth, a release, a return.",
+    s5_p1: "Behind this real-time adaptation, every treatment has its own original score. A one-hour treatment has an arc: an arrival, a first contact, a depth, a release, a return.",
     s5_p2: "The music can ignore that arc, or follow it. We compose alongside it: five strata written for five phases, entering and stepping back as the body settles.",
-    s5_p3: "The score adapts to the treatment by itself. The sensor, when present, adds a live response to the practitioner's gesture. The body softens. The nervous system remembers the precision.",
+    s5_p3: "The composition adapts to the treatment by itself. The sensor, when present, adds a live response to the practitioner's gesture. The body softens. The nervous system remembers the precision.",
 
     // Scroll prompt
     scroll_prompt: "Keep scrolling slowly",
