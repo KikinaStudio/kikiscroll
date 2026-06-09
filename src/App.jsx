@@ -579,14 +579,19 @@ function App() {
     // Initial setup for Lenis
     useEffect(() => {
         const lenis = new Lenis({
-            duration: 1.2,
+            // Gentle, frame-rate-independent smoothing. lerp drives the wheel feel;
+            // duration/easing are kept as a fallback. Tuned soft, not drastic.
+            lerp: 0.08,
+            duration: 1.4,
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            direction: 'vertical',
-            gestureDirection: 'vertical',
-            smooth: true,
-            mouseMultiplier: 1,
-            smoothTouch: false,
-            touchMultiplier: 2,
+            orientation: 'vertical',
+            gestureOrientation: 'vertical',
+            smoothWheel: true,
+            wheelMultiplier: 0.7,
+            // syncTouch lets Lenis smooth touch scrolling so touchMultiplier applies
+            // on mobile (without it, touch falls back to native scroll).
+            syncTouch: true,
+            touchMultiplier: 1.5,
         });
 
         lenisRef.current = lenis;
