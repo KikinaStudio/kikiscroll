@@ -111,7 +111,7 @@
 
 /* Finale: full center + a deeper veil so the white logos read over the sun halo */
 .leaflet-slide:last-child .leaflet-stat {
-    top: 50%;
+    top: 47%;
     max-width: min(46rem, 90vw);
 }
 
@@ -133,20 +133,32 @@
 }
 
 /* Finale (last page): partner logos around the experience CTA */
+/* The logo PNGs carry generous transparent padding, so rows need no gap of
+   their own — the built-in padding does the spacing. */
 .leaflet-stat__logos {
-    width: min(440px, 76vw);
-    max-height: 22vh;
-    object-fit: contain;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    column-gap: clamp(10px, 2vw, 28px);
+    row-gap: 0;
+    max-width: min(660px, 86vw);
     opacity: 0.92;
-    filter: drop-shadow(0 1px 10px rgba(8, 5, 3, 0.5));
+}
+
+.leaflet-logo-img {
+    height: clamp(26px, 4vh, 40px);
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 1px 8px rgba(8, 5, 3, 0.55));
 }
 
 .leaflet-stat__logos--top {
-    margin-bottom: clamp(14px, 3vh, 30px);
+    margin-bottom: clamp(12px, 2.4vh, 26px);
 }
 
 .leaflet-stat__logos--bottom {
-    margin-top: clamp(14px, 3vh, 30px);
+    margin-top: clamp(12px, 2.4vh, 26px);
 }
 
 .leaflet-stat__btn {
@@ -172,8 +184,8 @@
 
 .leaflet-caption {
     position: absolute;
-    left: clamp(24px, 6vw, 96px);
-    bottom: clamp(32px, 8vh, 96px);
+    left: clamp(28px, 8.5vw, 150px);
+    bottom: clamp(36px, 12vh, 130px);
     max-width: min(34rem, 82vw);
     z-index: 5;
     opacity: 0;

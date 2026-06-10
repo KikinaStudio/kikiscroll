@@ -117,17 +117,41 @@ const SLIDES = [
         src: IMG('09-presence.jpg'),
         eyebrow: "Let's turn sound into care",
         display: ['Hear it for yourself.'],
-        logosTop: {
-            src: IMG('logos-top.png'),
-            alt: "Kering, Puressentiel, L'Oréal, Guerlain, Maisons du Monde, Pernod Ricard, Unicef, Pierre Fabre, Furterer",
-        },
-        logosBottom: {
-            src: IMG('logos-bottom.png'),
-            alt: 'PiLeJe, bpifrance, Hôpital Ambroise-Paré, Publicis Groupe, ESCP, Institut du Monde Arabe, Marie Claire',
-        },
+        logosTop: [
+            ['kering', 'Kering'],
+            ['puressentiel', 'Puressentiel'],
+            ['loreal', "L'Oréal"],
+            ['guerlain', 'Guerlain'],
+            ['maisons-du-monde', 'Maisons du Monde'],
+            ['pernod-ricard', 'Pernod Ricard'],
+            ['harmonie-mutuelle', 'Harmonie Mutuelle'],
+            ['unicef', 'Unicef'],
+            ['pierre-fabre', 'Pierre Fabre'],
+            ['furterer', 'René Furterer'],
+        ],
+        logosBottom: [
+            ['pileje', 'PiLeJe'],
+            ['bpifrance', 'bpifrance'],
+            ['hopital-ambroise-pare', 'Hôpital Ambroise-Paré AP-HP'],
+            ['publicis', 'Publicis Groupe'],
+            ['ffpapf', 'Fédération Française du Prêt à Porter Féminin'],
+            ['escp', 'ESCP Business School'],
+            ['institut-du-monde-arabe', 'Institut du Monde Arabe'],
+            ['marie-claire', 'Marie Claire'],
+        ],
         cta: { label: 'Enter the sound experience', href: `${BASE}wellness/en` },
     },
 ];
+
+function LogoRow({ logos, position }) {
+    return (
+        <div className={`leaflet-stat__logos leaflet-stat__logos--${position}`}>
+            {logos.map(([file, name]) => (
+                <img key={file} src={IMG(`logos/${file}.png`)} alt={name} className="leaflet-logo-img" />
+            ))}
+        </div>
+    );
+}
 
 const MUSIC_SRC = `${BASE}MUSIC/leaflet/demo1.mp3`;
 const MUSIC_VOLUME = 0.65;
@@ -266,9 +290,7 @@ export default function LeafletPage() {
                         )}
                         {slide.display && (
                             <div className={`leaflet-stat leaflet-stat--lines${slide.key === 'cover' ? ' leaflet-stat--cover' : ''}`}>
-                                {slide.logosTop && (
-                                    <img className="leaflet-stat__logos leaflet-stat__logos--top" src={slide.logosTop.src} alt={slide.logosTop.alt} />
-                                )}
+                                {slide.logosTop && <LogoRow logos={slide.logosTop} position="top" />}
                                 {slide.display.map((line) => (
                                     <span key={line} className="leaflet-stat__line">{line}</span>
                                 ))}
@@ -277,9 +299,7 @@ export default function LeafletPage() {
                                         {slide.cta.label}
                                     </a>
                                 )}
-                                {slide.logosBottom && (
-                                    <img className="leaflet-stat__logos leaflet-stat__logos--bottom" src={slide.logosBottom.src} alt={slide.logosBottom.alt} />
-                                )}
+                                {slide.logosBottom && <LogoRow logos={slide.logosBottom} position="bottom" />}
                             </div>
                         )}
 
@@ -320,7 +340,7 @@ export default function LeafletPage() {
                     className={`leaflet-chrome leaflet-mute${isMuted ? ' is-muted' : ''}`}
                     aria-label={isMuted ? 'Unmute' : 'Mute'}
                 >
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                         <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                         {isMuted && <line x1="3" y1="3" x2="21" y2="21" />}
                     </svg>
