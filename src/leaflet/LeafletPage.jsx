@@ -103,7 +103,7 @@ const SLIDES = [
     },
     {
         key: 'the-result',
-        src: IMG('02-ear.jpg'),
+        src: IMG('10-matter.jpg'),
         eyebrow: 'The result',
         stat: '85 %',
         statSub: 'of clients say music influences their experience.',
