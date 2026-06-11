@@ -240,25 +240,35 @@ export default function LeafletPage() {
         };
     }, [goTo, step]);
 
-    // Background music — created on the entry click (a user gesture, so the
-    // browser allows playback) and faded in rather than snapped on.
-    const handleEnter = useCallback(() => {
-        if (startedRef.current) return;
-        if (!howlRef.current) {
-            howlRef.current = new Howl({ src: [MUSIC_SRC], loop: true, volume: 0 });
-        }
-        const howl = howlRef.current;
-        howl.play();
-        howl.fade(0, MUSIC_VOLUME, 2000);
-        startedRef.current = true;
-        setStarted(true);
+    // Background music. The Howl is created at mount — not inside the click —
+    // so the file is preloaded and Howler's mobile audio-unlock listeners are
+    // armed before the user's first tap. html5: true plays through a media
+    // element rather than Web Audio: iOS reliably allows it from a tap, and it
+    // keeps playing when the iPhone's hardware silent switch is on (Web Audio
+    // is muted by that switch — the usual reason for "no music on mobile").
+    useEffect(() => {
+        const howl = new Howl({ src: [MUSIC_SRC], loop: true, volume: 0, html5: true, preload: true });
+        howlRef.current = howl;
+        return () => {
+            howl.unload();
+            if (howlRef.current === howl) howlRef.current = null;
+        };
     }, []);
 
-    useEffect(() => () => {
-        if (howlRef.current) {
-            howlRef.current.unload();
-            howlRef.current = null;
+    // Entry click (a user gesture, so the browser allows playback) — fade the
+    // music in rather than snapping it on.
+    const handleEnter = useCallback(() => {
+        if (startedRef.current) return;
+        const howl = howlRef.current;
+        if (howl) {
+            // Fade only once the 'play' event fires: an html5 sound holds a
+            // play-lock until its play() promise resolves, and a fade queued
+            // during that lock never drains (volume would stay at 0).
+            howl.once('play', () => howl.fade(0, MUSIC_VOLUME, 2000));
+            howl.play();
         }
+        startedRef.current = true;
+        setStarted(true);
     }, []);
 
     const toggleMute = useCallback(() => {
