@@ -211,6 +211,43 @@ function installMasterSoftClip() {
     }
 }
 
+// --- iOS silent-switch workaround ---------------------------------------------
+// Safari mutes ALL Web Audio output while the iPhone's hardware ring/silent
+// switch is on — which is how most visitors carry their phone, so the whole
+// experience played silent for them. Playing a looping HTML5 <audio> element
+// (whose content is silence, so it is never heard) flips the system audio
+// session into "playback" mode, and iOS then lets Web Audio through despite
+// the switch — the same trick as the "unmute" library. The element must start
+// inside a user gesture, so engagePlaybackSession() is called from
+// startAllTracks. The WAV is generated in code (0.5s of zero samples) rather
+// than shipped as an asset or a magic base64 blob.
+let silentSessionAudio = null;
+function makeSilentWavUrl() {
+    const sampleRate = 8000;
+    const samples = sampleRate / 2; // 0.5s
+    const buf = new ArrayBuffer(44 + samples * 2);
+    const v = new DataView(buf);
+    const writeStr = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    writeStr(0, 'RIFF'); v.setUint32(4, 36 + samples * 2, true); writeStr(8, 'WAVE');
+    writeStr(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, sampleRate, true); v.setUint32(28, sampleRate * 2, true);
+    v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    writeStr(36, 'data'); v.setUint32(40, samples * 2, true);
+    return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+}
+function engagePlaybackSession() {
+    if (silentSessionAudio) return;
+    try {
+        const audio = new Audio(makeSilentWavUrl());
+        audio.loop = true;
+        audio.play().catch(() => { silentSessionAudio = null; });
+        silentSessionAudio = audio;
+    } catch (e) {
+        // Worst case the experience stays Web Audio-only, as before.
+        console.warn('Silent-switch workaround unavailable:', e);
+    }
+}
+
 const { mode } = parseUrlMode();
 const TRACKS = mode === 'wellness' ? WELLNESS_TRACKS : RETAIL_TRACKS;
 // Retail tracks were mastered consistently; no compensation needed.
@@ -245,6 +282,10 @@ export const useAudioStore = create((set, get) => {
 
             // Now guaranteed to be inside a user gesture with a live context.
             installMasterSoftClip();
+            engagePlaybackSession();
+            if (Howler.ctx && Howler.ctx.state === 'suspended') {
+                Howler.ctx.resume().catch(() => {});
+            }
 
             Object.entries(tracks).forEach(([key, howlInstance]) => {
                 const initialVol = TRACKS[key].initialVolume;
