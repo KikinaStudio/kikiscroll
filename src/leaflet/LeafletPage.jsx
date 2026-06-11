@@ -153,7 +153,7 @@ function LogoRow({ logos, position }) {
     );
 }
 
-const MUSIC_SRC = `${BASE}MUSIC/leaflet/demo1.mp3`;
+const MUSIC_SRC = `${BASE}MUSIC/wellness/01 Drone Wellness.mp3`;
 const MUSIC_VOLUME = 0.65;
 
 export default function LeafletPage() {
