@@ -10,10 +10,29 @@ for route in fr en leaflet wellness wellness/fr wellness/en; do
   cp index.html "$route/index.html"
 done
 
+# set_meta <fichier> <champ> <valeur> — champ: title|description|image
+set_meta() {
+  f=$1; field=$2; value=$3
+  case "$field" in
+    title)
+      sed -e "s|<title>[^<]*</title>|<title>$value</title>|" \
+          -e "s|\(property=\"og:title\" content=\"\)[^\"]*|\1$value|" \
+          -e "s|\(name=\"twitter:title\" content=\"\)[^\"]*|\1$value|" "$f" ;;
+    description)
+      sed -e "s|\(name=\"description\" content=\"\)[^\"]*|\1$value|" \
+          -e "s|\(property=\"og:description\" content=\"\)[^\"]*|\1$value|" \
+          -e "s|\(name=\"twitter:description\" content=\"\)[^\"]*|\1$value|" "$f" ;;
+    image)
+      sed -e "s|\(property=\"og:image\" content=\"\)[^\"]*|\1$value|" \
+          -e "s|\(name=\"twitter:image\" content=\"\)[^\"]*|\1$value|" "$f" ;;
+  esac > "$f.tmp" && mv "$f.tmp" "$f"
+}
+
 # La page leaflet a son propre texte de partage.
-LEAFLET_DESC="Sound is no longer a backdrop. It becomes care."
-sed \
-  -e "s|\(name=\"description\" content=\"\)[^\"]*|\1$LEAFLET_DESC|" \
-  -e "s|\(property=\"og:description\" content=\"\)[^\"]*|\1$LEAFLET_DESC|" \
-  -e "s|\(name=\"twitter:description\" content=\"\)[^\"]*|\1$LEAFLET_DESC|" \
-  leaflet/index.html > leaflet/index.html.tmp && mv leaflet/index.html.tmp leaflet/index.html
+set_meta leaflet/index.html description "Sound is no longer a backdrop. It becomes care."
+
+# Les pages wellness ont leur propre titre et image.
+for route in wellness wellness/fr wellness/en; do
+  set_meta "$route/index.html" title "Kikina⎜Experience the living Sound"
+  set_meta "$route/index.html" image "https://kikinastudio.github.io/kikiscroll/og-wellness.jpg"
+done
