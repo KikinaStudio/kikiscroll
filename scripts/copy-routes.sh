@@ -31,6 +31,7 @@ set_meta() {
 # La page leaflet a son propre titre et texte de partage.
 set_meta leaflet/index.html title "Kikina⎜Sound as Care"
 set_meta leaflet/index.html description "Sound is no longer a backdrop. It becomes care."
+set_meta leaflet/index.html image "https://kikinastudio.github.io/kikiscroll/og-leaflet.jpg"
 
 # Les pages wellness ont leur propre titre et image.
 for route in wellness wellness/fr wellness/en; do
