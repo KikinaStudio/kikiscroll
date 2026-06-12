@@ -12,8 +12,8 @@ done
 
 # La page leaflet a son propre texte de partage.
 LEAFLET_DESC="Sound is no longer a backdrop. It becomes care."
-sed -i '' \
+sed \
   -e "s|\(name=\"description\" content=\"\)[^\"]*|\1$LEAFLET_DESC|" \
   -e "s|\(property=\"og:description\" content=\"\)[^\"]*|\1$LEAFLET_DESC|" \
   -e "s|\(name=\"twitter:description\" content=\"\)[^\"]*|\1$LEAFLET_DESC|" \
-  leaflet/index.html
+  leaflet/index.html > leaflet/index.html.tmp && mv leaflet/index.html.tmp leaflet/index.html
