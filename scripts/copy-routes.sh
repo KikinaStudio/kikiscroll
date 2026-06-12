@@ -9,3 +9,11 @@ for route in fr en leaflet wellness wellness/fr wellness/en; do
   mkdir -p "$route"
   cp index.html "$route/index.html"
 done
+
+# La page leaflet a son propre texte de partage.
+LEAFLET_DESC="Sound is no longer a backdrop. It becomes care."
+sed -i '' \
+  -e "s|\(name=\"description\" content=\"\)[^\"]*|\1$LEAFLET_DESC|" \
+  -e "s|\(property=\"og:description\" content=\"\)[^\"]*|\1$LEAFLET_DESC|" \
+  -e "s|\(name=\"twitter:description\" content=\"\)[^\"]*|\1$LEAFLET_DESC|" \
+  leaflet/index.html
