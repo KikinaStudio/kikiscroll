@@ -136,6 +136,12 @@ function rampGain(howlInstance, target, durationMs) {
         node.gain.setValueAtTime(from, now); // anchor at the current value (no jump)
         node.gain.linearRampToValueAtTime(t, now + Math.max(0.005, durationMs / 1000));
         howlInstance._volume = Math.min(1, t);
+        // Keep the per-Sound volume in sync too: Howler's mobile audio unlock
+        // re-creates buffer sources and resets each gain node from
+        // sound._volume. If that stays 0 while we drive the gain node
+        // directly, the unlock silently clobbers the level (the drone never
+        // played on mobile because of this).
+        sound._volume = Math.min(1, t);
     } else if (node && node.gain) {
         node.gain.value = t;
     } else {
@@ -297,6 +303,13 @@ export const useAudioStore = create((set, get) => {
                 // visibly the drone — stuck at volume 0 for the whole session.
                 // `once('play')` fires deterministically when playback begins.
                 howlInstance.once('play', () => applyGain(howlInstance, key, initialVol));
+                // iOS: the begin gesture is a touchstart, but Howler's mobile
+                // unlock runs on touchend — right AFTER the first gain apply.
+                // The unlock re-creates buffer sources and resets gains, so
+                // re-apply the initial volume once it completes. Scroll-driven
+                // tracks recover on their own; the drone (set once, never
+                // ramped again) is the one this saves.
+                howlInstance.once('unlock', () => applyGain(howlInstance, key, initialVol));
                 howlInstance.play();
                 // If the node already exists synchronously (preloaded + context
                 // already running), set it now too — idempotent with the above.
@@ -341,6 +354,7 @@ export const useAudioStore = create((set, get) => {
                 // ~40 ms time constant: smooth but still responsive.
                 node.gain.setTargetAtTime(desired, ctx.currentTime, 0.04);
                 howlInstance._volume = Math.min(1, desired); // keep mute() coherent
+                sound._volume = Math.min(1, desired); // keep the unlock refresh coherent
             } else {
                 applyGain(howlInstance, trackName, Math.max(0, volume));
             }
