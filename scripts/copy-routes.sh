@@ -28,7 +28,8 @@ set_meta() {
   esac > "$f.tmp" && mv "$f.tmp" "$f"
 }
 
-# La page leaflet a son propre texte de partage.
+# La page leaflet a son propre titre et texte de partage.
+set_meta leaflet/index.html title "Kikina⎜Sound as Care"
 set_meta leaflet/index.html description "Sound is no longer a backdrop. It becomes care."
 
 # Les pages wellness ont leur propre titre et image.
