@@ -50,6 +50,26 @@
     transform: scale(1.01);
 }
 
+/* Dark base for a video slide — shows through before the clip is available. */
+.leaflet-slide__img--dark {
+    background: #0a0806;
+    transform: none;
+    transition: none;
+}
+
+/* Background video (events deck, "Ancrage"): fills the slide like the image,
+   slight overscan to hide edges. The clip carries its own motion, so no
+   Ken Burns settle. */
+.leaflet-slide__video {
+    position: absolute;
+    inset: -2%;
+    width: 104%;
+    height: 104%;
+    object-fit: cover;
+    object-position: center;
+    background: #0a0806;
+}
+
 /* Legibility scrim — bottom-left for the caption, a soft veil for the stat. */
 .leaflet-slide__scrim {
     position: absolute;

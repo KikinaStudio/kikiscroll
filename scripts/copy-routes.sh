@@ -5,7 +5,7 @@
 # route pour servir un vrai 200.
 set -e
 cd "$(dirname "$0")/../dist"
-for route in fr en leaflet wellness wellness/fr wellness/en; do
+for route in fr en leaflet events wellness wellness/fr wellness/en; do
   mkdir -p "$route"
   cp index.html "$route/index.html"
 done
@@ -32,6 +32,11 @@ set_meta() {
 set_meta leaflet/index.html title "Kikina⎜Sound as Care"
 set_meta leaflet/index.html description "Sound is no longer a backdrop. It becomes care."
 set_meta leaflet/index.html image "https://kikinastudio.github.io/kikiscroll/og-leaflet.jpg"
+
+# La page events a son propre titre et texte de partage (image OG par défaut
+# tant qu'un visuel dédié n'existe pas).
+set_meta events/index.html title "Kikina⎜Le son qui marque les esprits"
+set_meta events/index.html description "Le son ne décore pas votre soirée. Il décide ce qu'on en retiendra."
 
 # Les pages wellness ont leur propre titre et image.
 for route in wellness wellness/fr wellness/en; do
