@@ -89,7 +89,7 @@ const SLIDES = [
         body: [
             "Dès l'ouverture, l'invité est plongé dans l'univers de l'événement comme aucune autre expérience ne le permet. Une étude Nature Communications (McClay et al., 2023) montre que les transitions émotionnelles d'une musique structurent l'encodage des souvenirs épisodiques : elles découpent le vécu en moments mémorables.",
             "Bien orchestrées, ces transitions gravent l'événement dans la mémoire longue.",
-            "La musique ne décore pas la soirée. Elle dicte ce qu'on en retiendra.",
+            "La musique ne décore pas l'événement. Elle dicte ce qu'on en retiendra.",
         ],
         label: 'Ancrage',
         credit: { name: 'PiLeJe', detail: '250 commerciaux · Lido, Paris' },
@@ -425,7 +425,7 @@ export default function EventsPage() {
             <div className={`leaflet-enter${started ? ' is-hidden' : ''}`}>
                 <p className="leaflet-enter__eyebrow">Kikina — Events</p>
                 <h1 className="leaflet-enter__title">
-                    Le son ne décore pas votre soirée.
+                    Le son ne décore pas votre événement.
                     <br />
                     Il décide ce qu'on en retiendra.
                 </h1>
