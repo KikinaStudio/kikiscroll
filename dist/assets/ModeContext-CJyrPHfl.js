@@ -1,1 +1,0 @@
-import{j as n,r as e}from"./index-zBOagm67.js";const t=e.createContext("retail");function u({mode:r,children:o}){return n.jsx(t.Provider,{value:r,children:o})}function x(){return e.useContext(t)}export{u as ModeProvider,x as useMode};

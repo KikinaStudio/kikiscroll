@@ -28,7 +28,7 @@ const SLIDES = [
         stat: '70%',
         statSub: 'Oublié sous 24h.',
         body: [
-            "C'est la part de l'information traitée passivement que le cerveau efface en une journée (courbe d'Ebbinghaus). La soirée d'entreprise coche toutes les cases du jetable : écrans, slides, position assise, posture pro maintenue.",
+            "C'est la part de l'information passive que le cerveau efface en une journée (courbe d'Ebbinghaus). L'événement d'entreprise coche toutes les cases du jetable : écrans, slides, position assise, attention de façade.",
             "On ne prolonge pas la journée. On la fait oublier plus vite.",
         ],
         label: 'Oublié sous 24h — 70%',
@@ -39,8 +39,8 @@ const SLIDES = [
         stat: 'Habituation',
         statSub: 'Le réflexe qui ne marche plus.',
         body: [
-            "Face à un événement plat, l'instinct du secteur est de frapper plus fort : plus de lumière, plus de son, plus d'effets, pour générer dopamine et souvenirs.",
-            "Or un cerveau saturé d'écrans est en habituation permanente. Chaque stimulus supplémentaire produit une réponse décroissante. On ajoute du bruit, pas de la mémoire.",
+            "Face à un événement plat, l'instinct du secteur est de frapper plus fort : plus de lumière, plus d'effets, plus de décibels, pour générer dopamine et souvenirs.",
+            "Mais un cerveau saturé d'écrans vit en habituation permanente. Chaque stimulus supplémentaire produit une réponse plus faible que le précédent. On ajoute du bruit, pas de la mémoire.",
         ],
         label: 'Habituation',
     },
@@ -83,7 +83,8 @@ const SLIDES = [
         stat: 'Ancrage',
         statSub: 'Le storytelling qui structure la mémoire.',
         body: [
-            "Dès l'ouverture, l'invité est plongé dans l'univers de l'événement comme aucune autre expérience ne le permet. Une étude Nature Communications (McClay et al., 2023) montre que les transitions émotionnelles musicales organisent littéralement l'encodage des souvenirs épisodiques.",
+            "Dès l'ouverture, l'invité est plongé dans l'univers de l'événement comme aucune autre expérience ne le permet. Une étude Nature Communications (McClay et al., 2023) montre que les transitions émotionnelles d'une musique structurent l'encodage des souvenirs épisodiques : elles découpent le vécu en moments mémorables.",
+            "Bien orchestrées, ces transitions gravent l'événement dans la mémoire longue.",
             "La musique ne décore pas la soirée. Elle dicte ce qu'on en retiendra.",
         ],
         label: 'Ancrage',
@@ -92,17 +93,28 @@ const SLIDES = [
         key: 'signature',
         src: IMG('07-signature.jpg'),
         stat: '+76%',
-        statSub: 'Votre imagerie est sur mesure. Votre musique, jamais. Parce que c’était impossible. Plus aujourd’hui.',
+        statSub: 'Ce que vous gagnez à signer le son de votre événement.',
         body: [
-            "Les marques dotées d'actifs sonores forts captent +76% de brand power (Kantar). Notre tech fusionne neurosciences, storytelling et composition en une expérience inoubliable, puis en fait découler tout le design sonore de la soirée : entrée, accueil sur scène, musiques des vidéos.",
-            "Un univers sonore cohérent, vivant, signé.",
+            "Les marques avec une identité sonore forte sont 76 % plus souvent choisies que les autres (Kantar). À l'échelle d'un événement, c'est la différence entre une convention oubliée le lundi matin et une marque qu'on associe encore, six mois plus tard, à une émotion précise.",
         ],
-        label: '+76%',
+        label: '+76% — La puissance du son',
+    },
+    {
+        key: 'sounddesign',
+        // TODO: idéalement sa propre image (08-signature.jpg) ; réutilise 07 en attendant.
+        src: IMG('07-signature.jpg'),
+        stat: 'Sur mesure',
+        statSub: 'Tout ce qui se voit à votre événement est pensé sur mesure. Le son, jamais. Parce que c’était impossible — plus aujourd’hui.',
+        body: [
+            "Notre technologie fusionne neurosciences, storytelling et composition en une expérience unique, puis irrigue tout le sound design de l'événement : musique d'accueil, transitions entre les prises de parole, habillage des vidéos, temps forts.",
+            "Un sound design propre à votre marque, cohérent, vivant, signé Kikina.",
+        ],
+        label: 'Sound design signé Kikina',
     },
     {
         key: 'contact',
         src: LEAFLET('09-presence.jpg'),
-        eyebrow: 'Faisons de votre soirée un souvenir',
+        eyebrow: 'Faisons de votre événement un souvenir',
         display: ['Écoutez par vous-même.'],
         logosTop: [
             ['kering', 'Kering'],
@@ -126,8 +138,8 @@ const SLIDES = [
             ['institut-du-monde-arabe', 'Institut du Monde Arabe'],
             ['marie-claire', 'Marie Claire'],
         ],
-        cta: { label: 'Organiser votre soirée', href: 'mailto:jeremie@kikinastudio.com' },
-        label: 'Faisons de votre soirée un souvenir',
+        cta: { label: 'Organiser votre événement', href: 'mailto:jeremie@kikinastudio.com' },
+        label: 'Faisons de votre événement un souvenir',
     },
 ];
 
@@ -161,7 +173,7 @@ export default function EventsPage() {
     const touchStartYRef = useRef(null);
 
     useEffect(() => {
-        document.title = 'Kikina Lab — Le son qui marque les esprits';
+        document.title = 'Kikina — Le son qui marque les esprits';
     }, []);
 
     const goTo = useCallback((target) => {
@@ -396,13 +408,13 @@ export default function EventsPage() {
 
             {/* Entry overlay — starts the music inside a user gesture */}
             <div className={`leaflet-enter${started ? ' is-hidden' : ''}`}>
-                <p className="leaflet-enter__eyebrow">Kikina Lab — Events</p>
+                <p className="leaflet-enter__eyebrow">Kikina — Events</p>
                 <h1 className="leaflet-enter__title">
                     Le son ne décore pas votre soirée.
                     <br />
                     Il décide ce qu'on en retiendra.
                 </h1>
-                <p className="leaflet-enter__sub">Une courte traversée visuelle. Son activé.</p>
+                <p className="leaflet-enter__sub">Quelques minutes. Le son, en fond, pour mieux s'y plonger.</p>
                 <button className="leaflet-enter__btn" onClick={handleEnter}>
                     Entrer
                 </button>
