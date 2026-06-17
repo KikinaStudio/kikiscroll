@@ -10,10 +10,12 @@ import '../leaflet/leaflet.css';
 // the content differs. Order, titles, taglines and body copy mirror the Notion
 // deck "Slides Leaflet Events" slide by slide.
 //
-// Backgrounds live in public/IMAGES/events/. Slide 6 ("Ancrage") is a video in
-// Notion (a non-downloadable internal attachment), so it plays a local clip —
-// drop 06-ancrage.mp4 into public/IMAGES/events/ to enable it; until then the
-// section shows the deck's dark canvas behind its text.
+// Backgrounds live in public/IMAGES/events/. Slides 6 ("Ancrage") and 8
+// ("Vivant") use silent looping background videos (06-ancrage.mp4 — PiLeJe at
+// the Lido ; 08-paris-podcast.mp4 — Paris Podcast Festival at the Gaité
+// Lyrique). A dark canvas shows behind a video slide's text if its clip is
+// ever missing. `credit` carries the small photo/video caption (client +
+// audience + venue) shown bottom-right on the experience slides.
 const BASE = import.meta.env.BASE_URL;
 const IMG = (name) => `${BASE}IMAGES/events/${name}`;
 // The finale reuses the leaflet's partner logos and warm-glow backdrop — the
@@ -65,6 +67,7 @@ const SLIDES = [
             "Le signal sonore qui suit est traité avec une acuité que rien d'autre ne déclenche.",
         ],
         label: '0,15 s — On coupe',
+        credit: { name: "L'Amphi", detail: '200 leaders en santé · Paris' },
     },
     {
         key: 'cocreation',
@@ -76,6 +79,7 @@ const SLIDES = [
             "Le son touche avant que la raison n'intervienne. C'est précisément là, les yeux fermés, que le souvenir s'inscrit en profondeur.",
         ],
         label: 'Co-création',
+        credit: { name: 'Kering', detail: 'International Fashion Summit · NYC' },
     },
     {
         key: 'ancrage',
@@ -88,6 +92,7 @@ const SLIDES = [
             "La musique ne décore pas la soirée. Elle dicte ce qu'on en retiendra.",
         ],
         label: 'Ancrage',
+        credit: { name: 'PiLeJe', detail: '250 commerciaux · Lido, Paris' },
     },
     {
         key: 'signature',
@@ -96,20 +101,22 @@ const SLIDES = [
         statSub: 'Ce que vous gagnez à signer le son de votre événement.',
         body: [
             "Les marques avec une identité sonore forte sont 76 % plus souvent choisies que les autres (Kantar). À l'échelle d'un événement, c'est la différence entre une convention oubliée le lundi matin et une marque qu'on associe encore, six mois plus tard, à une émotion précise.",
+            "Pourtant, à votre événement, tout ce qui se voit est pensé sur mesure, et le son, jamais. Parce que c'était impossible. Plus aujourd'hui.",
         ],
         label: '+76% — La puissance du son',
+        credit: { name: 'PiLeJe', detail: '250 commerciaux · Lido, Paris' },
     },
     {
-        key: 'sounddesign',
-        // TODO: idéalement sa propre image (08-signature.jpg) ; réutilise 07 en attendant.
-        src: IMG('07-signature.jpg'),
-        stat: 'Sur mesure',
-        statSub: 'Tout ce qui se voit à votre événement est pensé sur mesure. Le son, jamais. Parce que c’était impossible — plus aujourd’hui.',
+        key: 'vivant',
+        video: IMG('08-paris-podcast.mp4'),
+        stat: 'Vivant',
+        statSub: 'Vos convives deviennent les instruments.',
         body: [
-            "Notre technologie fusionne neurosciences, storytelling et composition en une expérience unique, puis irrigue tout le sound design de l'événement : musique d'accueil, transitions entre les prises de parole, habillage des vidéos, temps forts.",
-            "Un sound design propre à votre marque, cohérent, vivant, signé Kikina.",
+            "Notre son est adaptatif et vivant : composé pour votre événement, il réagit à la salle en temps réel. Les gestes, les expressions et les déplacements de vos convives nourrissent la musique — chacun devient, sans le savoir, l'un de ses instruments.",
+            "Le son atteint alors la puissance émotionnelle qu'on ne ressent d'ordinaire qu'au cinéma : porté par la salle, vivant, impossible à rejouer à l'identique.",
         ],
-        label: 'Sound design signé Kikina',
+        label: 'Vivant — le son adaptatif',
+        credit: { name: 'Paris Podcast Festival', detail: '400 personnes · Gaité Lyrique, Paris' },
     },
     {
         key: 'contact',
@@ -288,7 +295,7 @@ export default function EventsPage() {
                     >
                         {slide.video ? (
                             <>
-                                {/* Dark base shows through until 06-ancrage.mp4 is added */}
+                                {/* Dark base shows through if the clip is ever missing */}
                                 <div className="leaflet-slide__img leaflet-slide__img--dark" />
                                 <video
                                     className="leaflet-slide__video"
@@ -336,6 +343,14 @@ export default function EventsPage() {
                                 {slide.body && slide.body.map((para) => (
                                     <p key={para} className="leaflet-caption__body">{para}</p>
                                 ))}
+                            </div>
+                        )}
+
+                        {/* Photo/video credit (experience slides) — bottom-right */}
+                        {slide.credit && (
+                            <div className="leaflet-credit" aria-hidden="true">
+                                <span className="leaflet-credit__name">{slide.credit.name}</span>
+                                <span className="leaflet-credit__detail">{slide.credit.detail}</span>
                             </div>
                         )}
                     </section>
