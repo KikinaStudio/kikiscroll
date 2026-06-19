@@ -24,6 +24,12 @@ if (segments[0] === 'leaflet') {
     import('./leaflet/LeafletPage.jsx').then(({ default: LeafletPage }) => {
         renderRoot(<LeafletPage />);
     });
+} else if (segments[0] === 'leaflet2') {
+    document.documentElement.lang = 'fr';
+    document.documentElement.dataset.mode = 'leaflet2';
+    import('./leaflet2/Leaflet2Page.jsx').then(({ default: Leaflet2Page }) => {
+        renderRoot(<Leaflet2Page />);
+    });
 } else if (segments[0] === 'events') {
     document.documentElement.lang = 'fr';
     document.documentElement.dataset.mode = 'events';
