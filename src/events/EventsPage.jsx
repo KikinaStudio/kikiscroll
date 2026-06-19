@@ -10,11 +10,11 @@ import '../leaflet/leaflet.css';
 // the content differs. Order, titles, taglines and body copy mirror the Notion
 // deck "Slides Leaflet Events" slide by slide.
 //
-// Backgrounds live in public/IMAGES/events/. Slides 6 ("Ancrage") and 8
-// ("Vivant") use silent looping background videos (06-ancrage.mp4 — PiLeJe at
-// the Lido ; 08-paris-podcast.mp4 — Paris Podcast Festival at the Gaité
-// Lyrique). A dark canvas shows behind a video slide's text if its clip is
-// ever missing. `credit` carries the small photo/video caption (client +
+// Backgrounds live in public/IMAGES/events/. Slides 6 ("Ancrage") and 7
+// ("Sur mesure") use silent looping background videos (06-ancrage.mp4 —
+// PiLeJe at the Lido ; 08-paris-podcast.mp4 — Paris Podcast Festival at the
+// Gaité Lyrique). A dark canvas shows behind a video slide's text if its clip
+// is ever missing. `credit` carries the small photo/video caption (client +
 // audience + venue) shown bottom-right on the experience slides.
 const BASE = import.meta.env.BASE_URL;
 const IMG = (name) => `${BASE}IMAGES/events/${name}`;
@@ -31,7 +31,7 @@ const SLIDES = [
         statSub: 'Oublié sous 24h.',
         body: [
             "C'est la part de l'information passive que le cerveau efface en une journée (courbe d'Ebbinghaus). L'événement d'entreprise coche toutes les cases du jetable : écrans, slides, position assise, attention de façade.",
-            "On ne prolonge pas la journée. On la fait oublier plus vite.",
+            "Et plus on en rajoute, plus on accélère l'oubli.",
         ],
         label: 'Oublié sous 24h — 70%',
     },
@@ -39,9 +39,9 @@ const SLIDES = [
         key: 'habituation',
         src: IMG('02-habituation.jpg'),
         stat: 'Habituation',
-        statSub: 'Le réflexe qui ne marche plus.',
+        statSub: 'Pourquoi en rajouter ne marche plus.',
         body: [
-            "Face à un événement plat, l'instinct du secteur est de frapper plus fort : plus de lumière, plus d'effets, plus de décibels, pour générer dopamine et souvenirs.",
+            "L'instinct du secteur est de frapper plus fort : plus de lumière, plus d'effets, plus de décibels, pour générer dopamine et souvenirs.",
             "Mais un cerveau saturé d'écrans vit en habituation permanente. Chaque stimulus supplémentaire produit une réponse plus faible que le précédent. On ajoute du bruit, pas de la mémoire.",
         ],
         label: 'Habituation',
@@ -50,10 +50,10 @@ const SLIDES = [
         key: 'contraste',
         src: IMG('03-contraste.jpg'),
         stat: 'Contraste',
-        statSub: 'La mémoire ne fonctionne pas au volume.',
+        statSub: 'Ce que le cerveau récompense vraiment.',
         body: [
-            "La dopamine ne répond pas au niveau absolu de stimulation, mais à l'écart entre l'attendu et le vécu (reward prediction error, Schultz, Science, 1997). C'est le mécanisme de récompense le plus solidement établi en neurosciences.",
-            "Ce que le cerveau récompense, ce n'est pas l'intensité. C'est la rupture.",
+            "La dopamine ne répond pas au niveau absolu de stimulation, mais à l'écart entre l'attendu et le vécu (reward prediction error, Schultz, Science, 1997) — le mécanisme de récompense le plus solidement établi en neurosciences.",
+            "Ce n'est pas l'intensité. C'est la rupture. Reste à savoir comment la créer dans une salle saturée d'images.",
         ],
         label: 'Contraste',
     },
@@ -61,22 +61,22 @@ const SLIDES = [
         key: 'coupe',
         src: IMG('04-coupe.jpg'),
         stat: '0,15 s',
-        statSub: 'On coupe. Yeux fermés.',
+        statSub: 'Le son, le seul medium qui crée cette rupture.',
         body: [
-            "Le son atteint l'auditeur en 0,146 seconde, trois fois plus vite que l'image. En éteignant d'un coup la surstimulation visuelle, on libère des ressources attentionnelles massives et on crée l'écart exact que le cerveau récompense.",
-            "Le signal sonore qui suit est traité avec une acuité que rien d'autre ne déclenche.",
+            "Le son atteint l'auditeur en 0,146 seconde, près de trois fois plus vite que les stimuli visuels.",
+            "Yeux fermés, écrans éteints, la surstimulation tombe d'un coup : on crée l'écart exact que le cerveau récompense. Le signal sonore qui suit touche avant que la rationalisation n'intervienne.",
         ],
-        label: '0,15 s — On coupe',
+        label: '0,15 s — Le son crée la rupture',
         credit: { name: "L'Amphi", detail: '200 leaders en santé · Paris' },
     },
     {
         key: 'cocreation',
         src: IMG('05-cocreation.jpg'),
         stat: 'Co-création',
-        statSub: 'Un sas de décompression, puis un voyage intérieur.',
+        statSub: 'Ce qui se passe alors pour vos invités.',
         body: [
             "L'audience se déconnecte de son quotidien et entre dans un récit dont elle est co-auteure : elle y projette ses souvenirs, ses sensations, ses émotions. Personne ne vit la même chose.",
-            "Le son touche avant que la raison n'intervienne. C'est précisément là, les yeux fermés, que le souvenir s'inscrit en profondeur.",
+            "C'est précisément là, les yeux fermés, que le souvenir s'inscrit en profondeur.",
         ],
         label: 'Co-création',
         credit: { name: 'Kering', detail: 'International Fashion Summit · NYC' },
@@ -85,37 +85,24 @@ const SLIDES = [
         key: 'ancrage',
         video: IMG('06-ancrage.mp4'),
         stat: 'Ancrage',
-        statSub: 'Le storytelling qui structure la mémoire.',
+        statSub: 'Comment cette expérience devient un souvenir.',
         body: [
-            "Dès l'ouverture, l'invité est plongé dans l'univers de l'événement comme aucune autre expérience ne le permet. Une étude Nature Communications (McClay et al., 2023) montre que les transitions émotionnelles d'une musique structurent l'encodage des souvenirs épisodiques : elles découpent le vécu en moments mémorables.",
-            "Bien orchestrées, ces transitions gravent l'événement dans la mémoire longue.",
-            "La musique ne décore pas l'événement. Elle dicte ce qu'on en retiendra.",
+            "Une étude Nature Communications (McClay et al., 2023) montre que les transitions émotionnelles d'une musique structurent l'encodage des souvenirs épisodiques : elles découpent le vécu en moments mémorables.",
+            "Bien orchestrées, ces transitions gravent l'événement dans la mémoire longue. La musique ne décore pas l'événement — elle dicte ce qu'on en retiendra.",
         ],
         label: 'Ancrage',
         credit: { name: 'PiLeJe', detail: '250 commerciaux · Lido, Paris' },
     },
     {
-        key: 'signature',
-        src: IMG('07-signature.jpg'),
-        stat: '+76%',
-        statSub: 'Ce que vous gagnez à signer le son de votre événement.',
-        body: [
-            "Les marques avec une identité sonore forte sont 76 % plus souvent choisies que les autres (Kantar). À l'échelle d'un événement, c'est la différence entre une convention oubliée le lundi matin et une marque qu'on associe encore, six mois plus tard, à une émotion précise.",
-            "Pourtant, à votre événement, tout ce qui se voit est pensé sur mesure, et le son, jamais. Parce que c'était impossible. Plus aujourd'hui.",
-        ],
-        label: '+76% — La puissance du son',
-        credit: { name: 'PiLeJe', detail: '250 commerciaux · Lido, Paris' },
-    },
-    {
-        key: 'vivant',
+        key: 'surmesure',
         video: IMG('08-paris-podcast.mp4'),
-        stat: 'Vivant',
-        statSub: 'Vos convives deviennent les instruments.',
+        stat: 'Sur mesure',
+        statSub: 'Une signature sonore, composée pour vous, vivante en salle.',
         body: [
-            "Notre son est adaptatif et vivant : composé pour votre événement, il réagit à la salle en temps réel. Les gestes, les expressions et les déplacements de vos convives nourrissent la musique — chacun devient, sans le savoir, l'un de ses instruments.",
-            "Le son atteint alors la puissance émotionnelle qu'on ne ressent d'ordinaire qu'au cinéma : porté par la salle, vivant, impossible à rejouer à l'identique.",
+            "Pourtant, à votre événement, tout ce qui se voit est pensé sur mesure, et le son, jamais. Parce que c'était impossible. Plus aujourd'hui.",
+            "Notre son est composé pour votre événement et reste vivant en salle : il réagit aux gestes et aux déplacements de vos convives en temps réel — chacun devient, sans le savoir, l'un de ses instruments. Impossible à rejouer à l'identique.",
         ],
-        label: 'Vivant — le son adaptatif',
+        label: 'Sur mesure — vivant en salle',
         credit: { name: 'Paris Podcast Festival', detail: '400 personnes · Gaité Lyrique, Paris' },
     },
     {
