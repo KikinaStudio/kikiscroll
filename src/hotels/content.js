@@ -64,7 +64,7 @@ export const SLIDES = [
         heavy: true,
         eyebrow: 'Le bien-être n’est plus un service',
         stat: '23,3 %',
-        statSub: 'du tourisme bien-être passe par l’hébergement, devenu son premier poste.',
+        statSub: 'du tourisme bien-être passe par l’hébergement, devenu son premier poste de dépense.',
         statSource: 'Grand View Research / GWI, 2025',
         body: [
             'Design, sommeil, nourriture, mouvement : tout l’hôtel a été pensé pour le bien-être.',
@@ -79,12 +79,12 @@ export const SLIDES = [
         src: HIMG('02-lounge.jpg'),
         eyebrow: 'Les deux tendances qui montent',
         stats: [
-            { figure: '+19,5 %', sub: 'par an. L’immobilier bien-être, des lieux conçus pour soigner. Notre objectif.', source: 'Global Wellness Institute' },
-            { figure: '+12,4 %', sub: 'par an. Le bien-être mental, agir sur l’état intérieur. Notre technologie.', source: 'Global Wellness Institute' },
+            { figure: '+19,5 %', sub: 'par an. Les lieux physiques dédiés au bien-être. Notre objectif.', source: 'Global Wellness Institute' },
+            { figure: '+12,4 %', sub: 'par an. Le bien-être mental. Notre technologie.', source: 'Global Wellness Institute' },
         ],
         body: [
-            'Sur cinq ans, les deux marchés du bien-être qui croissent le plus vite sont les lieux pensés pour soigner et le bien-être mental.',
-            'L’un est notre objectif, l’autre notre technologie.',
+            'Notre technologie modifie la musique en direct pour augmenter l’expérience client, et la module à volonté selon le lieu et le moment.',
+            'Une seule solution sur les deux tendances : les lieux dédiés au bien-être, et le bien-être mental.',
         ],
         label: 'Les deux tendances qui montent',
     },
