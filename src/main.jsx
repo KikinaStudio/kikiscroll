@@ -36,6 +36,12 @@ if (segments[0] === 'leaflet') {
     import('./events/EventsPage.jsx').then(({ default: EventsPage }) => {
         renderRoot(<EventsPage />);
     });
+} else if (segments[0] === 'hotels') {
+    document.documentElement.lang = 'fr';
+    document.documentElement.dataset.mode = 'hotels';
+    import('./hotels/HotelsPage.jsx').then(({ default: HotelsPage }) => {
+        renderRoot(<HotelsPage />);
+    });
 } else {
     const { mode, lang } = parseUrlMode();
 

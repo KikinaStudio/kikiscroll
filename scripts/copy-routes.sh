@@ -5,7 +5,7 @@
 # route pour servir un vrai 200.
 set -e
 cd "$(dirname "$0")/../dist"
-for route in fr en leaflet leaflet2 events wellness wellness/fr wellness/en; do
+for route in fr en leaflet leaflet2 events hotels wellness wellness/fr wellness/en; do
   mkdir -p "$route"
   cp index.html "$route/index.html"
 done
@@ -41,6 +41,10 @@ set_meta events/index.html description "Le son ne décore pas votre soirée. Il 
 # La page leaflet2 (deck événementiel FR — clone du leaflet wellness).
 set_meta leaflet2/index.html title "Kikina⎜Le son qui marque les esprits"
 set_meta leaflet2/index.html description "Le son n'est plus un fond. Il devient un outil."
+
+# La page hotels (paysage sonore pour l'hôtellerie de luxe — FR).
+set_meta hotels/index.html title "Kikina⎜Le son, dernière couche du bien-être hôtelier"
+set_meta hotels/index.html description "Tout l'hôtel a été conçu pour le bien-être, sauf le son. Un paysage sonore génératif et neuro-informé, calibré espace par espace."
 
 # Les pages wellness ont leur propre titre et image.
 for route in wellness wellness/fr wellness/en; do
