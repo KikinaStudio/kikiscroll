@@ -83,8 +83,8 @@ export const SLIDES = [
             { figure: '+12,4 %', sub: 'par an. Le bien-être mental. Notre technologie.', source: 'Global Wellness Institute' },
         ],
         body: [
-            'Notre technologie modifie la musique en direct pour augmenter l’expérience client, et la module à volonté selon le lieu et le moment.',
-            'Une seule solution sur les deux tendances : les lieux dédiés au bien-être, et le bien-être mental.',
+            'La tendance du bien-être qui croît le plus vite concerne les lieux physiques qui lui sont dédiés. La deuxième, le bien-être mental.',
+            'Notre solution adresse exactement ces deux tendances.',
         ],
         label: 'Les deux tendances qui montent',
     },
@@ -96,7 +96,7 @@ export const SLIDES = [
         src: IMG('11-score.webp'),
         eyebrow: 'La musique évolutive',
         title: 'Le souffle du live, sans la contrainte du live.',
-        intro: 'Toute la musique connue tient en deux modèles. Nous en ouvrons un troisième.',
+        intro: 'Toute la musique connue tient en deux modèles. Nous ouvrons le troisième : un son modifié en direct, modulé à volonté pour augmenter l’expérience client, espace par espace, moment par moment.',
         columns: [
             { tag: 'Le live', artist: 'Artiste présent', music: 'Vivante', alive: true, living: false, body: 'Elle réagit à la salle et à l’instant. Mais elle ne dure qu’un soir.' },
             { tag: 'Le disque & le streaming', artist: 'Artiste absent', music: 'Figée', alive: false, living: false, body: 'Partout, tout le temps. Mais identique à chaque écoute, et elle finit par s’user.' },
