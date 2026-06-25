@@ -681,6 +681,14 @@ html[data-mode="events"] .leaflet-logo-img {
     }
 }
 
+/* Heavy scrim (events slide 1) — bright/busy B&W photo. Darkens the frame and
+   adds a centre vignette so the figure + bottom-left caption stay legible. */
+html[data-mode="events"] .leaflet-slide--heavy-scrim .leaflet-slide__scrim {
+    background:
+        linear-gradient(to top, rgba(8, 5, 3, 0.86) 0%, rgba(8, 5, 3, 0.55) 45%, rgba(8, 5, 3, 0.5) 100%),
+        radial-gradient(ellipse 62% 48% at 50% 44%, rgba(8, 5, 3, 0.55) 0%, rgba(8, 5, 3, 0) 72%);
+}
+
 /* --- Team (events slide 9) — cloned from the /hotels deck ------------------ */
 /* Same markup and look as html[data-mode="hotels"] .h-team; scoped to events
    so it rides on the same leaflet.css the events page already imports. */

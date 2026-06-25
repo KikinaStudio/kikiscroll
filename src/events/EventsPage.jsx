@@ -29,7 +29,8 @@ const LOGO = (file) => `${BASE}IMAGES/leaflet/logos/${file}.png`;
 const SLIDES = [
     {
         key: 'ressemblance',
-        src: IMG('01-oubli.jpg'),
+        src: IMG('01-cinema.jpg'),
+        heavyScrim: true, // bright, busy B&W photo — needs a deeper veil for legibility
         stat: 'Déjà vu',
         statSub: 'Le visuel ne suffit plus.',
         body: [
@@ -325,7 +326,7 @@ export default function EventsPage() {
                 {SLIDES.map((slide, i) => (
                     <section
                         key={slide.key}
-                        className={`leaflet-slide${slide.cards ? ' leaflet-slide--voyages' : ''}${slide.members ? ' leaflet-slide--team' : ''}${i === index ? ' is-active' : ''}`}
+                        className={`leaflet-slide${slide.cards ? ' leaflet-slide--voyages' : ''}${slide.members ? ' leaflet-slide--team' : ''}${slide.heavyScrim ? ' leaflet-slide--heavy-scrim' : ''}${i === index ? ' is-active' : ''}`}
                         aria-hidden={i !== index}
                     >
                         {slide.video ? (
