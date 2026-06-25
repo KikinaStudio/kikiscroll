@@ -9,9 +9,10 @@ import '../leaflet/leaflet.css';
 // gesture → one slide, GSAP track, entry overlay, drone, cursor canvas. Only
 // the content differs.
 //
-// Storytelling (2026 rewrite): 1 constat → 2 fausse solution → 3 mécanisme
-// (rupture) → 4 yeux fermés (+37%) → 5 les trois mouvements (CARDS) → 6 install
-// interactive → 7 fil sonore → 8 manifeste Kikina → 9 équipe → 10 contact.
+// Storytelling (2026 rewrite): 1 objectif → 2 l'état (le public est ailleurs)
+// → 3 le moment (la rupture qui fait basculer) → 4 yeux fermés (+37%) → 5 le
+// mécanisme en trois mouvements (CARDS) → 6 install interactive → 7 fil sonore
+// → 8 Kikina → 9 équipe → 10 contact.
 //
 // Backgrounds live in public/IMAGES/events/. Two slides use silent looping
 // videos: "installations" (08-paris-podcast.mp4 — Paris Podcast Festival, Gaité
@@ -31,54 +32,54 @@ const SLIDES = [
         key: 'ressemblance',
         src: IMG('01-cinema.jpg'),
         heavyScrim: true, // bright, busy B&W photo — needs a deeper veil for legibility
-        stat: 'Déjà vu',
-        statSub: 'Le visuel ne suffit plus.',
+        stat: 'Un objectif',
+        statSub: 'On ne réunit pas des gens pour être regardé.',
         body: [
-            "Tous les événements corporate finissent par se ressembler. Écrans, slides, keynote : on regarde, on applaudit, on oublie.",
-            "70 % de ce qu'on voit s'efface en 24 h. Le visuel ne suffit plus. Pour qu'un message reste, il faut toucher l'émotion.",
+            "Vous ne réunissez pas des centaines de personnes pour qu'on vous regarde, mais pour faire passer un message, fédérer une équipe, lancer une marque.",
+            "Un objectif clair, un budget, une salle pleine. Tout est réuni pour que ça marque. Reste une question : votre audience est-elle prête à le recevoir ?",
         ],
-        label: 'Tout se ressemble',
+        label: 'Votre objectif',
     },
     {
         key: 'plus',
         src: IMG('02-habituation.jpg'),
-        stat: 'Toujours plus',
-        statSub: "Plus de spectacle, moins d'effet.",
+        stat: 'Ailleurs',
+        statSub: "Présents dans la salle, absents à l'instant.",
         body: [
-            "Le réflexe du secteur : en faire toujours plus. Plus d'effets, plus de spectacle, plus de waouh.",
-            "Mais un public habitué s'en lasse vite, et chaque effet pèse moins que le précédent. On dépense plus pour marquer moins. Il faut un autre levier.",
+            "Vos invités arrivent saturés : la réunion d'avant, 200 mails, les notifications, les transports. Ils sont dans la salle, mais la tête est ailleurs.",
+            "Le problème n'est pas votre contenu, c'est leur état. Un message, même excellent, ricoche sur un public absent : 70 % s'efface en 24 h.",
         ],
-        label: 'En faire plus ne suffit plus',
+        label: 'Le mauvais état',
     },
     {
         key: 'rupture',
         src: IMG('03-contraste.jpg'),
-        stat: 'La rupture',
-        statSub: 'On retient ce qui rompt.',
+        stat: 'Le moment',
+        statSub: 'On ne décore pas. On fait basculer.',
         body: [
-            "Le cerveau retient ce qui rompt, pas ce qui dure. Il réagit à l'écart entre l'attendu et le vécu (Schultz, 1997).",
-            "Le levier : créer une vraie coupure dans le programme. On déconnecte, on reconnecte, et les invités reviennent concentrés.",
+            "Le cerveau n'enregistre que ce qui rompt avec l'attendu (Schultz, 1997). Inutile d'en faire plus : il faut créer un écart, une vraie coupure.",
+            "C'est notre métier. Un moment sonore qui détache toute la salle de son état d'arrivée et la fait basculer dans celui où votre message peut enfin entrer.",
         ],
-        label: 'La rupture',
+        label: 'Le moment qui fait basculer',
     },
     {
         key: 'yeux-fermes',
         src: IMG('04-coupe.jpg'),
         stat: '+37 %',
-        statSub: 'Les yeux fermés, on retient plus.',
+        statSub: "Changez l'état, le souvenir suit.",
         body: [
-            "Quelques minutes les yeux fermés, écrans éteints. Le public arrête de regarder et commence à ressentir.",
-            "Les yeux fermés, on retient nettement plus (+37 %, Vredeveldt et al.). Chacun associe vos messages à ses émotions, et les garde.",
+            "Quelques minutes les yeux fermés, écrans éteints. Le public arrête de regarder et bascule : il commence à ressentir.",
+            "Les yeux fermés, on retient nettement plus (+37 %, Vredeveldt et al.). Dans cet état, chacun relie vos messages à ses émotions, et les garde.",
         ],
-        label: 'Et si on fermait les yeux — +37 %',
+        label: 'Les yeux fermés, +37 %',
     },
     {
         key: 'voyages',
         src: IMG('05-cocreation.jpg'),
         cards: {
-            intro: "Nos voyages sonores, c'est :",
+            intro: "On fabrique ce basculement en trois mouvements :",
             items: [
-                { titre: 'Déconnexion', body: "Le public sort de sa journée, de son téléphone, de sa charge mentale. Il revient vraiment dans la salle." },
+                { titre: 'Déconnexion', body: "Le public sort de son état d'arrivée : la journée, le téléphone, la charge mentale. Il revient vraiment dans la salle." },
                 { titre: 'Synchronisation', body: "Le son cale le rythme du groupe, de l'agitation vers le calme. Le message passe par le corps, pas seulement par la tête." },
                 { titre: 'Ancrage', body: "Une transition musicale forte fixe le souvenir (McClay et al., 2023). Ce que le public ressent, il le retient." },
             ],
@@ -216,7 +217,7 @@ export default function EventsPage() {
     const touchStartYRef = useRef(null);
 
     useEffect(() => {
-        document.title = 'Kikina — Le son qui marque les esprits';
+        document.title = 'Kikina · Le son qui marque les esprits';
     }, []);
 
     const goTo = useCallback((target) => {
@@ -503,7 +504,7 @@ export default function EventsPage() {
 
             {/* Entry overlay — starts the music inside a user gesture */}
             <div className={`leaflet-enter${started ? ' is-hidden' : ''}`}>
-                <p className="leaflet-enter__eyebrow">Kikina — Events</p>
+                <p className="leaflet-enter__eyebrow">Kikina · Events</p>
                 <h1 className="leaflet-enter__title">
                     Le son ne décore pas votre événement.
                     <br />
