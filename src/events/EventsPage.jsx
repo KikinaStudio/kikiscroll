@@ -509,7 +509,7 @@ export default function EventsPage() {
                     <br />
                     Il décide ce qu'on en retiendra.
                 </h1>
-                <p className="leaflet-enter__sub">Quelques minutes. Le son, en fond, pour mieux s'y plonger.</p>
+                <p className="leaflet-enter__sub">Kikina compose les expériences sonores qui font basculer votre audience dans l'état que votre événement attend d'elle.</p>
                 <button className="leaflet-enter__btn" onClick={handleEnter}>
                     Entrer
                 </button>

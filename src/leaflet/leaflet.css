@@ -440,8 +440,10 @@ html[data-mode="events"] .leaflet-logo-img {
     font-size: 14px;
     font-weight: 300;
     letter-spacing: 0.04em;
+    line-height: 1.5;
     color: rgba(245, 239, 231, 0.7);
-    margin-bottom: 40px;
+    max-width: 60ch;
+    margin: 0 auto 40px;
 }
 
 .leaflet-enter__btn {
