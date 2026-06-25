@@ -9,14 +9,37 @@ html[data-mode="hotels"] {
     --h-accent: #c9a45f;
 }
 
-/* --- Source line under a centered key figure ------------------------------ */
+/* --- Sources: one small line pinned to the bottom of the slide ------------ */
 
-html[data-mode="hotels"] .h-stat__source {
-    margin-top: 10px;
-    font-size: 11px;
-    letter-spacing: 0.03em;
-    color: rgba(246, 238, 217, 0.5);
-    max-width: 30ch;
+html[data-mode="hotels"] .h-sources {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(58px, 9vh, 100px);
+    transform: translateX(-50%);
+    z-index: 6;
+    margin: 0;
+    max-width: min(80vw, 62ch);
+    text-align: center;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    color: rgba(246, 238, 217, 0.4);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+html[data-mode="hotels"] .leaflet-slide.is-active .h-sources {
+    opacity: 1;
+    transition: opacity 1s ease 0.5s;
+}
+
+/* Smaller unit glued to a key figure (e.g. « par an »). */
+html[data-mode="hotels"] .h-stat__unit {
+    margin-left: 0.2em;
+    font-size: 0.42em;
+    letter-spacing: 0.01em;
+    color: rgba(246, 238, 217, 0.68);
+    font-variant-numeric: normal;
 }
 
 /* --- Row of two / three centered key figures ------------------------------ */
@@ -77,8 +100,10 @@ html[data-mode="hotels"] .h-stat__sub {
     max-width: 20ch;
 }
 
-html[data-mode="hotels"] .h-stat__source {
-    margin-top: 9px;
+/* Two figures: keep them on one row and push them further apart. */
+html[data-mode="hotels"] .h-stat-row--2 {
+    flex-wrap: nowrap;
+    gap: clamp(52px, 9vw, 132px);
 }
 
 /* --- Special (centered) slides: shared frame ------------------------------ */
@@ -259,6 +284,22 @@ html[data-mode="hotels"] .h-col__axis--fixed {
     text-decoration-color: rgba(246, 238, 217, 0.3);
 }
 
+html[data-mode="hotels"] .h-col__badge {
+    position: relative;
+    z-index: 1;
+    align-self: flex-start;
+    margin-bottom: 13px;
+    padding: 4px 10px;
+    border: 1px solid rgba(201, 164, 95, 0.45);
+    border-radius: 9999px;
+    background: rgba(201, 164, 95, 0.14);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--h-accent);
+}
+
 html[data-mode="hotels"] .h-col__body {
     position: relative;
     z-index: 1;
@@ -384,15 +425,30 @@ html[data-mode="hotels"] .h-card__body {
 
 html[data-mode="hotels"] .h-card__tag {
     align-self: flex-start;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
     margin-top: 14px;
     padding: 5px 13px;
     border: 1px solid rgba(201, 164, 95, 0.4);
     border-radius: 9999px;
-    font-size: 10.5px;
+}
+
+html[data-mode="hotels"] .h-card__tag-fig {
     font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: 12.5px;
+    letter-spacing: 0.04em;
     color: var(--h-accent);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+html[data-mode="hotels"] .h-card__tag-label {
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(246, 238, 217, 0.6);
 }
 
 /* --- Team (section 8) ----------------------------------------------------- */
@@ -409,6 +465,20 @@ html[data-mode="hotels"] .h-team--4 {
     grid-template-columns: repeat(4, 1fr);
     gap: clamp(16px, 2vw, 34px);
     width: min(94vw, 1140px);
+}
+
+html[data-mode="hotels"] .h-team--5 {
+    grid-template-columns: repeat(5, 1fr);
+    gap: clamp(12px, 1.6vw, 26px);
+    width: min(96vw, 1300px);
+}
+
+html[data-mode="hotels"] .h-team--5 .h-member__name {
+    font-size: clamp(17px, 1.4vw, 22px);
+}
+
+html[data-mode="hotels"] .h-team--5 .h-member__photo {
+    margin-bottom: 14px;
 }
 
 html[data-mode="hotels"] .h-member {
@@ -477,15 +547,15 @@ html[data-mode="hotels"] .h-finale__eyebrow {
     color: rgba(246, 238, 217, 0.7);
 }
 
-/* Full client roster — sized down so ~20 logos read as a tidy wall. */
+/* Full client roster — a tidy wall, logos large enough to read at a glance. */
 html[data-mode="hotels"] .leaflet-stat__logos {
-    column-gap: clamp(16px, 2.4vw, 36px);
-    row-gap: clamp(10px, 1.8vh, 20px);
-    max-width: min(960px, 94vw);
+    column-gap: clamp(20px, 2.8vw, 44px);
+    row-gap: clamp(14px, 2.4vh, 28px);
+    max-width: min(1040px, 94vw);
 }
 
 html[data-mode="hotels"] .leaflet-logo-img {
-    height: clamp(22px, 3.2vh, 36px);
+    height: clamp(30px, 4.4vh, 50px);
 }
 
 html[data-mode="hotels"] .h-logo-text {

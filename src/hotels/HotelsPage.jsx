@@ -37,15 +37,14 @@ function Icon({ name }) {
 
 // ── Centered key figures (one big, or a row of two/three) ────────────────────
 function Stats({ slide }) {
-    const stats = slide.stats || (slide.stat ? [{ figure: slide.stat, sub: slide.statSub, source: slide.statSource }] : null);
+    const stats = slide.stats || (slide.stat ? [{ figure: slide.stat, sub: slide.statSub, unit: slide.statUnit }] : null);
     if (!stats) return null;
     if (stats.length === 1) {
         const s = stats[0];
         return (
             <div className="leaflet-stat">
-                <span className="leaflet-stat__figure">{s.figure}</span>
+                <span className="leaflet-stat__figure">{s.figure}{s.unit && <span className="h-stat__unit">{s.unit}</span>}</span>
                 {s.sub && <span className="leaflet-stat__sub">{s.sub}</span>}
-                {s.source && <span className="h-stat__source">{s.source}</span>}
             </div>
         );
     }
@@ -53,13 +52,18 @@ function Stats({ slide }) {
         <div className={`leaflet-stat h-stat-row h-stat-row--${stats.length}`}>
             {stats.map((s, i) => (
                 <div className="h-stat" key={i}>
-                    <span className="h-stat__figure">{s.figure}</span>
+                    <span className="h-stat__figure">{s.figure}{s.unit && <span className="h-stat__unit">{s.unit}</span>}</span>
                     {s.sub && <span className="h-stat__sub">{s.sub}</span>}
-                    {s.source && <span className="h-stat__source">{s.source}</span>}
                 </div>
             ))}
         </div>
     );
+}
+
+// Sources gathered to one small line at the bottom of the slide.
+function Sources({ slide }) {
+    if (!slide.sources || !slide.sources.length) return null;
+    return <p className="h-sources" aria-hidden="true">{slide.sources.join(' · ')}</p>;
 }
 
 function Caption({ slide }) {
@@ -127,6 +131,7 @@ function SlideBody({ slide }) {
                                         Musique {col.music}
                                     </span>
                                 </div>
+                                {col.badge && <span className="h-col__badge">{col.badge}</span>}
                                 <p className="h-col__body">{col.body}</p>
                             </article>
                         ))}
@@ -152,7 +157,12 @@ function SlideBody({ slide }) {
                                     <h3 className="h-card__title">{card.title}</h3>
                                 </span>
                                 <p className="h-card__body">{card.body}</p>
-                                {card.tag && <span className="h-card__tag">{card.tag}</span>}
+                                {card.tag && (
+                                    <span className="h-card__tag">
+                                        <span className="h-card__tag-fig">{card.tag}</span>
+                                        {card.tagLabel && <span className="h-card__tag-label">{card.tagLabel}</span>}
+                                    </span>
+                                )}
                             </article>
                         ))}
                     </div>
@@ -326,6 +336,7 @@ export default function HotelsPage() {
                         <div className="leaflet-slide__img" style={{ backgroundImage: `url(${slide.src})` }} />
                         <div className="leaflet-slide__scrim" aria-hidden="true" />
                         <SlideBody slide={slide} />
+                        <Sources slide={slide} />
                     </section>
                 ))}
             </div>
