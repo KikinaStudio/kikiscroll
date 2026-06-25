@@ -559,12 +559,11 @@ html[data-mode="hotels"] .leaflet-stat__logos {
     max-width: min(1160px, 94vw);
 }
 
-/* Uniform bounding box: same height for all, width capped so very wide
-   marks don't dominate. object-fit keeps each logo's aspect ratio. */
+/* Every logo at the exact same height (no width cap, so a wide wordmark like
+   JCDecaux keeps full height instead of being shrunk). The wall wraps. */
 html[data-mode="hotels"] .leaflet-logo-img {
     height: clamp(44px, 6.2vh, 68px);
     width: auto;
-    max-width: clamp(150px, 17vw, 220px);
     object-fit: contain;
 }
 

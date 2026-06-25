@@ -51,16 +51,15 @@ const CLIENTS = [
     { name: 'Marie Claire', src: LOGO('marie-claire') },
     { name: 'Fédération Française du Prêt-à-Porter Féminin', src: LOGO('ffpapf') },
     { name: 'AP-HP, Hôpital Ambroise-Paré', src: LOGO('hopital-ambroise-pare') },
-    // [À FOURNIR] : SVG manquant — repli texte en attendant.
-    { name: 'JCDecaux', src: null },
+    { name: 'JCDecaux', src: LOGO('jcdecaux') },
 ];
 
 export const SLIDES = [
     // 1 — Le bien-être n'est plus un service
     {
         key: 'dimension',
-        src: HIMG('01-cinema.jpg'),
-        heavy: true,
+        src: HIMG('01-corridor.jpg'),
+        dark: true,
         eyebrow: 'Le bien-être n’est plus un service',
         stat: '23,3 %',
         statSub: 'du tourisme bien-être passe par l’hébergement, devenu son premier poste de dépense.',
@@ -240,25 +239,25 @@ export const SLIDES = [
                 name: 'Jérémie Guez',
                 role: 'Co-fondateur · Direction artistique',
                 bio: 'Musicien et sound designer. Il façonne la signature sonore de chaque lieu et tient la cohérence artistique de bout en bout.',
-                photo: null,
+                photo: HIMG('team/jeremie.jpg'),
             },
             {
                 name: 'Bianca Guez',
                 role: 'Co-fondatrice & présidente · Stratégie',
                 bio: 'Elle relie la science, le son et la marque, et porte l’expérience Kikina auprès des hôtels.',
-                photo: null,
+                photo: HIMG('team/bianca.webp'),
             },
             {
                 name: 'Arthur Boval',
                 role: 'Compositeur-développeur · Technologie',
                 bio: 'Architecte du moteur génératif Kikina. Il rend la musique vivante : composée en continu, jamais deux fois la même.',
-                photo: null,
+                photo: HIMG('team/arthur.webp'),
             },
             {
                 name: 'Nicolas Decat',
                 role: 'Neuroscientifique · Conseil scientifique',
                 bio: 'Garant de la rigueur derrière chaque choix sonore : ce qui sépare une ambiance agréable d’un environnement qui agit sur le système nerveux.',
-                photo: null,
+                photo: HIMG('team/nicolas.webp'),
             },
             {
                 name: 'Michelle George',
