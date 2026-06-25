@@ -7,15 +7,18 @@ import '../leaflet/leaflet.css';
 // Events deck — /kikiscroll/events.
 // Same mechanics and styling as the wellness leaflet (LeafletPage): one
 // gesture → one slide, GSAP track, entry overlay, drone, cursor canvas. Only
-// the content differs. Order, titles, taglines and body copy mirror the Notion
-// deck "Slides Leaflet Events" slide by slide.
+// the content differs.
 //
-// Backgrounds live in public/IMAGES/events/. Slides 6 ("Ancrage") and 7
-// ("Sur mesure") use silent looping background videos (06-ancrage.mp4 —
-// PiLeJe at the Lido ; 08-paris-podcast.mp4 — Paris Podcast Festival at the
-// Gaité Lyrique). A dark canvas shows behind a video slide's text if its clip
-// is ever missing. `credit` carries the small photo/video caption (client +
-// audience + venue) shown bottom-right on the experience slides.
+// Storytelling (2026 rewrite): 1 constat → 2 fausse solution → 3 mécanisme
+// (rupture) → 4 yeux fermés (+37%) → 5 les trois mouvements (CARDS) → 6 install
+// interactive → 7 fil sonore → 8 manifeste Kikina → 9 équipe → 10 contact.
+//
+// Backgrounds live in public/IMAGES/events/. Two slides use silent looping
+// videos: "installations" (08-paris-podcast.mp4 — Paris Podcast Festival, Gaité
+// Lyrique) and "fil-sonore" (06-ancrage.mp4 — PiLeJe at the Lido). A dark canvas
+// shows behind a video slide's text if its clip is missing. `credit` carries the
+// bottom-right photo/video caption. Slide 5 ("voyages") renders `cards` (an intro
+// + three movement cards) instead of the centered stat / bottom-left caption.
 const BASE = import.meta.env.BASE_URL;
 const IMG = (name) => `${BASE}IMAGES/events/${name}`;
 // The finale reuses the leaflet's partner logos and warm-glow backdrop — the
@@ -25,85 +28,130 @@ const LOGO = (file) => `${BASE}IMAGES/leaflet/logos/${file}.png`;
 
 const SLIDES = [
     {
-        key: 'oubli',
+        key: 'ressemblance',
         src: IMG('01-oubli.jpg'),
-        stat: '70%',
-        statSub: 'Oublié sous 24h.',
+        stat: 'Déjà vu',
+        statSub: 'Le visuel ne suffit plus.',
         body: [
-            "C'est la part de l'information passive que le cerveau efface en une journée (courbe d'Ebbinghaus). L'événement d'entreprise coche toutes les cases du jetable : écrans, slides, position assise, attention de façade.",
-            "Et plus on en rajoute, plus on accélère l'oubli.",
+            "Tous les événements corporate finissent par se ressembler. On passe d'un écran à l'autre : keynote, slides, vidéo. L'invité regarde, applaudit aux bons moments, puis oublie presque tout.",
+            "70 % de ce qu'on reçoit passivement s'efface en 24 h. Le visuel sature et ne marque plus. Pour qu'un message reste, il faut sortir de la routine et toucher l'émotion, pas seulement l'œil.",
         ],
-        label: 'Oublié sous 24h — 70%',
+        label: 'Tout se ressemble',
     },
     {
-        key: 'habituation',
+        key: 'plus',
         src: IMG('02-habituation.jpg'),
-        stat: 'Habituation',
-        statSub: 'Pourquoi en rajouter ne marche plus.',
+        stat: 'Toujours plus',
+        statSub: "Plus de spectacle, moins d'effet.",
         body: [
-            "L'instinct du secteur est de frapper plus fort : plus de lumière, plus d'effets, plus de décibels, pour générer dopamine et souvenirs.",
-            "Mais un cerveau saturé d'écrans vit en habituation permanente. Chaque stimulus supplémentaire produit une réponse plus faible que le précédent. On ajoute du bruit, pas de la mémoire.",
+            "Le réflexe du secteur, c'est d'en faire toujours plus. Plus d'effets, plus de spectacle, plus de waouh, pour créer de l'émotion.",
+            "Mais un public habitué aux écrans s'en lasse très vite : chaque effet supplémentaire produit moins d'effet que le précédent. On monte la facture et on marque moins. La solution n'est pas d'ajouter une couche. Elle est à l'opposé du trop-plein.",
         ],
-        label: 'Habituation',
+        label: 'En faire plus ne suffit plus',
     },
     {
-        key: 'contraste',
+        key: 'rupture',
         src: IMG('03-contraste.jpg'),
-        stat: 'Contraste',
-        statSub: 'Ce que le cerveau récompense vraiment.',
+        stat: 'La rupture',
+        statSub: 'On retient ce qui rompt.',
         body: [
-            "La dopamine ne répond pas au niveau absolu de stimulation, mais à l'écart entre l'attendu et le vécu (reward prediction error, Schultz, Science, 1997) — le mécanisme de récompense le plus solidement établi en neurosciences.",
-            "Ce n'est pas l'intensité. C'est la rupture. Reste à savoir comment la créer dans une salle saturée d'images.",
+            "Le cerveau retient ce qui rompt, pas ce qui dure. Ce qui déclenche la récompense, c'est l'écart entre l'attendu et le vécu (Schultz, 1997).",
+            "Le vrai levier : créer une vraie coupure dans le programme. On déconnecte le public, puis on le reconnecte. Il revient au présent, concentré et disponible, prêt à recevoir les messages qui comptent vraiment.",
         ],
-        label: 'Contraste',
+        label: 'La rupture',
     },
     {
-        key: 'coupe',
+        key: 'yeux-fermes',
         src: IMG('04-coupe.jpg'),
-        stat: '0,15 s',
-        statSub: 'Le son, le seul medium qui crée cette rupture.',
+        stat: '+37 %',
+        statSub: 'Les yeux fermés, on retient plus.',
         body: [
-            "Le son atteint l'auditeur en 0,146 seconde, près de trois fois plus vite que les stimuli visuels.",
-            "Yeux fermés, écrans éteints, la surstimulation tombe d'un coup : on crée l'écart exact que le cerveau récompense. Le signal sonore qui suit touche avant que la rationalisation n'intervienne.",
+            "Quelques minutes les yeux fermés, écrans éteints. La surstimulation tombe d'un coup, et le public arrête de regarder pour se mettre à ressentir.",
+            "Les yeux fermés, on retient nettement plus : +37 % de souvenirs corrects (effet eye-closure, Vredeveldt et al.). Chacun associe vos messages à ses propres émotions, et les garde bien après la soirée.",
         ],
-        label: '0,15 s — Le son crée la rupture',
-        credit: { name: "L'Amphi", detail: '200 leaders en santé · Paris' },
+        label: 'Et si on fermait les yeux — +37 %',
     },
     {
-        key: 'cocreation',
+        key: 'voyages',
         src: IMG('05-cocreation.jpg'),
-        stat: 'Co-création',
-        statSub: 'Ce qui se passe alors pour vos invités.',
-        body: [
-            "L'audience se déconnecte de son quotidien et entre dans un récit dont elle est co-auteure : elle y projette ses souvenirs, ses sensations, ses émotions. Personne ne vit la même chose.",
-            "C'est précisément là, les yeux fermés, que le souvenir s'inscrit en profondeur.",
-        ],
-        label: 'Co-création',
-        credit: { name: 'Kering', detail: 'International Fashion Summit · NYC' },
+        cards: {
+            intro: "Nos voyages sonores, c'est :",
+            items: [
+                { titre: 'Déconnexion', body: "Le public sort de sa journée, de son téléphone, de sa charge mentale. Il revient vraiment dans la salle." },
+                { titre: 'Synchronisation', body: "Le son cale le rythme du groupe, de l'agitation vers le calme. Le message passe par le corps, pas seulement par la tête." },
+                { titre: 'Ancrage', body: "Une transition musicale forte fixe le souvenir (McClay et al., 2023). Ce que le public ressent, il le retient." },
+            ],
+        },
+        label: 'Nos voyages sonores',
     },
     {
-        key: 'ancrage',
-        video: IMG('06-ancrage.mp4'),
-        stat: 'Ancrage',
-        statSub: 'Comment cette expérience devient un souvenir.',
+        key: 'installations',
+        video: IMG('08-paris-podcast.mp4'),
+        stat: 'Au centre',
+        statSub: "L'invité devient l'instrument.",
         body: [
-            "Une étude Nature Communications (McClay et al., 2023) montre que les transitions émotionnelles d'une musique structurent l'encodage des souvenirs épisodiques : elles découpent le vécu en moments mémorables.",
-            "Bien orchestrées, ces transitions gravent l'événement dans la mémoire longue. La musique ne décore pas l'événement — elle dicte ce qu'on en retiendra.",
+            "Une installation audiovisuelle simple et puissante, posée le temps d'un festival ou d'une soirée de marque. L'invité est placé au centre : sa voix et ses gestes pilotent le son et une image générative projetée en direct.",
+            "Rien n'est préenregistré, donc impossible à reproduire. Au lieu d'assister à un spectacle, vos invités le fabriquent eux-mêmes, et s'en souviennent.",
         ],
-        label: 'Ancrage',
+        label: "Vos invités deviennent l'instrument",
+        credit: { name: 'Paris Podcast Festival', detail: '400 personnes · Gaité Lyrique, Paris' },
+    },
+    {
+        key: 'fil-sonore',
+        video: IMG('06-ancrage.mp4'),
+        stat: 'Un seul fil',
+        statSub: 'Une signature, du premier au dernier instant.',
+        body: [
+            "La plupart des événements posent de la musique par-dessus, morceau par morceau : un jingle à l'accueil, un titre pour le final, des moments isolés sans lien.",
+            "Nous faisons l'inverse. Une seule signature sonore, composée pour vous, tient toute la soirée : accueil, montées sur scène, transitions, final. Un fil continu et cohérent, du premier au dernier instant.",
+        ],
+        label: 'Un seul fil sonore',
         credit: { name: 'PiLeJe', detail: '250 commerciaux · Lido, Paris' },
     },
     {
-        key: 'surmesure',
-        video: IMG('08-paris-podcast.mp4'),
-        stat: 'Sur mesure',
-        statSub: 'Une signature sonore, composée pour vous, vivante en salle.',
+        key: 'kikina',
+        src: IMG('07-signature.jpg'),
+        stat: 'Kikina',
+        statSub: 'Un son qui réagit à vos invités.',
         body: [
-            "Pourtant, à votre événement, tout ce qui se voit est pensé sur mesure, et le son, jamais. Parce que c'était impossible. Plus aujourd'hui.",
-            "Notre son est composé pour votre événement et reste vivant en salle : il réagit aux gestes et aux déplacements de vos convives en temps réel — chacun devient, sans le savoir, l'un de ses instruments. Impossible à rejouer à l'identique.",
+            "Kikina réunit trois expertises : les neurosciences, le son et le storytelling. Les neurosciences disent comment un souvenir se grave. Le son atteint l'émotion en 0,146 s, plus vite que l'image. Le storytelling donne du sens.",
+            "À cette intersection, nous composons un son sur mesure, vivant en salle, qui réagit à vos invités. L'objectif est clair : qu'ils repartent en s'en souvenant.",
         ],
-        label: 'Sur mesure — vivant en salle',
-        credit: { name: 'Paris Podcast Festival', detail: '400 personnes · Gaité Lyrique, Paris' },
+        label: 'Kikina',
+    },
+    {
+        key: 'equipe',
+        src: IMG('09-bourdelle.jpg'),
+        // Team section cloned from the /hotels deck (same four people, same look).
+        team: { eyebrow: "L'équipe", title: 'Création sonore et rigueur scientifique.' },
+        members: [
+            {
+                name: 'Jérémie Guez',
+                role: 'Co-fondateur · Direction artistique',
+                bio: 'Musicien et sound designer. Il façonne la signature sonore de chaque événement et tient la cohérence artistique de bout en bout.',
+                photo: null,
+            },
+            {
+                name: 'Bianca Guez',
+                role: 'Co-fondatrice & présidente · Stratégie',
+                bio: 'Elle relie la science, le son et la marque, et porte l’expérience Kikina auprès des organisateurs.',
+                photo: null,
+            },
+            {
+                name: 'Arthur Boval',
+                role: 'Composer-développeur · Technologie',
+                bio: 'Architecte du moteur génératif maison. Il rend la musique vivante : générée en continu, jamais deux fois la même.',
+                photo: null,
+            },
+            {
+                name: 'Nicolas Decat',
+                role: 'Neuroscientifique',
+                bio: 'Garant de la rigueur derrière chaque choix sonore : ce qui sépare une ambiance agréable d’un environnement qui agit sur le système nerveux.',
+                highlight: true,
+                photo: null,
+            },
+        ],
+        label: "L'équipe",
     },
     {
         key: 'contact',
@@ -277,7 +325,7 @@ export default function EventsPage() {
                 {SLIDES.map((slide, i) => (
                     <section
                         key={slide.key}
-                        className={`leaflet-slide${i === index ? ' is-active' : ''}`}
+                        className={`leaflet-slide${slide.cards ? ' leaflet-slide--voyages' : ''}${slide.members ? ' leaflet-slide--team' : ''}${i === index ? ' is-active' : ''}`}
                         aria-hidden={i !== index}
                     >
                         {slide.video ? (
@@ -320,6 +368,50 @@ export default function EventsPage() {
                                     </a>
                                 )}
                                 {slide.logosBottom && <LogoRow logos={slide.logosBottom} position="bottom" />}
+                            </div>
+                        )}
+
+                        {/* Section 5 — the three movements, presented as cards */}
+                        {slide.cards && (
+                            <div className="leaflet-voyages-wrap">
+                                <p className="leaflet-voyages__head">{slide.cards.intro}</p>
+                                <div className="leaflet-voyages">
+                                    {slide.cards.items.map((card, ci) => (
+                                        <div key={card.titre} className="leaflet-voyage">
+                                            <span className="leaflet-voyage__index">{String(ci + 1).padStart(2, '0')}</span>
+                                            <h3 className="leaflet-voyage__title">{card.titre}</h3>
+                                            <p className="leaflet-voyage__body">{card.body}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Section 9 — team, cloned from the /hotels deck */}
+                        {slide.members && (
+                            <div className="h-special">
+                                <div className="h-special__head">
+                                    {slide.team?.eyebrow && <p className="h-special__eyebrow">{slide.team.eyebrow}</p>}
+                                    {slide.team?.title && <p className="h-special__title">{slide.team.title}</p>}
+                                </div>
+                                <div className={`h-team h-team--${slide.members.length}`}>
+                                    {slide.members.map((m, mi) => (
+                                        <article key={m.name + mi} className={`h-member${m.highlight ? ' h-member--highlight' : ''}`}>
+                                            <div className="h-member__photo" aria-hidden="true">
+                                                {m.photo ? (
+                                                    <img src={m.photo} alt="" />
+                                                ) : (
+                                                    <span className="h-member__initials">
+                                                        {m.name.split(' ').map((w) => w[0]).join('').slice(0, 2)}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <h3 className="h-member__name">{m.name}</h3>
+                                            <p className="h-member__role">{m.role}</p>
+                                            <p className="h-member__bio">{m.bio}</p>
+                                        </article>
+                                    ))}
+                                </div>
                             </div>
                         )}
 

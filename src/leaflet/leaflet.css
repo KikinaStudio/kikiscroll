@@ -568,6 +568,254 @@ html[data-mode="events"] .leaflet-logo-img {
     box-shadow: 0 6px 20px rgba(8, 5, 3, 0.45);
 }
 
+/* --- Voyages (events slide 5) — three movement cards ---------------------- */
+/* The cards slide hides the bottom-left caption and the centered stat; the
+   intro line + three cards are centered together as a single column. */
+.leaflet-slide--voyages .leaflet-caption {
+    display: none;
+}
+
+.leaflet-voyages-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(28px, 5vh, 60px);
+    padding: clamp(86px, 13vh, 150px) clamp(24px, 6vw, 96px);
+    text-align: center;
+}
+
+.leaflet-voyages__head {
+    font-family: 'Instrument Serif', var(--font-heading), serif;
+    font-size: clamp(30px, 4.4vw, 56px);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: #f6eed9;
+    text-shadow: 0 2px 28px rgba(8, 5, 3, 0.45);
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.leaflet-slide.is-active .leaflet-voyages__head {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 1s ease 0.4s, transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.4s;
+}
+
+.leaflet-voyages {
+    width: min(92vw, 1100px);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(14px, 1.8vw, 30px);
+}
+
+.leaflet-voyage {
+    position: relative;
+    text-align: left;
+    padding: clamp(22px, 2.2vw, 36px);
+    border: 1px solid rgba(246, 238, 217, 0.16);
+    border-radius: 12px;
+    background: rgba(18, 12, 8, 0.34);
+    -webkit-backdrop-filter: blur(7px);
+    backdrop-filter: blur(7px);
+    box-shadow: 0 10px 30px rgba(8, 5, 3, 0.34);
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.leaflet-slide.is-active .leaflet-voyage {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.leaflet-slide.is-active .leaflet-voyage:nth-child(1) { transition: opacity 0.7s ease 0.55s, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.55s; }
+.leaflet-slide.is-active .leaflet-voyage:nth-child(2) { transition: opacity 0.7s ease 0.7s, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.7s; }
+.leaflet-slide.is-active .leaflet-voyage:nth-child(3) { transition: opacity 0.7s ease 0.85s, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.85s; }
+
+.leaflet-voyage__index {
+    display: block;
+    font-family: 'Instrument Serif', var(--font-heading), serif;
+    font-size: clamp(24px, 2.4vw, 34px);
+    line-height: 1;
+    color: rgba(196, 123, 110, 0.95);
+    margin-bottom: 14px;
+}
+
+.leaflet-voyage__title {
+    font-family: 'Instrument Serif', var(--font-heading), serif;
+    font-weight: 400;
+    font-size: clamp(22px, 2vw, 30px);
+    line-height: 1.15;
+    color: #f6eed9;
+    margin: 0 0 10px;
+}
+
+.leaflet-voyage__body {
+    font-size: clamp(13px, 0.98vw, 15px);
+    font-weight: 300;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+    color: rgba(246, 238, 217, 0.84);
+    margin: 0;
+}
+
+@media (max-width: 880px) {
+    .leaflet-voyages-wrap {
+        gap: clamp(20px, 4vh, 36px);
+    }
+    .leaflet-voyages {
+        grid-template-columns: 1fr;
+        width: min(90vw, 460px);
+        gap: 12px;
+    }
+    .leaflet-voyage {
+        padding: 18px 22px;
+    }
+    .leaflet-voyage__index {
+        margin-bottom: 8px;
+    }
+}
+
+/* --- Team (events slide 9) — cloned from the /hotels deck ------------------ */
+/* Same markup and look as html[data-mode="hotels"] .h-team; scoped to events
+   so it rides on the same leaflet.css the events page already imports. */
+html[data-mode="events"] .leaflet-slide--team .leaflet-slide__scrim {
+    background:
+        linear-gradient(to bottom, rgba(8, 5, 3, 0.72) 0%, rgba(8, 5, 3, 0.8) 100%),
+        radial-gradient(ellipse 80% 70% at 50% 45%, rgba(8, 5, 3, 0.2) 0%, rgba(8, 5, 3, 0) 75%);
+}
+
+html[data-mode="events"] .h-special {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(26px, 4vh, 50px);
+    padding: clamp(92px, 13vh, 150px) clamp(28px, 6vw, 110px);
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+html[data-mode="events"] .leaflet-slide.is-active .h-special {
+    opacity: 1;
+    transition: opacity 1.1s ease 0.4s;
+}
+
+html[data-mode="events"] .h-special__head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    max-width: 42ch;
+}
+
+html[data-mode="events"] .h-special__eyebrow {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(246, 238, 217, 0.8);
+}
+
+html[data-mode="events"] .h-special__title {
+    margin: 0;
+    font-family: 'Instrument Serif', var(--font-heading), serif;
+    font-size: clamp(28px, 3.6vw, 50px);
+    line-height: 1.16;
+    color: #f6eed9;
+}
+
+html[data-mode="events"] .h-team {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(20px, 2.4vw, 44px);
+    width: min(92vw, 940px);
+    text-align: left;
+}
+
+html[data-mode="events"] .h-team--4 {
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(16px, 2vw, 34px);
+    width: min(94vw, 1140px);
+}
+
+html[data-mode="events"] .h-member {
+    display: flex;
+    flex-direction: column;
+}
+
+html[data-mode="events"] .h-member__photo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 4 / 5;
+    margin-bottom: 18px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: linear-gradient(160deg, rgba(201, 164, 95, 0.12) 0%, rgba(246, 238, 217, 0.03) 100%);
+}
+
+html[data-mode="events"] .h-member__photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+html[data-mode="events"] .h-member--highlight .h-member__photo {
+    border: 1px solid rgba(201, 164, 95, 0.45);
+}
+
+html[data-mode="events"] .h-member__initials {
+    font-family: 'Instrument Serif', var(--font-heading), serif;
+    font-size: 40px;
+    color: rgba(246, 238, 217, 0.5);
+}
+
+html[data-mode="events"] .h-member__name {
+    margin: 0 0 4px;
+    font-family: 'Instrument Serif', var(--font-heading), serif;
+    font-size: clamp(19px, 1.6vw, 25px);
+    color: #f6eed9;
+}
+
+html[data-mode="events"] .h-member__role {
+    margin: 0 0 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #c9a45f;
+}
+
+html[data-mode="events"] .h-member__bio {
+    margin: 0;
+    font-size: clamp(12px, 0.95vw, 14px);
+    line-height: 1.58;
+    color: rgba(246, 238, 217, 0.8);
+}
+
+@media (max-width: 900px) {
+    html[data-mode="events"] .h-team {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 560px) {
+    html[data-mode="events"] .h-team {
+        grid-template-columns: 1fr;
+    }
+}
+
 .leaflet-case__name {
     font-family: 'Instrument Serif', var(--font-heading), serif;
     font-size: clamp(14px, 1.15vw, 18px);
