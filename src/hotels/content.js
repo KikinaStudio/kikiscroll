@@ -245,7 +245,7 @@ export const SLIDES = [
                 name: 'Bianca Guez',
                 role: 'Co-fondatrice & présidente · Stratégie',
                 bio: 'Elle relie la science, le son et la marque, et porte l’expérience Kikina auprès des hôtels.',
-                photo: HIMG('team/bianca.webp'),
+                photo: HIMG('team/bianca.jpg'),
             },
             {
                 name: 'Arthur Boval',
@@ -263,7 +263,7 @@ export const SLIDES = [
                 name: 'Michelle George',
                 role: 'Docteure en neurosciences · Conseil scientifique',
                 bio: 'Chercheuse à l’Institut du Cerveau (ICM), spécialisée sur le sommeil et les états de conscience. Elle valide les choix sonores qui agissent sur l’endormissement et la qualité du repos.',
-                photo: null,
+                photo: HIMG('team/michelle.jpg'),
             },
         ],
         label: 'L’équipe',
