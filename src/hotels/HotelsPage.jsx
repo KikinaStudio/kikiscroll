@@ -43,7 +43,8 @@ function Stats({ slide }) {
         const s = stats[0];
         return (
             <div className="leaflet-stat">
-                <span className="leaflet-stat__figure">{s.figure}{s.unit && <span className="h-stat__unit">{s.unit}</span>}</span>
+                <span className="leaflet-stat__figure">{s.figure}</span>
+                {s.unit && <span className="h-stat__unit">{s.unit}</span>}
                 {s.sub && <span className="leaflet-stat__sub">{s.sub}</span>}
             </div>
         );
@@ -52,7 +53,8 @@ function Stats({ slide }) {
         <div className={`leaflet-stat h-stat-row h-stat-row--${stats.length}`}>
             {stats.map((s, i) => (
                 <div className="h-stat" key={i}>
-                    <span className="h-stat__figure">{s.figure}{s.unit && <span className="h-stat__unit">{s.unit}</span>}</span>
+                    <span className="h-stat__figure">{s.figure}</span>
+                    {s.unit && <span className="h-stat__unit">{s.unit}</span>}
                     {s.sub && <span className="h-stat__sub">{s.sub}</span>}
                 </div>
             ))}

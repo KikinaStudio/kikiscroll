@@ -33,13 +33,14 @@ html[data-mode="hotels"] .leaflet-slide.is-active .h-sources {
     transition: opacity 1s ease 0.5s;
 }
 
-/* Smaller unit glued to a key figure (e.g. « par an »). */
+/* Unit on its own line under the figure (e.g. « par an »). */
 html[data-mode="hotels"] .h-stat__unit {
-    margin-left: 0.2em;
-    font-size: 0.42em;
+    margin-top: 4px;
+    font-family: 'Instrument Serif', var(--font-heading), serif;
+    font-size: clamp(15px, 1.5vw, 21px);
+    line-height: 1;
     letter-spacing: 0.01em;
-    color: rgba(246, 238, 217, 0.68);
-    font-variant-numeric: normal;
+    color: rgba(246, 238, 217, 0.72);
 }
 
 /* --- Row of two / three centered key figures ------------------------------ */
@@ -78,9 +79,13 @@ html[data-mode="hotels"] .leaflet-stat__figure {
     white-space: nowrap;
 }
 
-html[data-mode="hotels"] .h-stat-row--3 {
-    max-width: min(80rem, 95vw);
-    gap: clamp(24px, 4vw, 64px);
+/* Give the row an explicit width (not shrink-to-fit) so the three figures
+   spread across the slide instead of clustering in the left half — the base
+   `.leaflet-stat` is absolutely positioned and would otherwise cap at ~50vw. */
+html[data-mode="hotels"] .leaflet-stat.h-stat-row--3 {
+    width: min(90rem, 92vw);
+    max-width: none;
+    gap: clamp(60px, 8vw, 130px);
 }
 
 html[data-mode="hotels"] .h-stat-row--3 .h-stat__figure {
@@ -100,10 +105,12 @@ html[data-mode="hotels"] .h-stat__sub {
     max-width: 20ch;
 }
 
-/* Two figures: keep them on one row and push them further apart. */
-html[data-mode="hotels"] .h-stat-row--2 {
+/* Two figures: keep them on one row and push them further apart.
+   Selector matches the base `.leaflet-stat.h-stat-row` specificity so the gap
+   actually wins. */
+html[data-mode="hotels"] .leaflet-stat.h-stat-row--2 {
     flex-wrap: nowrap;
-    gap: clamp(52px, 9vw, 132px);
+    gap: clamp(56px, 7vw, 116px);
 }
 
 /* --- Special (centered) slides: shared frame ------------------------------ */
@@ -280,8 +287,6 @@ html[data-mode="hotels"] .h-col__axis--alive {
 
 html[data-mode="hotels"] .h-col__axis--fixed {
     color: rgba(246, 238, 217, 0.4);
-    text-decoration: line-through;
-    text-decoration-color: rgba(246, 238, 217, 0.3);
 }
 
 html[data-mode="hotels"] .h-col__badge {
@@ -547,27 +552,33 @@ html[data-mode="hotels"] .h-finale__eyebrow {
     color: rgba(246, 238, 217, 0.7);
 }
 
-/* Full client roster — a tidy wall, logos large enough to read at a glance. */
+/* Full client roster — a tidy wall, every logo in the same-size box. */
 html[data-mode="hotels"] .leaflet-stat__logos {
-    column-gap: clamp(20px, 2.8vw, 44px);
-    row-gap: clamp(14px, 2.4vh, 28px);
-    max-width: min(1040px, 94vw);
+    column-gap: clamp(26px, 3.4vw, 56px);
+    row-gap: clamp(20px, 3.2vh, 40px);
+    max-width: min(1160px, 94vw);
 }
 
+/* Uniform bounding box: same height for all, width capped so very wide
+   marks don't dominate. object-fit keeps each logo's aspect ratio. */
 html[data-mode="hotels"] .leaflet-logo-img {
-    height: clamp(30px, 4.4vh, 50px);
+    height: clamp(44px, 6.2vh, 68px);
+    width: auto;
+    max-width: clamp(150px, 17vw, 220px);
+    object-fit: contain;
 }
 
 html[data-mode="hotels"] .h-logo-text {
     font-size: clamp(17px, 1.9vw, 24px);
 }
 
-/* Text fallback for missing client logos (Dior, JCDecaux). */
+/* Text fallback for a missing client logo (JCDecaux). Scaled up to sit closer
+   to the image logos — a real logo file would match them exactly. */
 html[data-mode="hotels"] .h-logo-text {
     display: inline-flex;
     align-items: center;
     font-family: 'Instrument Serif', var(--font-heading), serif;
-    font-size: clamp(20px, 2.4vw, 30px);
+    font-size: clamp(30px, 3.6vw, 48px);
     letter-spacing: 0.02em;
     color: rgba(246, 238, 217, 0.85);
 }
