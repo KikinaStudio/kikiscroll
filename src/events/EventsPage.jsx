@@ -15,14 +15,16 @@ import '../leaflet/leaflet.css';
 // (PiLeJe · UNICEF · Kering+Paris Podcast · Pernod Ricard+L'Amphi) → équipe →
 // contact.
 //
-// Backgrounds live in public/IMAGES/events/. Slides whose dedicated image isn't
-// in yet (10-ecoute, 11-vivant, 13-pernod-amphi, 14-equipe) render on a dark
-// canvas until the file is dropped in — a dark base sits behind every slide.
-// Videos: 06-ancrage.mp4 (PiLeJe, Lido) and 08-paris-podcast.mp4 (Paris Podcast
-// Festival, Gaité Lyrique). Slide shapes: `stat`/`body` (statement), `pull`
-// (right-side figure, slide "La bascule"), `cards` (the sas), `cases` (case
-// studies — 1 or 2 blocks of Contexte/Notre rôle/Effet + optional citations),
-// `members` (team, cloned from /hotels), `display`/`logos` (contact).
+// Backgrounds live in public/IMAGES/events/. The client photos sit on their
+// own case slides (05-cocreation = Kering, 04-coupe = L'Amphi, 07-signature =
+// PiLeJe, 09-bourdelle = UNICEF). Images not in yet (10-ecoute, 11-vivant,
+// 13-pernod, 14-equipe) render on a dark canvas; "Le sas" and "Un seul fil" are
+// dark by design. A dark base sits behind every slide. Videos: 06-ancrage.mp4
+// (on "La bascule") and 08-paris-podcast.mp4 (Paris Podcast panel). Slide
+// shapes: `stat`/`body` (statement), `pull` (right-side figure, "La bascule"),
+// `cards` (the sas), `cases` (full-bleed panels, 1 or 2, each with its own image
+// + optional caseHeader and citations), `members` (team), `display`/`logos`
+// (contact).
 const BASE = import.meta.env.BASE_URL;
 const IMG = (name) => `${BASE}IMAGES/events/${name}`;
 // The finale reuses the leaflet's partner logos and warm-glow backdrop — the
@@ -80,7 +82,7 @@ const SLIDES = [
     },
     {
         key: 'bascule',
-        src: IMG('04-coupe.jpg'),
+        video: IMG('06-ancrage.mp4'),
         stat: 'La bascule',
         statSub: 'Le son qui rend la salle disponible.',
         body: [
@@ -92,7 +94,6 @@ const SLIDES = [
     },
     {
         key: 'sas',
-        src: IMG('05-cocreation.jpg'),
         cards: {
             title: 'Le sas, en trois mouvements.',
             subtitle: 'Trois leviers physiologiques, validés par les neurosciences.',
@@ -108,7 +109,6 @@ const SLIDES = [
     },
     {
         key: 'fil',
-        src: IMG('07-signature.jpg'),
         stat: 'Un seul fil',
         statSub: 'Une signature, du premier au dernier instant.',
         body: [
@@ -130,9 +130,9 @@ const SLIDES = [
     },
     {
         key: 'cas-pileje',
-        video: IMG('06-ancrage.mp4'),
         cases: [
             {
+                img: IMG('07-signature.jpg'),
                 soustitre: 'PiLeJe · Lido, Paris · 250 commerciaux',
                 titre: "Faire ressentir l'innovation avant de la présenter.",
                 contexte: "Une journée innovation à enchaîner. Six heures de pitchs produits devant les équipes terrain.",
@@ -144,9 +144,9 @@ const SLIDES = [
     },
     {
         key: 'cas-unicef',
-        src: IMG('09-bourdelle.jpg'),
         cases: [
             {
+                img: IMG('09-bourdelle.jpg'),
                 soustitre: 'UNICEF · Musée Bourdelle · dîner philanthropes',
                 titre: "Porter un sujet grave dans un dîner de gala, sans tomber dans le pathos.",
                 contexte: "Un dîner de gala. Une cause humanitaire à défendre. L'équilibre fragile entre légèreté de la soirée et gravité du propos.",
@@ -158,10 +158,10 @@ const SLIDES = [
     },
     {
         key: 'cas-kering',
-        video: IMG('08-paris-podcast.mp4'),
         caseHeader: 'La même bascule, à toutes les échelles.',
         cases: [
             {
+                img: IMG('05-cocreation.jpg'),
                 soustitre: 'Kering · sommet international · New York',
                 titre: "Aligner des leaders de la mode et du luxe autour d'un sujet commun, la sustainability.",
                 contexte: "Dirigeants, scientifiques, journalistes et influenceurs réunis autour de la sustainability. Chacun avec son agenda, son angle, son audience à reconquérir.",
@@ -169,6 +169,7 @@ const SLIDES = [
                 effet: "Un moment d'alignement silencieux. Les influenceurs présents repartent ambassadeurs, pas spectateurs.",
             },
             {
+                video: IMG('08-paris-podcast.mp4'),
                 soustitre: 'Paris Podcast Festival · Gaîté Lyrique · 400 personnes',
                 titre: "Faire vivre une expérience sonore à 400 personnes, dans un lieu culturel ouvert.",
                 contexte: "Festival culturel ouvert, audience large et exigeante.",
@@ -180,10 +181,10 @@ const SLIDES = [
     },
     {
         key: 'cas-pernod',
-        src: IMG('13-pernod-amphi.jpg'),
         caseHeader: 'Chaque format, un objectif précis.',
         cases: [
             {
+                img: IMG('13-pernod.jpg'),
                 soustitre: 'Pernod Ricard · séminaire international · présidents de marques',
                 titre: "Recentrer des dirigeants en compétition autour de l'identité du groupe.",
                 contexte: "Un rassemblement des présidents de toutes les marques du groupe, au niveau monde. Des dirigeants par nature en compétition interne, qu'il faut fédérer autour de ce qu'ils incarnent ensemble.",
@@ -191,6 +192,7 @@ const SLIDES = [
                 effet: "Les dirigeants reposent leur fonction le temps de l'expérience. Ce qui en sort, idées et réflexions, revient au groupe.",
             },
             {
+                img: IMG('04-coupe.jpg'),
                 soustitre: "L'Amphi · Club des Leaders en Santé · 200 dirigeants",
                 titre: "Faire vivre la santé mentale au lieu d'en parler.",
                 contexte: "Un dîner de gala dans un secteur où l'on parle santé toute la journée. Comment faire passer la santé mentale du sujet de comité au vécu de salle ?",
@@ -434,9 +436,9 @@ export default function EventsPage() {
                                 tabIndex={-1}
                                 aria-hidden="true"
                             />
-                        ) : (
+                        ) : slide.src ? (
                             <div className="leaflet-slide__img" style={{ backgroundImage: `url(${slide.src})` }} />
-                        )}
+                        ) : null}
                         <div className="leaflet-slide__scrim" aria-hidden="true" />
 
                         {/* Centered display — big serif stat (deck style) or multi-line statement */}
@@ -483,26 +485,34 @@ export default function EventsPage() {
                             </div>
                         )}
 
-                        {/* Case-study slides — 1 or 2 blocks (Contexte / Notre rôle / Effet) */}
+                        {/* Case-study slides — full-bleed panels (1 or 2), one image each */}
                         {slide.cases && (
                             <div className="leaflet-study-wrap">
                                 {slide.caseHeader && <p className="leaflet-study__head">{slide.caseHeader}</p>}
                                 <div className={`leaflet-study leaflet-study--${slide.cases.length}`}>
                                     {slide.cases.map((c) => (
-                                        <article key={c.titre} className="leaflet-study-card">
-                                            <p className="leaflet-study-card__sub">{c.soustitre}</p>
-                                            <h3 className="leaflet-study-card__title">{c.titre}</h3>
-                                            <div className="leaflet-study-field">
-                                                <span className="leaflet-study-field__label">Contexte</span>
-                                                <p className="leaflet-study-field__text">{c.contexte}</p>
-                                            </div>
-                                            <div className="leaflet-study-field">
-                                                <span className="leaflet-study-field__label">Notre rôle</span>
-                                                <p className="leaflet-study-field__text">{c.role}</p>
-                                            </div>
-                                            <div className="leaflet-study-field">
-                                                <span className="leaflet-study-field__label">Effet</span>
-                                                <p className="leaflet-study-field__text">{c.effet}</p>
+                                        <article key={c.titre} className="leaflet-study-panel">
+                                            {c.video ? (
+                                                <video className="leaflet-study-panel__media" src={c.video} autoPlay muted loop playsInline preload="auto" tabIndex={-1} aria-hidden="true" />
+                                            ) : (
+                                                <div className="leaflet-study-panel__media" style={{ backgroundImage: `url(${c.img})` }} />
+                                            )}
+                                            <div className="leaflet-study-panel__veil" aria-hidden="true" />
+                                            <div className="leaflet-study-panel__content">
+                                                <p className="leaflet-study__sub">{c.soustitre}</p>
+                                                <h3 className="leaflet-study__title">{c.titre}</h3>
+                                                <div className="leaflet-study-field">
+                                                    <span className="leaflet-study-field__label">Contexte</span>
+                                                    <p className="leaflet-study-field__text">{c.contexte}</p>
+                                                </div>
+                                                <div className="leaflet-study-field">
+                                                    <span className="leaflet-study-field__label">Notre rôle</span>
+                                                    <p className="leaflet-study-field__text">{c.role}</p>
+                                                </div>
+                                                <div className="leaflet-study-field">
+                                                    <span className="leaflet-study-field__label">Effet</span>
+                                                    <p className="leaflet-study-field__text">{c.effet}</p>
+                                                </div>
                                             </div>
                                         </article>
                                     ))}
