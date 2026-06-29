@@ -11,26 +11,16 @@ html[data-mode="hotels"] {
 
 /* --- Sources: one small line pinned to the bottom of the slide ------------ */
 
+/* Sources sit just under the centred key figure (inside .leaflet-stat), never
+   pinned to the bottom of the slide where the attribution reads as orphaned. */
 html[data-mode="hotels"] .h-sources {
-    position: absolute;
-    left: 50%;
-    bottom: clamp(58px, 9vh, 100px);
-    transform: translateX(-50%);
-    z-index: 6;
-    margin: 0;
+    margin: clamp(13px, 2.2vh, 22px) 0 0;
     max-width: min(80vw, 62ch);
     text-align: center;
     font-size: 10.5px;
     letter-spacing: 0.04em;
     line-height: 1.4;
-    color: rgba(246, 238, 217, 0.4);
-    opacity: 0;
-    transition: opacity 0.5s ease;
-}
-
-html[data-mode="hotels"] .leaflet-slide.is-active .h-sources {
-    opacity: 1;
-    transition: opacity 1s ease 0.5s;
+    color: rgba(246, 238, 217, 0.42);
 }
 
 /* Unit on its own line under the figure (e.g. « par an »). */
@@ -45,14 +35,21 @@ html[data-mode="hotels"] .h-stat__unit {
 
 /* --- Row of two / three centered key figures ------------------------------ */
 
-html[data-mode="hotels"] .leaflet-stat.h-stat-row {
+/* Outer wrapper for a row of figures: a column so the sources line can sit
+   under the figures. Width is uncapped so the inner row controls spread. */
+html[data-mode="hotels"] .leaflet-stat--multi {
+    max-width: none;
+    top: 46%;
+}
+
+html[data-mode="hotels"] .h-stat-row {
+    display: flex;
     flex-direction: row;
     align-items: flex-start;
     justify-content: center;
     flex-wrap: wrap;
     gap: clamp(28px, 5vw, 72px);
     max-width: min(66rem, 92vw);
-    top: 46%;
 }
 
 html[data-mode="hotels"] .h-stat {
@@ -82,7 +79,7 @@ html[data-mode="hotels"] .leaflet-stat__figure {
 /* Give the row an explicit width (not shrink-to-fit) so the three figures
    spread across the slide instead of clustering in the left half — the base
    `.leaflet-stat` is absolutely positioned and would otherwise cap at ~50vw. */
-html[data-mode="hotels"] .leaflet-stat.h-stat-row--3 {
+html[data-mode="hotels"] .h-stat-row--3 {
     width: min(90rem, 92vw);
     max-width: none;
     gap: clamp(60px, 8vw, 130px);
@@ -114,7 +111,7 @@ html[data-mode="hotels"] .leaflet-stat__sub {
 /* Two figures: keep them on one row and push them further apart.
    Selector matches the base `.leaflet-stat.h-stat-row` specificity so the gap
    actually wins. */
-html[data-mode="hotels"] .leaflet-stat.h-stat-row--2 {
+html[data-mode="hotels"] .h-stat-row--2 {
     flex-wrap: nowrap;
     gap: clamp(56px, 7vw, 116px);
 }
@@ -232,6 +229,23 @@ html[data-mode="hotels"] .h-special__foot-src {
     margin-top: 4px;
     font-size: 11px;
     color: rgba(246, 238, 217, 0.45);
+}
+
+/* Citation under the head (special slides) — small, muted, tight under the
+   claim/subtitle above it. */
+html[data-mode="hotels"] .h-special__src {
+    margin: -6px 0 0;
+    max-width: 64ch;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    color: rgba(246, 238, 217, 0.42);
+}
+
+/* Slide 4 carries a subtitle + a longer citation under the head: a touch wider
+   so both read on fewer lines (the brand slide keeps its own width). */
+html[data-mode="hotels"] .leaflet-slide--cards:not(.h-brand) .h-special__head {
+    max-width: 56ch;
 }
 
 /* Stronger veil so cards/columns read over any background photo. */
@@ -688,9 +702,11 @@ html[data-mode="hotels"] .h-logo-text {
     html[data-mode="hotels"] .h-team {
         grid-template-columns: 1fr;
     }
-    html[data-mode="hotels"] .leaflet-stat.h-stat-row {
+    html[data-mode="hotels"] .h-stat-row {
         flex-direction: column;
         gap: 22px;
+    }
+    html[data-mode="hotels"] .leaflet-stat--multi {
         top: 44%;
     }
     html[data-mode="hotels"] .h-card {

@@ -52,18 +52,22 @@ function Stats({ slide }) {
                 <span className="leaflet-stat__figure">{s.figure}</span>
                 {s.unit && <span className="h-stat__unit">{s.unit}</span>}
                 {s.sub && <span className="leaflet-stat__sub">{s.sub}</span>}
+                <Sources slide={slide} />
             </div>
         );
     }
     return (
-        <div className={`leaflet-stat h-stat-row h-stat-row--${stats.length}`}>
-            {stats.map((s, i) => (
-                <div className="h-stat" key={i}>
-                    <span className="h-stat__figure">{s.figure}</span>
-                    {s.unit && <span className="h-stat__unit">{s.unit}</span>}
-                    {s.sub && <span className="h-stat__sub">{s.sub}</span>}
-                </div>
-            ))}
+        <div className="leaflet-stat leaflet-stat--multi">
+            <div className={`h-stat-row h-stat-row--${stats.length}`}>
+                {stats.map((s, i) => (
+                    <div className="h-stat" key={i}>
+                        <span className="h-stat__figure">{s.figure}</span>
+                        {s.unit && <span className="h-stat__unit">{s.unit}</span>}
+                        {s.sub && <span className="h-stat__sub">{s.sub}</span>}
+                    </div>
+                ))}
+            </div>
+            <Sources slide={slide} />
         </div>
     );
 }
@@ -104,23 +108,17 @@ function SpecialHead({ slide }) {
                 </p>
             )}
             {slide.intro && <p className="h-special__intro">{slide.intro}</p>}
+            {slide.foot && <p className="h-special__foot">{slide.foot}</p>}
+            {slide.sources && slide.sources.length > 0 && (
+                <p className="h-special__src">{slide.sources.join(' · ')}</p>
+            )}
         </div>
     );
 }
 
-function Foot({ slide }) {
-    if (!slide.foot) return null;
+function LogoRow({ logos, position = 'bottom' }) {
     return (
-        <p className="h-special__foot">
-            {slide.foot}
-            {slide.footSource && <span className="h-special__foot-src">{slide.footSource}</span>}
-        </p>
-    );
-}
-
-function LogoRow({ logos }) {
-    return (
-        <div className="leaflet-stat__logos leaflet-stat__logos--bottom">
+        <div className={`leaflet-stat__logos leaflet-stat__logos--${position}`}>
             {logos.map((logo) =>
                 logo.src ? (
                     <img key={logo.name} src={logo.src} alt={logo.name} className="leaflet-logo-img" />
@@ -155,7 +153,6 @@ function SlideBody({ slide }) {
                             </article>
                         ))}
                     </div>
-                    <Foot slide={slide} />
                 </div>
             );
 
@@ -185,7 +182,6 @@ function SlideBody({ slide }) {
                             </article>
                         ))}
                     </div>
-                    <Foot slide={slide} />
                 </div>
             );
 
@@ -224,9 +220,14 @@ function SlideBody({ slide }) {
                 </div>
             );
 
-        case 'finale':
+        case 'finale': {
+            // CTA sits in the middle of the client wall (logos above + below),
+            // matching the leaflet/events finales.
+            const logos = slide.logos || [];
+            const mid = Math.ceil(logos.length / 2);
             return (
-                <div className="leaflet-stat leaflet-stat--lines">
+                <div className="leaflet-stat leaflet-stat--lines leaflet-stat--finale">
+                    {logos.length > 0 && <LogoRow logos={logos.slice(0, mid)} position="top" />}
                     {slide.eyebrow && <p className="h-finale__eyebrow">{slide.eyebrow}</p>}
                     {slide.display && slide.display.map((line) => (
                         <span key={line} className="leaflet-stat__line">{line}</span>
@@ -234,9 +235,10 @@ function SlideBody({ slide }) {
                     {slide.cta && (
                         <a className="leaflet-stat__btn" href={slide.cta.href}>{slide.cta.label}</a>
                     )}
-                    {slide.logos && <LogoRow logos={slide.logos} />}
+                    {logos.length > 0 && <LogoRow logos={logos.slice(mid)} position="bottom" />}
                 </div>
             );
+        }
 
         default:
             return (
@@ -371,7 +373,6 @@ export default function HotelsPage({ slides = FR_SLIDES, entry = FR_ENTRY, meta 
                         <div className="leaflet-slide__img" style={{ backgroundImage: `url(${slide.src})` }} />
                         <div className="leaflet-slide__scrim" aria-hidden="true" />
                         <SlideBody slide={slide} />
-                        <Sources slide={slide} />
                     </section>
                 ))}
             </div>
@@ -451,9 +452,16 @@ export default function HotelsPage({ slides = FR_SLIDES, entry = FR_ENTRY, meta 
                         </span>
                     ))}
                 </h1>
-                {Array.isArray(ENTRY.sub)
-                    ? ENTRY.sub.map((line) => <p key={line} className="leaflet-enter__sub">{line}</p>)
-                    : <p className="leaflet-enter__sub">{ENTRY.sub}</p>}
+                <p className="leaflet-enter__sub">
+                    {Array.isArray(ENTRY.sub)
+                        ? ENTRY.sub.map((line, i) => (
+                            <span key={line}>
+                                {line}
+                                {i < ENTRY.sub.length - 1 && <br />}
+                            </span>
+                        ))
+                        : ENTRY.sub}
+                </p>
                 <button className="leaflet-enter__btn" onClick={handleEnter}>{ENTRY.button}</button>
             </div>
 

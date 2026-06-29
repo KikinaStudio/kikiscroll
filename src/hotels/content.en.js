@@ -119,7 +119,7 @@ export const SLIDES = [
             { tag: 'Kikina', artist: 'Artist absent', music: 'Living music', alive: true, living: true, badge: 'AI conductor', body: 'Generated continuously, never twice the same, calibrated for each space and moment.' },
         ],
         foot: 'Music activates the same reward circuit as food.',
-        footSource: 'Salimpoor & Zatorre, Nature Neuroscience, 2011',
+        sources: ['Salimpoor & Zatorre, Nature Neuroscience, 2011'],
         label: 'Evolving music',
     },
 
@@ -130,6 +130,7 @@ export const SLIDES = [
         src: IMG('12-imprint.jpg'),
         eyebrow: 'One objective per space',
         title: 'Each space calls for a precise mental state.',
+        intro: 'Each space is dressed according to the state it must induce, not according to musical taste.',
         cards: [
             {
                 title: 'Reception',
@@ -181,8 +182,7 @@ export const SLIDES = [
                 tagLabel: 'Relaxation',
             },
         ],
-        foot: 'Each space is dressed according to the state it must induce, not according to musical taste.',
-        footSource: 'JMIR Mental Health, 2025 · Applied Ergonomics · Bernardi, Heart, 2006',
+        sources: ['JMIR Mental Health, 2025 · Applied Ergonomics · Bernardi, Heart, 2006'],
         label: 'One objective per space',
     },
 
@@ -293,7 +293,7 @@ export const SLIDES = [
             },
             {
                 name: 'Michelle George',
-                role: 'PhD in neuroscience · Scientific advisor',
+                role: 'PhD in Neuroscience',
                 bio: 'Researcher at the Paris Brain Institute (ICM), specialized in sleep and states of consciousness. She validates the sonic choices that act on sleep onset and rest quality.',
                 photo: HIMG('team/michelle.jpg'),
             },

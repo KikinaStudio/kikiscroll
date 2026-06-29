@@ -111,7 +111,7 @@ export const SLIDES = [
             { tag: 'Kikina', artist: 'Artiste absent', music: 'Musique vivante', alive: true, living: true, badge: 'IA chef d’orchestre', body: 'Générée en continu, jamais deux fois la même, calibrée pour le lieu et le moment.' },
         ],
         foot: 'La musique active le même circuit de récompense que la nourriture.',
-        footSource: 'Salimpoor & Zatorre, Nature Neuroscience, 2011',
+        sources: ['Salimpoor & Zatorre, Nature Neuroscience, 2011'],
         label: 'La musique évolutive',
     },
 
@@ -122,6 +122,7 @@ export const SLIDES = [
         src: IMG('12-imprint.jpg'),
         eyebrow: 'Un objectif par espace',
         title: 'Chaque espace appelle un état mental précis.',
+        intro: 'Chaque espace est habillé selon l’état qu’il doit induire, pas selon un goût musical.',
         cards: [
             {
                 title: 'Réception',
@@ -166,8 +167,7 @@ export const SLIDES = [
                 tagLabel: 'Rythme cardiaque',
             },
         ],
-        foot: 'Chaque espace est habillé selon l’état qu’il doit induire, pas selon un goût musical.',
-        footSource: 'JMIR Mental Health, 2025 · Applied Ergonomics · Bernardi, Heart, 2006',
+        sources: ['JMIR Mental Health, 2025 · Applied Ergonomics · Bernardi, Heart, 2006'],
         label: 'Un objectif par espace',
     },
 
