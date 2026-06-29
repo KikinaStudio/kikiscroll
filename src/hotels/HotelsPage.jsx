@@ -108,10 +108,19 @@ function SpecialHead({ slide }) {
                 </p>
             )}
             {slide.intro && <p className="h-special__intro">{slide.intro}</p>}
+        </div>
+    );
+}
+
+// Foot zone pinned to the bottom of a special slide: an optional claim line
+// plus the scientific source (cols/cards slides).
+function SpecialFoot({ slide }) {
+    const hasSources = slide.sources && slide.sources.length > 0;
+    if (!slide.foot && !hasSources) return null;
+    return (
+        <div className="h-special__footzone">
             {slide.foot && <p className="h-special__foot">{slide.foot}</p>}
-            {slide.sources && slide.sources.length > 0 && (
-                <p className="h-special__src">{slide.sources.join(' · ')}</p>
-            )}
+            {hasSources && <p className="h-special__src">{slide.sources.join(' · ')}</p>}
         </div>
     );
 }
@@ -121,7 +130,7 @@ function LogoRow({ logos, position = 'bottom' }) {
         <div className={`leaflet-stat__logos leaflet-stat__logos--${position}`}>
             {logos.map((logo) =>
                 logo.src ? (
-                    <img key={logo.name} src={logo.src} alt={logo.name} className="leaflet-logo-img" />
+                    <img key={logo.name} src={logo.src} alt={logo.name} className={`leaflet-logo-img${logo.small ? ' leaflet-logo-img--sm' : ''}`} />
                 ) : (
                     <span key={logo.name} className="h-logo-text">{logo.name}</span>
                 )
@@ -153,6 +162,7 @@ function SlideBody({ slide }) {
                             </article>
                         ))}
                     </div>
+                    <SpecialFoot slide={slide} />
                 </div>
             );
 
@@ -182,6 +192,7 @@ function SlideBody({ slide }) {
                             </article>
                         ))}
                     </div>
+                    <SpecialFoot slide={slide} />
                 </div>
             );
 

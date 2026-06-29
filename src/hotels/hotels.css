@@ -216,34 +216,35 @@ html[data-mode="hotels"] .h-brand .h-card__icon svg {
     height: 30px;
 }
 
+/* Foot zone pinned to the bottom of a cols/cards slide: the claim line (s03)
+   and/or the scientific source. */
+html[data-mode="hotels"] .h-special__footzone {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(34px, 6vh, 74px);
+    transform: translateX(-50%);
+    z-index: 6;
+    width: min(82vw, 64ch);
+    text-align: center;
+}
+
 html[data-mode="hotels"] .h-special__foot {
     margin: 0;
-    max-width: 60ch;
     font-size: clamp(12px, 1vw, 14px);
     line-height: 1.5;
     color: rgba(246, 238, 217, 0.7);
 }
 
-html[data-mode="hotels"] .h-special__foot-src {
-    display: block;
-    margin-top: 4px;
-    font-size: 11px;
-    color: rgba(246, 238, 217, 0.45);
-}
-
-/* Citation under the head (special slides) — small, muted, tight under the
-   claim/subtitle above it. */
 html[data-mode="hotels"] .h-special__src {
-    margin: -6px 0 0;
-    max-width: 64ch;
+    margin: 4px 0 0;
     font-size: 10.5px;
     letter-spacing: 0.04em;
     line-height: 1.4;
     color: rgba(246, 238, 217, 0.42);
 }
 
-/* Slide 4 carries a subtitle + a longer citation under the head: a touch wider
-   so both read on fewer lines (the brand slide keeps its own width). */
+/* Slide 4 carries a subtitle under the head: a touch wider so it reads on fewer
+   lines (the brand slide keeps its own width). */
 html[data-mode="hotels"] .leaflet-slide--cards:not(.h-brand) .h-special__head {
     max-width: 56ch;
 }
@@ -557,6 +558,13 @@ html[data-mode="hotels"] .h-team--5 .h-member__photo {
     margin-bottom: 14px;
 }
 
+/* Tighten the role line on the 5-up team so the longest one (Michelle's
+   "Neuroscience PhD · Scientific advisor") holds on a single line. */
+html[data-mode="hotels"] .h-team--5 .h-member__role {
+    font-size: 10px;
+    letter-spacing: 0.04em;
+}
+
 html[data-mode="hotels"] .h-member {
     display: flex;
     flex-direction: column;
@@ -669,6 +677,11 @@ html[data-mode="hotels"] .leaflet-logo-img {
     height: clamp(44px, 6.2vh, 68px);
     width: auto;
     object-fit: contain;
+}
+
+/* JCDecaux is a wide, heavy wordmark — scale it down so it doesn't dominate. */
+html[data-mode="hotels"] .leaflet-logo-img--sm {
+    height: clamp(28px, 4vh, 44px);
 }
 
 html[data-mode="hotels"] .h-logo-text {

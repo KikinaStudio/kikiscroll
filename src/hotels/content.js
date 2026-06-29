@@ -60,7 +60,7 @@ const CLIENTS = [
     { name: 'Marie Claire', src: LOGO('marie-claire') },
     { name: 'Fédération Française du Prêt-à-Porter Féminin', src: LOGO('ffpapf') },
     { name: 'AP-HP, Hôpital Ambroise-Paré', src: LOGO('hopital-ambroise-pare') },
-    { name: 'JCDecaux', src: LOGO('jcdecaux') },
+    { name: 'JCDecaux', src: LOGO('jcdecaux'), small: true },
 ];
 
 export const SLIDES = [

@@ -68,7 +68,7 @@ const CLIENTS = [
     { name: 'Marie Claire', src: LOGO('marie-claire') },
     { name: 'Fédération Française du Prêt-à-Porter Féminin', src: LOGO('ffpapf') },
     { name: 'AP-HP, Hôpital Ambroise-Paré', src: LOGO('hopital-ambroise-pare') },
-    { name: 'JCDecaux', src: LOGO('jcdecaux') },
+    { name: 'JCDecaux', src: LOGO('jcdecaux'), small: true },
 ];
 
 export const SLIDES = [
@@ -293,7 +293,7 @@ export const SLIDES = [
             },
             {
                 name: 'Michelle George',
-                role: 'PhD in Neuroscience',
+                role: 'Neuroscience PhD · Scientific advisor',
                 bio: 'Researcher at the Paris Brain Institute (ICM), specialized in sleep and states of consciousness. She validates the sonic choices that act on sleep onset and rest quality.',
                 photo: HIMG('team/michelle.jpg'),
             },
