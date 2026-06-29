@@ -144,23 +144,25 @@ function SlideBody({ slide }) {
         case 'cols':
             return (
                 <div className="h-special">
-                    <SpecialHead slide={slide} />
-                    <div className="h-cols">
-                        {slide.columns.map((col) => (
-                            <article key={col.tag} className={`h-col${col.living ? ' h-col--living' : ' h-col--static'}`}>
-                                {col.living && <SoundWave className="h-col__wave" lines={3} amplitude={0.3} alpha={0.6} speed={0.011} />}
-                                {col.living && <span className="h-col__pulse" aria-hidden="true" />}
-                                <span className="h-col__tag">{col.tag}</span>
-                                <div className="h-col__axes">
-                                    <span className="h-col__axis">{col.artist}</span>
-                                    <span className={`h-col__axis h-col__axis--${col.alive ? 'alive' : 'fixed'}`}>
-                                        {col.music}
-                                    </span>
-                                </div>
-                                {col.badge && <span className="h-col__badge">{col.badge}</span>}
-                                <p className="h-col__body">{col.body}</p>
-                            </article>
-                        ))}
+                    <div className="h-special__main">
+                        <SpecialHead slide={slide} />
+                        <div className="h-cols">
+                            {slide.columns.map((col) => (
+                                <article key={col.tag} className={`h-col${col.living ? ' h-col--living' : ' h-col--static'}`}>
+                                    {col.living && <SoundWave className="h-col__wave" lines={3} amplitude={0.3} alpha={0.6} speed={0.011} />}
+                                    {col.living && <span className="h-col__pulse" aria-hidden="true" />}
+                                    <span className="h-col__tag">{col.tag}</span>
+                                    <div className="h-col__axes">
+                                        <span className="h-col__axis">{col.artist}</span>
+                                        <span className={`h-col__axis h-col__axis--${col.alive ? 'alive' : 'fixed'}`}>
+                                            {col.music}
+                                        </span>
+                                    </div>
+                                    {col.badge && <span className="h-col__badge">{col.badge}</span>}
+                                    <p className="h-col__body">{col.body}</p>
+                                </article>
+                            ))}
+                        </div>
                     </div>
                     <SpecialFoot slide={slide} />
                 </div>
@@ -169,28 +171,30 @@ function SlideBody({ slide }) {
         case 'cards':
             return (
                 <div className="h-special">
-                    <SpecialHead slide={slide} />
-                    <div className={`h-cards h-cards--${slide.cards.length}`}>
-                        {slide.cards.map((card) => (
-                            <article key={card.title} className={`h-card${card.feature ? ' h-card--feature' : ''}`}>
-                                {card.badge && <span className="h-card__badge">{card.badge}</span>}
-                                <span className="h-card__head">
-                                    {card.icon && (
-                                        <span className="h-card__icon">
-                                            <Icon name={card.icon} />
+                    <div className="h-special__main">
+                        <SpecialHead slide={slide} />
+                        <div className={`h-cards h-cards--${slide.cards.length}`}>
+                            {slide.cards.map((card) => (
+                                <article key={card.title} className={`h-card${card.feature ? ' h-card--feature' : ''}`}>
+                                    {card.badge && <span className="h-card__badge">{card.badge}</span>}
+                                    <span className="h-card__head">
+                                        {card.icon && (
+                                            <span className="h-card__icon">
+                                                <Icon name={card.icon} />
+                                            </span>
+                                        )}
+                                        <h3 className="h-card__title">{card.title}</h3>
+                                    </span>
+                                    <p className="h-card__body">{card.body}</p>
+                                    {card.tag && (
+                                        <span className="h-card__tag">
+                                            <span className="h-card__tag-fig">{card.tag}</span>
+                                            {card.tagLabel && <span className="h-card__tag-label">{card.tagLabel}</span>}
                                         </span>
                                     )}
-                                    <h3 className="h-card__title">{card.title}</h3>
-                                </span>
-                                <p className="h-card__body">{card.body}</p>
-                                {card.tag && (
-                                    <span className="h-card__tag">
-                                        <span className="h-card__tag-fig">{card.tag}</span>
-                                        {card.tagLabel && <span className="h-card__tag-label">{card.tagLabel}</span>}
-                                    </span>
-                                )}
-                            </article>
-                        ))}
+                                </article>
+                            ))}
+                        </div>
                     </div>
                     <SpecialFoot slide={slide} />
                 </div>

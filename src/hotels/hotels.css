@@ -135,12 +135,23 @@ html[data-mode="hotels"] .h-special {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: clamp(26px, 4vh, 50px);
-    padding: clamp(92px, 13vh, 150px) clamp(28px, 6vw, 110px);
+    gap: clamp(12px, 2.4vh, 26px);
+    padding: clamp(58px, 8vh, 130px) clamp(28px, 6vw, 110px);
     text-align: center;
     opacity: 0;
     transition: opacity 0.5s ease;
+}
+
+/* Head + grid live in a flex-filling middle so the foot zone always flows
+   underneath them (never overlapping) while staying pinned to the bottom. */
+html[data-mode="hotels"] .h-special__main {
+    flex: 1 1 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(26px, 4vh, 50px);
 }
 
 html[data-mode="hotels"] .leaflet-slide.is-active .h-special {
@@ -219,10 +230,7 @@ html[data-mode="hotels"] .h-brand .h-card__icon svg {
 /* Foot zone pinned to the bottom of a cols/cards slide: the claim line (s03)
    and/or the scientific source. */
 html[data-mode="hotels"] .h-special__footzone {
-    position: absolute;
-    left: 50%;
-    bottom: clamp(34px, 6vh, 74px);
-    transform: translateX(-50%);
+    flex: 0 0 auto;
     z-index: 6;
     width: min(82vw, 64ch);
     text-align: center;
@@ -724,6 +732,48 @@ html[data-mode="hotels"] .h-logo-text {
     }
     html[data-mode="hotels"] .h-card {
         padding: 16px 18px;
+    }
+    /* Too narrow for the full grid to fit one screen: stop centering and let
+       the head, grid and foot zone flow top-to-bottom so nothing overlaps. */
+    html[data-mode="hotels"] .h-special {
+        justify-content: flex-start;
+    }
+    html[data-mode="hotels"] .h-special__main {
+        flex: 0 0 auto;
+        justify-content: flex-start;
+    }
+}
+
+/* Short screens (laptops, windowed): the dense slides (esp. the 7-card slide)
+   don't fit at full size, which would push the foot zone off-screen. Compress
+   padding, gaps and card/title sizing so everything stays on one screen. */
+@media (max-height: 820px) {
+    html[data-mode="hotels"] .h-special {
+        padding-top: clamp(42px, 6vh, 60px);
+        padding-bottom: clamp(34px, 5vh, 52px);
+        gap: 10px;
+    }
+    html[data-mode="hotels"] .h-special__main {
+        gap: clamp(12px, 2.2vh, 22px);
+    }
+    html[data-mode="hotels"] .h-special__title {
+        font-size: clamp(23px, 2.7vw, 34px);
+    }
+    html[data-mode="hotels"] .h-special__intro {
+        font-size: clamp(12px, 0.95vw, 14px);
+    }
+    html[data-mode="hotels"] .h-cards {
+        gap: clamp(10px, 1.2vw, 16px);
+    }
+    html[data-mode="hotels"] .h-card {
+        padding: 12px 15px;
+    }
+    html[data-mode="hotels"] .h-card__title {
+        font-size: clamp(16px, 1.3vw, 20px);
+    }
+    html[data-mode="hotels"] .h-card__body {
+        font-size: 12px;
+        line-height: 1.45;
     }
 }
 
