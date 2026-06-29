@@ -9,148 +9,237 @@ import '../leaflet/leaflet.css';
 // gesture → one slide, GSAP track, entry overlay, drone, cursor canvas. Only
 // the content differs.
 //
-// Storytelling (2026 rewrite): 1 objectif → 2 l'état (le public est ailleurs)
-// → 3 le moment (la rupture qui fait basculer) → 4 yeux fermés (+37%) → 5 le
-// mécanisme en trois mouvements (CARDS) → 6 install interactive → 7 fil sonore
-// → 8 Kikina → 9 équipe → 10 contact.
+// Storytelling (v2 — Notion "Deck événementiel v2"): cover (entry overlay) →
+// L'écart (le problème) → Ailleurs → Écouter vraiment → Le moment → La bascule
+// (+37%) → Le sas en 3 mouvements (CARDS) → Un seul fil → Vivant → 4 cas clients
+// (PiLeJe · UNICEF · Kering+Paris Podcast · Pernod Ricard+L'Amphi) → équipe →
+// contact.
 //
-// Backgrounds live in public/IMAGES/events/. Two slides use silent looping
-// videos: "installations" (08-paris-podcast.mp4 — Paris Podcast Festival, Gaité
-// Lyrique) and "fil-sonore" (06-ancrage.mp4 — PiLeJe at the Lido). A dark canvas
-// shows behind a video slide's text if its clip is missing. `credit` carries the
-// bottom-right photo/video caption. Slide 5 ("voyages") renders `cards` (an intro
-// + three movement cards) instead of the centered stat / bottom-left caption.
+// Backgrounds live in public/IMAGES/events/. Slides whose dedicated image isn't
+// in yet (10-ecoute, 11-vivant, 13-pernod-amphi, 14-equipe) render on a dark
+// canvas until the file is dropped in — a dark base sits behind every slide.
+// Videos: 06-ancrage.mp4 (PiLeJe, Lido) and 08-paris-podcast.mp4 (Paris Podcast
+// Festival, Gaité Lyrique). Slide shapes: `stat`/`body` (statement), `pull`
+// (right-side figure, slide "La bascule"), `cards` (the sas), `cases` (case
+// studies — 1 or 2 blocks of Contexte/Notre rôle/Effet + optional citations),
+// `members` (team, cloned from /hotels), `display`/`logos` (contact).
 const BASE = import.meta.env.BASE_URL;
 const IMG = (name) => `${BASE}IMAGES/events/${name}`;
 // The finale reuses the leaflet's partner logos and warm-glow backdrop — the
 // client roster is the same studio's, so there's no need to duplicate assets.
 const LEAFLET = (name) => `${BASE}IMAGES/leaflet/${name}`;
 const LOGO = (file) => `${BASE}IMAGES/leaflet/logos/${file}.png`;
+// Team photos are shared with the /hotels deck (same people).
+const HTEAM = (file) => `${BASE}IMAGES/hotels/team/${file}`;
 
 const SLIDES = [
     {
-        key: 'ressemblance',
+        key: 'ecart',
         src: IMG('01-cinema.jpg'),
         heavyScrim: true, // bright, busy B&W photo — needs a deeper veil for legibility
-        stat: 'Un objectif',
-        statSub: 'On ne réunit pas des gens pour être regardé.',
+        stat: "L'écart",
+        statSub: "Entre ce que vous donnez et ce qu'ils peuvent recevoir.",
         body: [
-            "Vous ne réunissez pas des centaines de personnes pour qu'on vous regarde, mais pour faire passer un message, fédérer une équipe, lancer une marque.",
-            "Un objectif clair, un budget, une salle pleine. Tout est réuni pour que ça marque. Reste une question : votre audience est-elle prête à le recevoir ?",
+            "Vous mesurez le ROI d'un événement à ce qui en reste : un message retenu, une équipe alignée, une marque qui a marqué.",
+            "Mais ce qui en reste ne dépend pas de ce que vous avez dit. Ça dépend de l'état dans lequel votre audience l'a entendu. C'est la variable que personne ne pilote.",
         ],
-        label: 'Votre objectif',
+        label: "L'écart",
     },
     {
-        key: 'plus',
+        key: 'ailleurs',
         src: IMG('02-habituation.jpg'),
         stat: 'Ailleurs',
         statSub: "Présents dans la salle, absents à l'instant.",
         body: [
             "Vos invités arrivent saturés : la réunion d'avant, 200 mails, les notifications, les transports. Ils sont dans la salle, mais la tête est ailleurs.",
-            "Le problème n'est pas votre contenu, c'est leur état. Un message, même excellent, ricoche sur un public absent : 70 % s'efface en 24 h.",
+            "Et un message, même excellent, ricoche sur un public absent. 70 % s'efface en 24 h.",
         ],
-        label: 'Le mauvais état',
+        label: 'Ailleurs',
     },
     {
-        key: 'rupture',
+        key: 'ecouter',
+        src: IMG('10-ecoute.jpg'),
+        stat: 'Écouter, vraiment',
+        statSub: "Dans un monde saturé, l'attention est devenue rare.",
+        body: [
+            "Partout, une tendance émerge. Listening bars à Tokyo, sound meditations à New York, écoute collective dans les espaces culturels. Des moments où l'on s'assoit, où l'on éteint le téléphone, où l'on écoute vraiment.",
+            "C'est devenu un rituel premium, une réponse culturelle à l'épuisement attentionnel. Nous l'apportons aux événements corporate : quelques minutes pour rendre votre audience à l'écoute, avant qu'elle ne reçoive votre message.",
+        ],
+        label: 'Écouter, vraiment',
+    },
+    {
+        key: 'moment',
         src: IMG('03-contraste.jpg'),
         stat: 'Le moment',
-        statSub: 'On ne décore pas. On fait basculer.',
+        statSub: 'Quelques minutes qui décident du reste.',
         body: [
-            "Le cerveau n'enregistre que ce qui rompt avec l'attendu (Schultz, 1997). Inutile d'en faire plus : il faut créer un écart, une vraie coupure.",
-            "C'est notre métier. Un moment sonore qui détache toute la salle de son état d'arrivée et la fait basculer dans celui où votre message peut enfin entrer.",
+            "Dans un événement, il y a un moment qui change tout ce qui suit. Une rupture nette qui détache l'audience de son état d'arrivée et la fait basculer dans celui où votre message peut être reçu.",
+            "C'est ce moment-là que nous composons.",
         ],
-        label: 'Le moment qui fait basculer',
+        label: 'Le moment',
     },
     {
-        key: 'yeux-fermes',
+        key: 'bascule',
         src: IMG('04-coupe.jpg'),
-        stat: '+37 %',
-        statSub: "Changez l'état, le souvenir suit.",
+        stat: 'La bascule',
+        statSub: 'Le son qui rend la salle disponible.',
         body: [
-            "Quelques minutes les yeux fermés, écrans éteints. Le public arrête de regarder et bascule : il commence à ressentir.",
-            "Les yeux fermés, on retient nettement plus (+37 %, Vredeveldt et al.). Dans cet état, chacun relie vos messages à ses émotions, et les garde.",
+            "Quelques minutes, salle plongée dans le noir, une expérience sonore composée pour votre soirée. Pendant des années, on a cherché à parler plus fort : plus d'écrans, plus d'effets, plus de scénographie.",
+            "Nous faisons l'inverse : nous suspendons le bruit, le temps que l'audience redevienne disponible. La tête revient dans le présent, le corps se cale au groupe, l'émotion s'installe. C'est là que vos messages atteignent, et qu'ils restent.",
         ],
-        label: 'Les yeux fermés, +37 %',
+        pull: { figure: '+37 %', legend: 'Les yeux fermés, le cerveau retient mieux (Vredeveldt et al., 2014).' },
+        label: 'La bascule',
     },
     {
-        key: 'voyages',
+        key: 'sas',
         src: IMG('05-cocreation.jpg'),
         cards: {
-            intro: "On fabrique ce basculement en trois mouvements :",
+            title: 'Le sas, en trois mouvements.',
+            subtitle: 'Trois leviers physiologiques, validés par les neurosciences.',
+            intro: "Nos expériences sont des sas qui préparent votre audience à recevoir ce qui suit. Quelques minutes qui la déconnectent de l'extérieur et la reconnectent à l'instant présent, ensemble. 200, 400 ou 1000 personnes basculent dans le même état mental.",
             items: [
-                { titre: 'Déconnexion', body: "Le public sort de son état d'arrivée : la journée, le téléphone, la charge mentale. Il revient vraiment dans la salle." },
-                { titre: 'Synchronisation', body: "Le son cale le rythme du groupe, de l'agitation vers le calme. Le message passe par le corps, pas seulement par la tête." },
-                { titre: 'Ancrage', body: "Une transition musicale forte fixe le souvenir (McClay et al., 2023). Ce que le public ressent, il le retient." },
+                { titre: 'Déconnexion', body: "Le public lâche prise. La journée, les notifications, la charge mentale s'effacent. L'audience arrête de penser à autre chose et revient pleinement dans la salle." },
+                { titre: 'Synchronisation', body: "Le son cale le rythme collectif. Les respirations, les corps, l'attention s'alignent. Le message passe par le corps avant la tête." },
+                { titre: 'Ancrage', body: "Une rupture musicale forte grave un souvenir (McClay et al., 2023). Ce que le public ressent ensemble, il le retient." },
             ],
+            note: "Le son active le même circuit de récompense que la nourriture. Salimpoor & Zatorre, Nature Neuroscience, 2011.",
         },
-        label: 'Nos voyages sonores',
+        label: 'Le sas, en trois mouvements',
     },
     {
-        key: 'installations',
-        video: IMG('08-paris-podcast.mp4'),
-        stat: 'Au centre',
-        statSub: "L'invité devient l'instrument.",
-        body: [
-            "Une installation audiovisuelle, le temps d'une soirée de marque. L'invité est au centre : sa voix et ses gestes pilotent le son et une image projetée en direct.",
-            "Simple, spectaculaire, impossible à reproduire. Vos invités fabriquent l'expérience.",
-        ],
-        label: "Vos invités deviennent l'instrument",
-        credit: { name: 'Paris Podcast Festival', detail: '400 personnes · Gaité Lyrique, Paris' },
-    },
-    {
-        key: 'fil-sonore',
-        video: IMG('06-ancrage.mp4'),
+        key: 'fil',
+        src: IMG('07-signature.jpg'),
         stat: 'Un seul fil',
         statSub: 'Une signature, du premier au dernier instant.',
         body: [
-            "La plupart des événements collent de la musique par-dessus, morceau par morceau, sans cohérence.",
-            "Nous faisons l'inverse : une seule signature sonore qui tient toute la soirée. Accueil, montées sur scène, transitions, final. Un fil continu.",
+            "La plupart des événements collent de la musique par-dessus, morceau par morceau. Nous composons l'inverse : une signature sonore unique qui traverse toute la soirée.",
+            "L'accueil, les montées sur scène, les transitions, le final : chaque moment avec sa propre intensité. Un fil continu, calé sur le rythme et l'histoire de votre événement.",
         ],
-        label: 'Un seul fil sonore',
-        credit: { name: 'PiLeJe', detail: '250 commerciaux · Lido, Paris' },
+        label: 'Un seul fil',
     },
     {
-        key: 'kikina',
-        src: IMG('07-signature.jpg'),
-        stat: 'Kikina',
-        statSub: 'Un son qui réagit à vos invités.',
+        key: 'vivant',
+        src: IMG('11-vivant.jpg'),
+        stat: 'Vivant',
+        statSub: 'Un son qui réagit à ce qui se passe dans la salle.',
         body: [
-            "Kikina réunit trois expertises : neurosciences, son et storytelling.",
-            "Nous composons pour votre événement un son sur mesure, vivant en salle, qui réagit à vos invités en temps réel. L'objectif est clair : qu'ils repartent en s'en souvenant.",
+            "Cette signature peut aussi devenir vivante. Grâce à des capteurs placés dans la salle, le son réagit en temps réel à ce qui s'y passe : densité de l'audience, intensité d'un moment, transitions du programme.",
+            "Le fil ne se contente plus de traverser la soirée, il la suit. Chaque diffusion devient unique, jamais identique à la précédente.",
         ],
-        label: 'Kikina',
+        label: 'Vivant',
+    },
+    {
+        key: 'cas-pileje',
+        video: IMG('06-ancrage.mp4'),
+        cases: [
+            {
+                soustitre: 'PiLeJe · Lido, Paris · 250 commerciaux',
+                titre: "Faire ressentir l'innovation avant de la présenter.",
+                contexte: "Une journée innovation à enchaîner. Six heures de pitchs produits devant les équipes terrain.",
+                role: "L'expérience sonore en ouverture. La science PiLeJe vécue par le corps avant d'être expliquée.",
+                effet: "Une journée qui démarre dans l'écoute, pas dans la résistance.",
+            },
+        ],
+        label: 'Cas · PiLeJe',
+    },
+    {
+        key: 'cas-unicef',
+        src: IMG('09-bourdelle.jpg'),
+        cases: [
+            {
+                soustitre: 'UNICEF · Musée Bourdelle · dîner philanthropes',
+                titre: "Porter un sujet grave dans un dîner de gala, sans tomber dans le pathos.",
+                contexte: "Un dîner de gala. Une cause humanitaire à défendre. L'équilibre fragile entre légèreté de la soirée et gravité du propos.",
+                role: "Les casques servis sur un plateau au moment de s'asseoir à table. Un sas d'écoute intérieure avant les discours.",
+                effet: "Un ice-breaker collectif qui prépare la parole sans l'écraser.",
+            },
+        ],
+        label: 'Cas · UNICEF',
+    },
+    {
+        key: 'cas-kering',
+        video: IMG('08-paris-podcast.mp4'),
+        caseHeader: 'La même bascule, à toutes les échelles.',
+        cases: [
+            {
+                soustitre: 'Kering · sommet international · New York',
+                titre: "Aligner des leaders de la mode et du luxe autour d'un sujet commun, la sustainability.",
+                contexte: "Dirigeants, scientifiques, journalistes et influenceurs réunis autour de la sustainability. Chacun avec son agenda, son angle, son audience à reconquérir.",
+                role: "60e étage, vue sur Manhattan. Le son fait basculer la salle du chaos urbain vers le rythme des saisons, et les rythmes cardiaques des participants avec lui. Le sujet rendu sensible avant d'être discuté.",
+                effet: "Un moment d'alignement silencieux. Les influenceurs présents repartent ambassadeurs, pas spectateurs.",
+            },
+            {
+                soustitre: 'Paris Podcast Festival · Gaîté Lyrique · 400 personnes',
+                titre: "Faire vivre une expérience sonore à 400 personnes, dans un lieu culturel ouvert.",
+                contexte: "Festival culturel ouvert, audience large et exigeante.",
+                role: "400 personnes plongées dans le noir, une expérience sonore collective. Suivie d'une table ronde que nous animons avec la direction sustainability et communication de Kering : l'audio peut-il être un accélérateur de conscience ?",
+                effet: "La preuve par l'échelle. Une expérience qui tient dans une salle de 400, et qui ouvre une vraie conversation publique sur le pouvoir du son.",
+            },
+        ],
+        label: 'Cas · Kering + Paris Podcast',
+    },
+    {
+        key: 'cas-pernod',
+        src: IMG('13-pernod-amphi.jpg'),
+        caseHeader: 'Chaque format, un objectif précis.',
+        cases: [
+            {
+                soustitre: 'Pernod Ricard · séminaire international · présidents de marques',
+                titre: "Recentrer des dirigeants en compétition autour de l'identité du groupe.",
+                contexte: "Un rassemblement des présidents de toutes les marques du groupe, au niveau monde. Des dirigeants par nature en compétition interne, qu'il faut fédérer autour de ce qu'ils incarnent ensemble.",
+                role: "Une composition originale par un joueur de cristal Baschet, l'un des cinquante au monde à maîtriser cet instrument. Un temps de mise en présence au milieu du séminaire, feuilles et crayons sur les tables.",
+                effet: "Les dirigeants reposent leur fonction le temps de l'expérience. Ce qui en sort, idées et réflexions, revient au groupe.",
+            },
+            {
+                soustitre: "L'Amphi · Club des Leaders en Santé · 200 dirigeants",
+                titre: "Faire vivre la santé mentale au lieu d'en parler.",
+                contexte: "Un dîner de gala dans un secteur où l'on parle santé toute la journée. Comment faire passer la santé mentale du sujet de comité au vécu de salle ?",
+                role: "7 minutes d'expérience sonore immersive, casques sur les oreilles, salle plongée dans le silence. Plongée collective dans le quotidien de personnes vivant avec des troubles psychiques.",
+                effet: "Une salle de 200 dirigeants sans aucun bruit. La santé mentale comprise par l'expérience, pas par les chiffres.",
+            },
+        ],
+        citations: [
+            "« C'est quand la dernière fois que vous avez vu une salle de 200 personnes sans aucun bruit ? »",
+            "« Au-delà de l'impact émotionnel, je crois à son impact diagnostique et son intérêt dans la formation professionnelle. »",
+        ],
+        label: "Cas · Pernod Ricard + L'Amphi",
     },
     {
         key: 'equipe',
-        src: IMG('09-bourdelle.jpg'),
-        // Team section cloned from the /hotels deck (same four people, same look).
+        src: IMG('14-equipe.jpg'),
+        // Team section cloned from the /hotels deck (same five people, same look).
         team: { eyebrow: "L'équipe", title: 'Création sonore et rigueur scientifique.' },
         members: [
             {
                 name: 'Jérémie Guez',
                 role: 'Co-fondateur · Direction artistique',
                 bio: 'Musicien et sound designer. Il façonne la signature sonore de chaque événement et tient la cohérence artistique de bout en bout.',
-                photo: null,
+                photo: HTEAM('jeremie.jpg'),
             },
             {
                 name: 'Bianca Guez',
                 role: 'Co-fondatrice & présidente · Stratégie',
-                bio: 'Elle relie la science, le son et la marque, et porte l’expérience Kikina auprès des organisateurs.',
-                photo: null,
+                bio: "Elle relie la science, le son et la marque, et porte l'expérience Kikina auprès des organisateurs.",
+                photo: HTEAM('bianca.jpg'),
             },
             {
                 name: 'Arthur Boval',
-                role: 'Composer-développeur · Technologie',
+                role: 'Compositeur-développeur · Technologie',
                 bio: 'Architecte du moteur génératif maison. Il rend la musique vivante : générée en continu, jamais deux fois la même.',
-                photo: null,
+                photo: HTEAM('arthur.webp'),
             },
             {
                 name: 'Nicolas Decat',
-                role: 'Neuroscientifique',
-                bio: 'Garant de la rigueur derrière chaque choix sonore : ce qui sépare une ambiance agréable d’un environnement qui agit sur le système nerveux.',
+                role: 'Neuroscientifique · Conseil scientifique',
+                bio: "Garant de la rigueur derrière chaque choix sonore : ce qui sépare une ambiance agréable d'un environnement qui agit sur le système nerveux.",
                 highlight: true,
-                photo: null,
+                photo: HTEAM('nicolas.webp'),
+            },
+            {
+                name: 'Michelle George',
+                role: 'Docteure en neurosciences · Conseil scientifique',
+                bio: "Chercheuse à l'Institut du Cerveau (ICM), spécialisée dans les états de conscience. Elle veille à ce que chaque choix sonore agisse vraiment sur l'attention et la mémoire.",
+                photo: HTEAM('michelle.jpg'),
             },
         ],
         label: "L'équipe",
@@ -158,32 +247,33 @@ const SLIDES = [
     {
         key: 'contact',
         src: LEAFLET('09-presence.jpg'),
-        eyebrow: 'Faisons de votre événement un souvenir',
-        display: ['Écoutez par vous-même.'],
+        display: ['Parlons de votre prochain événement.'],
+        displaySub: 'Écoutez par vous-même.',
         logosTop: [
             ['kering', 'Kering'],
-            ['puressentiel', 'Puressentiel'],
+            ['pernod-ricard', 'Pernod Ricard'],
             ['loreal', "L'Oréal"],
             ['guerlain', 'Guerlain'],
-            ['maisons-du-monde', 'Maisons du Monde'],
-            ['pernod-ricard', 'Pernod Ricard'],
-            ['harmonie-mutuelle', 'Harmonie Mutuelle'],
-            ['unicef', 'Unicef'],
             ['pierre-fabre', 'Pierre Fabre'],
+            ['unicef', 'Unicef'],
+            ['puressentiel', 'Puressentiel'],
+            ['harmonie-mutuelle', 'Harmonie Mutuelle'],
+            ['maisons-du-monde', 'Maisons du Monde'],
             ['furterer', 'René Furterer'],
         ],
         logosBottom: [
             ['pileje', 'PiLeJe'],
-            ['bpifrance', 'bpifrance'],
-            ['hopital-ambroise-pare', 'Hôpital Ambroise-Paré AP-HP'],
             ['publicis', 'Publicis Groupe'],
-            ['ffpapf', 'Fédération Française du Prêt à Porter Féminin'],
+            ['marie-claire', 'Marie Claire'],
+            ['hopital-ambroise-pare', 'Hôpital Ambroise-Paré AP-HP'],
+            ['jcdecaux', 'JCDecaux'],
+            ['bpifrance', 'bpifrance'],
             ['escp', 'ESCP Business School'],
             ['institut-du-monde-arabe', 'Institut du Monde Arabe'],
-            ['marie-claire', 'Marie Claire'],
+            ['ffpapf', 'Fédération Française du Prêt à Porter Féminin'],
         ],
         cta: { label: 'Organiser votre événement', href: 'mailto:jeremie@kikinastudio.com' },
-        label: 'Faisons de votre événement un souvenir',
+        label: 'Parlons de votre prochain événement',
     },
 ];
 
@@ -327,25 +417,23 @@ export default function EventsPage() {
                 {SLIDES.map((slide, i) => (
                     <section
                         key={slide.key}
-                        className={`leaflet-slide${slide.cards ? ' leaflet-slide--voyages' : ''}${slide.members ? ' leaflet-slide--team' : ''}${slide.heavyScrim ? ' leaflet-slide--heavy-scrim' : ''}${i === index ? ' is-active' : ''}`}
+                        className={`leaflet-slide${slide.cards ? ' leaflet-slide--voyages' : ''}${slide.cases ? ' leaflet-slide--study' : ''}${slide.members ? ' leaflet-slide--team' : ''}${slide.heavyScrim ? ' leaflet-slide--heavy-scrim' : ''}${i === index ? ' is-active' : ''}`}
                         aria-hidden={i !== index}
                     >
+                        {/* Dark base shows through if an image/clip is ever missing */}
+                        <div className="leaflet-slide__img leaflet-slide__img--dark" />
                         {slide.video ? (
-                            <>
-                                {/* Dark base shows through if the clip is ever missing */}
-                                <div className="leaflet-slide__img leaflet-slide__img--dark" />
-                                <video
-                                    className="leaflet-slide__video"
-                                    src={slide.video}
-                                    autoPlay
-                                    muted
-                                    loop
-                                    playsInline
-                                    preload="auto"
-                                    tabIndex={-1}
-                                    aria-hidden="true"
-                                />
-                            </>
+                            <video
+                                className="leaflet-slide__video"
+                                src={slide.video}
+                                autoPlay
+                                muted
+                                loop
+                                playsInline
+                                preload="auto"
+                                tabIndex={-1}
+                                aria-hidden="true"
+                            />
                         ) : (
                             <div className="leaflet-slide__img" style={{ backgroundImage: `url(${slide.src})` }} />
                         )}
@@ -364,6 +452,7 @@ export default function EventsPage() {
                                 {slide.display.map((line) => (
                                     <span key={line} className="leaflet-stat__line">{line}</span>
                                 ))}
+                                {slide.displaySub && <span className="leaflet-stat__sub">{slide.displaySub}</span>}
                                 {slide.cta && (
                                     <a className="leaflet-stat__btn" href={slide.cta.href}>
                                         {slide.cta.label}
@@ -373,10 +462,14 @@ export default function EventsPage() {
                             </div>
                         )}
 
-                        {/* Section 5 — the three movements, presented as cards */}
+                        {/* The sas — title + intro + three movement cards + footnote */}
                         {slide.cards && (
                             <div className="leaflet-voyages-wrap">
-                                <p className="leaflet-voyages__head">{slide.cards.intro}</p>
+                                <div className="leaflet-voyages__heading">
+                                    {slide.cards.title && <p className="leaflet-voyages__title">{slide.cards.title}</p>}
+                                    {slide.cards.subtitle && <p className="leaflet-voyages__subtitle">{slide.cards.subtitle}</p>}
+                                    {slide.cards.intro && <p className="leaflet-voyages__intro">{slide.cards.intro}</p>}
+                                </div>
                                 <div className="leaflet-voyages">
                                     {slide.cards.items.map((card, ci) => (
                                         <div key={card.titre} className="leaflet-voyage">
@@ -386,10 +479,45 @@ export default function EventsPage() {
                                         </div>
                                     ))}
                                 </div>
+                                {slide.cards.note && <p className="leaflet-voyages__note">{slide.cards.note}</p>}
                             </div>
                         )}
 
-                        {/* Section 9 — team, cloned from the /hotels deck */}
+                        {/* Case-study slides — 1 or 2 blocks (Contexte / Notre rôle / Effet) */}
+                        {slide.cases && (
+                            <div className="leaflet-study-wrap">
+                                {slide.caseHeader && <p className="leaflet-study__head">{slide.caseHeader}</p>}
+                                <div className={`leaflet-study leaflet-study--${slide.cases.length}`}>
+                                    {slide.cases.map((c) => (
+                                        <article key={c.titre} className="leaflet-study-card">
+                                            <p className="leaflet-study-card__sub">{c.soustitre}</p>
+                                            <h3 className="leaflet-study-card__title">{c.titre}</h3>
+                                            <div className="leaflet-study-field">
+                                                <span className="leaflet-study-field__label">Contexte</span>
+                                                <p className="leaflet-study-field__text">{c.contexte}</p>
+                                            </div>
+                                            <div className="leaflet-study-field">
+                                                <span className="leaflet-study-field__label">Notre rôle</span>
+                                                <p className="leaflet-study-field__text">{c.role}</p>
+                                            </div>
+                                            <div className="leaflet-study-field">
+                                                <span className="leaflet-study-field__label">Effet</span>
+                                                <p className="leaflet-study-field__text">{c.effet}</p>
+                                            </div>
+                                        </article>
+                                    ))}
+                                </div>
+                                {slide.citations && (
+                                    <div className="leaflet-study__cites">
+                                        {slide.citations.map((q) => (
+                                            <p key={q} className="leaflet-study__cite">{q}</p>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Team, cloned from the /hotels deck */}
                         {slide.members && (
                             <div className="h-special">
                                 <div className="h-special__head">
@@ -424,6 +552,14 @@ export default function EventsPage() {
                                 {slide.body && slide.body.map((para) => (
                                     <p key={para} className="leaflet-caption__body">{para}</p>
                                 ))}
+                            </div>
+                        )}
+
+                        {/* Pull-stat (slide "La bascule") — big figure + legend, right side */}
+                        {slide.pull && (
+                            <div className="leaflet-pull" aria-hidden="true">
+                                <span className="leaflet-pull__figure">{slide.pull.figure}</span>
+                                <span className="leaflet-pull__legend">{slide.pull.legend}</span>
                             </div>
                         )}
 
@@ -510,7 +646,7 @@ export default function EventsPage() {
                     <br />
                     Il décide ce qu'on en retiendra.
                 </h1>
-                <p className="leaflet-enter__sub">Kikina compose les expériences sonores qui font basculer votre audience dans l'état que votre événement attend d'elle.</p>
+                <p className="leaflet-enter__sub">Kikina compose le son de votre événement : une signature continue, et les moments qui font basculer.</p>
                 <button className="leaflet-enter__btn" onClick={handleEnter}>
                     Entrer
                 </button>

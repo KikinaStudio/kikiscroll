@@ -759,6 +759,12 @@ html[data-mode="events"] .h-team--4 {
     width: min(94vw, 1140px);
 }
 
+html[data-mode="events"] .h-team--5 {
+    grid-template-columns: repeat(5, 1fr);
+    gap: clamp(13px, 1.5vw, 28px);
+    width: min(96vw, 1320px);
+}
+
 html[data-mode="events"] .h-member {
     display: flex;
     flex-direction: column;
@@ -865,5 +871,241 @@ html[data-mode="events"] .h-member__bio {
     .leaflet-case__body {
         font-size: 11.5px;
         line-height: 1.4;
+    }
+}
+
+/* --- The sas (events) — title + subtitle + intro above the three cards ----- */
+.leaflet-voyages__heading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(8px, 1.1vh, 16px);
+    max-width: min(92vw, 820px);
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.leaflet-slide.is-active .leaflet-voyages__heading {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 1s ease 0.4s, transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.4s;
+}
+
+.leaflet-voyages__title {
+    margin: 0;
+    font-family: 'Instrument Serif', var(--font-heading), serif;
+    font-size: clamp(28px, 4vw, 50px);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    color: #f6eed9;
+    text-shadow: 0 2px 28px rgba(8, 5, 3, 0.45);
+}
+
+.leaflet-voyages__subtitle {
+    margin: 0;
+    font-size: clamp(11px, 0.9vw, 13px);
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #c9a45f;
+}
+
+.leaflet-voyages__intro {
+    margin: 6px 0 0;
+    font-size: clamp(13px, 1vw, 15.5px);
+    font-weight: 300;
+    line-height: 1.6;
+    color: rgba(245, 239, 231, 0.84);
+}
+
+.leaflet-voyages__note {
+    margin: 0;
+    max-width: min(90vw, 780px);
+    font-size: clamp(10.5px, 0.8vw, 12.5px);
+    line-height: 1.5;
+    color: rgba(245, 239, 231, 0.56);
+}
+
+/* --- Case-study slides (events) — 1 or 2 blocks of Contexte/Notre rôle/Effet */
+.leaflet-study-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(18px, 3vh, 38px);
+    padding: clamp(78px, 12vh, 140px) clamp(24px, 6vw, 110px);
+    text-align: center;
+}
+
+.leaflet-study__head {
+    margin: 0;
+    max-width: 22ch;
+    font-family: 'Instrument Serif', var(--font-heading), serif;
+    font-size: clamp(26px, 3.6vw, 48px);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: #f6eed9;
+    text-shadow: 0 2px 28px rgba(8, 5, 3, 0.45);
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.leaflet-slide.is-active .leaflet-study__head {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 1s ease 0.35s, transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.35s;
+}
+
+.leaflet-study {
+    width: min(92vw, 1180px);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(18px, 2.4vw, 44px);
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.55s ease 0.2s, transform 0.55s ease 0.2s;
+}
+
+.leaflet-slide.is-active .leaflet-study {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.leaflet-study--1 {
+    max-width: 720px;
+}
+
+.leaflet-study--2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.leaflet-study-card {
+    text-align: left;
+    padding: clamp(20px, 2vw, 34px);
+    border: 1px solid rgba(246, 238, 217, 0.16);
+    border-radius: 12px;
+    background: rgba(18, 12, 8, 0.36);
+    backdrop-filter: blur(3px);
+}
+
+.leaflet-study-card__sub {
+    margin: 0 0 8px;
+    font-size: clamp(10px, 0.8vw, 12px);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #c9a45f;
+}
+
+.leaflet-study-card__title {
+    margin: 0 0 clamp(12px, 1.3vw, 20px);
+    font-family: 'Instrument Serif', var(--font-heading), serif;
+    font-size: clamp(18px, 1.7vw, 26px);
+    line-height: 1.2;
+    color: #f6eed9;
+}
+
+.leaflet-study-field {
+    margin-top: clamp(9px, 1vw, 15px);
+}
+
+.leaflet-study-field__label {
+    display: block;
+    margin-bottom: 3px;
+    font-size: clamp(9.5px, 0.72vw, 11px);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(201, 164, 95, 0.85);
+}
+
+.leaflet-study-field__text {
+    margin: 0;
+    font-size: clamp(12px, 0.92vw, 14px);
+    line-height: 1.5;
+    color: rgba(246, 238, 217, 0.82);
+}
+
+.leaflet-study__cites {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(12px, 2vw, 40px);
+    max-width: min(92vw, 1000px);
+}
+
+.leaflet-study__cite {
+    margin: 0;
+    flex: 1 1 340px;
+    max-width: 520px;
+    font-family: 'Instrument Serif', var(--font-heading), serif;
+    font-style: italic;
+    font-size: clamp(13px, 1.05vw, 17px);
+    line-height: 1.42;
+    color: rgba(246, 238, 217, 0.9);
+}
+
+@media (max-width: 880px) {
+    .leaflet-study--2 {
+        grid-template-columns: 1fr;
+    }
+    .leaflet-study-wrap {
+        gap: 16px;
+        padding: 70px 22px;
+        overflow-y: auto;
+        justify-content: flex-start;
+    }
+}
+
+/* --- Pull-stat (events "La bascule") — big figure + legend on the right ---- */
+.leaflet-pull {
+    position: absolute;
+    right: clamp(28px, 6vw, 96px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+    max-width: 280px;
+    opacity: 0;
+    transition: opacity 0.6s ease 0.3s;
+}
+
+.leaflet-slide.is-active .leaflet-pull {
+    opacity: 1;
+}
+
+.leaflet-pull__figure {
+    font-family: 'Instrument Serif', var(--font-heading), serif;
+    font-size: clamp(56px, 7.5vw, 116px);
+    line-height: 1;
+    color: #f6eed9;
+    text-shadow: 0 2px 28px rgba(8, 5, 3, 0.5);
+}
+
+.leaflet-pull__legend {
+    margin-top: 10px;
+    font-size: clamp(11px, 0.85vw, 13px);
+    line-height: 1.45;
+    color: rgba(246, 238, 217, 0.78);
+}
+
+@media (max-width: 880px) {
+    .leaflet-pull {
+        top: auto;
+        bottom: 40%;
+        right: 22px;
+        transform: none;
+        max-width: 60vw;
+    }
+    .leaflet-pull__figure {
+        font-size: 64px;
     }
 }
