@@ -216,9 +216,11 @@ function SlideBody({ slide }) {
                                         </span>
                                     )}
                                 </div>
-                                <h3 className="h-member__name">{m.name}</h3>
-                                <p className="h-member__role">{m.role}</p>
-                                <p className="h-member__bio">{m.bio}</p>
+                                <div className="h-member__info">
+                                    <h3 className="h-member__name">{m.name}</h3>
+                                    <p className="h-member__role">{m.role}</p>
+                                    <p className="h-member__bio">{m.bio}</p>
+                                </div>
                             </article>
                         ))}
                     </div>

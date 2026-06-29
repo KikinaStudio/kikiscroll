@@ -123,7 +123,41 @@ export const SLIDES = [
         label: 'Evolving music',
     },
 
-    // 4 — One objective per space (FR + a 7th card, Treatment)
+    // 4 — The sound of your brand (right after the evolving-music slide)
+    {
+        key: 'marque',
+        type: 'cards',
+        mod: 'h-brand', // borderless gold icons + wider head (distinct from the per-space cards)
+        src: IMG('04-heat.jpg'),
+        eyebrow: 'The sound of your brand',
+        title: ['One signature.', 'Layers that tell a story.'],
+        intro: 'A hotel sounds like itself, end to end: not a different playlist per room, but one coherent voice carried across the journey. The brand becomes audible.',
+        cards: [
+            {
+                title: 'The signature',
+                icon: 'signature',
+                body: 'A sonic DNA defined with the brand: instruments, harmonic colors, narrative tone. Recognizable in every space.',
+            },
+            {
+                title: 'The story',
+                icon: 'story',
+                body: 'A continuous arc from arrival to departure. The guest moves through spaces, but stays inside one coherent world.',
+            },
+            {
+                title: 'Adaptation',
+                icon: 'adaptation',
+                body: 'Layers of tempo, density and texture adjusted space by space, in real time, to support what each moment requires.',
+            },
+            {
+                title: 'Evolution',
+                icon: 'evolution',
+                body: 'The signature grows with the brand over time: seasons, collaborations, special moments.',
+            },
+        ],
+        label: 'The sound of your brand',
+    },
+
+    // 5 — One objective per space (FR + a 7th card, Treatment)
     {
         key: 'espaces',
         type: 'cards',
@@ -186,7 +220,7 @@ export const SLIDES = [
         label: 'One objective per space',
     },
 
-    // 5 — The bedroom
+    // 6 — The bedroom
     {
         key: 'chambre',
         src: HIMG('05-bedroom.jpg'),
@@ -204,40 +238,6 @@ export const SLIDES = [
         ],
         sources: ['Meta-analysis, healthcare setting', 'Scientific Reports'],
         label: 'The bedroom',
-    },
-
-    // 6 — The sound of your brand (replaces the FR diffusion slide)
-    {
-        key: 'marque',
-        type: 'cards',
-        mod: 'h-brand', // borderless gold icons + wider head (distinct from slide 4)
-        src: IMG('04-heat.jpg'),
-        eyebrow: 'The sound of your brand',
-        title: ['One signature.', 'Layers that tell a story.'],
-        intro: 'A hotel sounds like itself, end to end: not a different playlist per room, but one coherent voice carried across the journey. The brand becomes audible.',
-        cards: [
-            {
-                title: 'The signature',
-                icon: 'signature',
-                body: 'A sonic DNA defined with the brand: instruments, harmonic colors, narrative tone. Recognizable in every space.',
-            },
-            {
-                title: 'The story',
-                icon: 'story',
-                body: 'A continuous arc from arrival to departure. The guest moves through spaces, but stays inside one coherent world.',
-            },
-            {
-                title: 'Adaptation',
-                icon: 'adaptation',
-                body: 'Layers of tempo, density and texture adjusted space by space, in real time, to support what each moment requires.',
-            },
-            {
-                title: 'Evolution',
-                icon: 'evolution',
-                body: 'The signature grows with the brand over time: seasons, collaborations, special moments.',
-            },
-        ],
-        label: 'The sound of your brand',
     },
 
     // 7 — The experience continues at home
