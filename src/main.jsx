@@ -37,11 +37,21 @@ if (segments[0] === 'leaflet') {
         renderRoot(<EventsPage />);
     });
 } else if (segments[0] === 'hotels') {
-    document.documentElement.lang = 'fr';
+    const isEn = segments[1] === 'en';
+    document.documentElement.lang = isEn ? 'en' : 'fr';
     document.documentElement.dataset.mode = 'hotels';
-    import('./hotels/HotelsPage.jsx').then(({ default: HotelsPage }) => {
-        renderRoot(<HotelsPage />);
-    });
+    if (isEn) {
+        Promise.all([
+            import('./hotels/HotelsPage.jsx'),
+            import('./hotels/content.en.js'),
+        ]).then(([{ default: HotelsPage }, { SLIDES, ENTRY, META, UI }]) => {
+            renderRoot(<HotelsPage slides={SLIDES} entry={ENTRY} meta={META} ui={UI} />);
+        });
+    } else {
+        import('./hotels/HotelsPage.jsx').then(({ default: HotelsPage }) => {
+            renderRoot(<HotelsPage />);
+        });
+    }
 } else {
     const { mode, lang } = parseUrlMode();
 

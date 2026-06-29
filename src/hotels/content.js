@@ -31,6 +31,15 @@ export const ENTRY = {
     button: 'Entrer',
 };
 
+// Libellés du chrome (bouton son, indice de défilement, étiquettes de slide).
+export const UI = {
+    mute: 'Couper le son',
+    unmute: 'Activer le son',
+    scroll: 'Défiler',
+    slidesNav: 'Diapositives',
+    slideLabel: (n, label) => `Diapositive ${n} : ${label}`,
+};
+
 // Roster client complet (logos disponibles + repli texte pour ceux sans SVG).
 const CLIENTS = [
     { name: 'Kering', src: LOGO('kering') },
@@ -94,12 +103,12 @@ export const SLIDES = [
         type: 'cols',
         src: IMG('11-score.webp'),
         eyebrow: 'La musique évolutive',
-        title: 'Le souffle du live, sans la contrainte du live.',
+        title: ['Le souffle du live,', 'sans la contrainte du live.'],
         intro: 'Toute la musique connue tient en deux modèles. Nous ouvrons le troisième : un son composé par l’humain, porté par notre technologie et dirigé en direct par l’IA, pour amplifier l’expérience client, espace par espace, moment par moment.',
         columns: [
-            { tag: 'Le live', artist: 'Artiste présent', music: 'Vivante', alive: true, living: false, body: 'Elle réagit à la salle et à l’instant. Mais elle ne dure qu’un soir.' },
-            { tag: 'Le disque & le streaming', artist: 'Artiste absent', music: 'Figée', alive: false, living: false, body: 'Partout, tout le temps. Mais identique à chaque écoute, jusqu’à l’usure.' },
-            { tag: 'Kikina', artist: 'Artiste absent', music: 'Vivante', alive: true, living: true, badge: 'IA chef d’orchestre', body: 'Générée en continu, jamais deux fois la même, calibrée pour le lieu et le moment.' },
+            { tag: 'Le live', artist: 'Artiste présent', music: 'Musique vivante', alive: true, living: false, body: 'Elle réagit à la salle et à l’instant. Mais elle ne dure qu’un soir.' },
+            { tag: 'Le disque & le streaming', artist: 'Artiste absent', music: 'Musique figée', alive: false, living: false, body: 'Partout, tout le temps. Mais identique à chaque écoute, jusqu’à l’usure.' },
+            { tag: 'Kikina', artist: 'Artiste absent', music: 'Musique vivante', alive: true, living: true, badge: 'IA chef d’orchestre', body: 'Générée en continu, jamais deux fois la même, calibrée pour le lieu et le moment.' },
         ],
         foot: 'La musique active le même circuit de récompense que la nourriture.',
         footSource: 'Salimpoor & Zatorre, Nature Neuroscience, 2011',

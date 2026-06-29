@@ -105,12 +105,28 @@ html[data-mode="hotels"] .h-stat__sub {
     max-width: 20ch;
 }
 
+/* Single key-figure sub (slide 1): wider than the base 24ch so the line breaks
+   onto two balanced lines instead of three. */
+html[data-mode="hotels"] .leaflet-stat__sub {
+    max-width: 34ch;
+}
+
 /* Two figures: keep them on one row and push them further apart.
    Selector matches the base `.leaflet-stat.h-stat-row` specificity so the gap
    actually wins. */
 html[data-mode="hotels"] .leaflet-stat.h-stat-row--2 {
     flex-wrap: nowrap;
     gap: clamp(56px, 7vw, 116px);
+}
+
+/* Bottom-left captions (slides 1, 2, 5, 7): a wider box than the base 52ch so
+   the multi-paragraph copy wraps onto fewer lines. A shorter block sits lower,
+   keeping more breathing room below the centred key figures. */
+html[data-mode="hotels"] .leaflet-caption {
+    max-width: min(47rem, 86vw);
+}
+html[data-mode="hotels"] .leaflet-caption__body {
+    max-width: 66ch;
 }
 
 /* --- Special (centered) slides: shared frame ------------------------------ */
@@ -166,6 +182,41 @@ html[data-mode="hotels"] .h-special__intro {
     font-size: clamp(13px, 1.05vw, 16px);
     line-height: 1.5;
     color: rgba(246, 238, 217, 0.72);
+}
+
+/* Slide 3 (cols) — give the title + intro more room so the title sits on two
+   balanced lines and the intro underneath is less cramped. */
+html[data-mode="hotels"] .leaflet-slide--cols .h-special__head {
+    max-width: 58ch;
+}
+html[data-mode="hotels"] .leaflet-slide--cols .h-special__intro {
+    max-width: 58ch;
+}
+
+/* Slide 6 (brand) — wider head + intro, and a distinct icon style: borderless,
+   gold, stacked above the card title (vs. the boxed icons on slide 4). */
+html[data-mode="hotels"] .h-brand .h-special__head {
+    max-width: 56ch;
+}
+html[data-mode="hotels"] .h-brand .h-special__intro {
+    max-width: 56ch;
+}
+html[data-mode="hotels"] .h-brand .h-card__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+html[data-mode="hotels"] .h-brand .h-card__icon {
+    width: auto;
+    height: auto;
+    border: none;
+    border-radius: 0;
+    color: var(--h-accent);
+}
+html[data-mode="hotels"] .h-brand .h-card__icon svg {
+    width: 30px;
+    height: 30px;
 }
 
 html[data-mode="hotels"] .h-special__foot {
@@ -355,6 +406,12 @@ html[data-mode="hotels"] .h-cards--7 {
     grid-template-columns: repeat(4, 1fr);
 }
 
+/* Brand slide — four text sub-points in a balanced 2×2 grid. */
+html[data-mode="hotels"] .h-cards--4 {
+    grid-template-columns: repeat(2, 1fr);
+    width: min(88vw, 880px);
+}
+
 html[data-mode="hotels"] .h-card {
     display: flex;
     flex-direction: column;
@@ -539,6 +596,39 @@ html[data-mode="hotels"] .h-member__bio {
     font-size: clamp(12px, 0.95vw, 14px);
     line-height: 1.58;
     color: rgba(246, 238, 217, 0.8);
+}
+
+/* Research partners — small text credits under the team (logo files pending). */
+html[data-mode="hotels"] .h-partners {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(22px, 3.4vw, 56px);
+    width: min(92vw, 900px);
+    margin-top: clamp(22px, 3.2vh, 40px);
+    padding-top: clamp(16px, 2.2vh, 26px);
+    border-top: 1px solid rgba(246, 238, 217, 0.14);
+}
+
+html[data-mode="hotels"] .h-partner {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-width: 32ch;
+    text-align: center;
+}
+
+html[data-mode="hotels"] .h-partner__name {
+    font-family: 'Instrument Serif', var(--font-heading), serif;
+    font-size: clamp(16px, 1.4vw, 21px);
+    color: #f6eed9;
+}
+
+html[data-mode="hotels"] .h-partner__note {
+    font-size: 10.5px;
+    letter-spacing: 0.02em;
+    line-height: 1.45;
+    color: rgba(246, 238, 217, 0.55);
 }
 
 /* --- Finale (section 9) --------------------------------------------------- */

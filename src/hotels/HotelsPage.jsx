@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { Howl } from 'howler';
 import CursorCanvas from '../leaflet/CursorCanvas';
 import SoundWave from './SoundWave';
-import { SLIDES, ENTRY, META } from './content';
+import { SLIDES as FR_SLIDES, ENTRY as FR_ENTRY, META as FR_META, UI as FR_UI } from './content';
 import '../leaflet/leaflet.css';
 import './hotels.css';
 
@@ -24,6 +24,12 @@ const ICONS = {
     work: <><rect x="4" y="5" width="16" height="11" rx="1.2" /><path d="M2.5 19.5h19" /></>,
     spa: <path d="M12 3c3.5 4.2 5.5 7 5.5 10a5.5 5.5 0 0 1-11 0c0-3 2-5.8 5.5-10z" />,
     bed: <><path d="M3 18v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4" /><path d="M3 20v-2M21 20v-2" /><path d="M7 12V9a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v3" /></>,
+    treatment: <><ellipse cx="12" cy="16.6" rx="6" ry="2.3" /><ellipse cx="12" cy="11.8" rx="4.5" ry="1.9" /><ellipse cx="12" cy="7.6" rx="3.1" ry="1.5" /></>,
+    // Brand slide (s06) — a distinct family, shown borderless + gold.
+    signature: <path d="M3 16c2 0 3.1-8.5 4.9-8.5 1.6 0 1.7 10 3.4 10 1.2 0 1.8-3 3.1-3 1.1 0 1.6 1.2 3.6 1.2" />,
+    story: <><path d="M12 6.6C10.4 5.4 8.3 4.8 5 5.1v12c3.3-.3 5.4.3 7 1.5 1.6-1.2 3.7-1.8 7-1.5v-12c-3.3-.3-5.4.3-7 1.5z" /><path d="M12 6.6v12.4" /></>,
+    adaptation: <><path d="M6 4v16M12 4v16M18 4v16" /><circle cx="6" cy="14" r="2" /><circle cx="12" cy="8" r="2" /><circle cx="18" cy="12" r="2" /></>,
+    evolution: <><path d="M3 17l5.5-5.5 4 4 8.5-9" /><path d="M16 6.5h5v5" /></>,
 };
 
 function Icon({ name }) {
@@ -85,7 +91,18 @@ function SpecialHead({ slide }) {
     return (
         <div className="h-special__head">
             {slide.eyebrow && <p className="h-special__eyebrow">{slide.eyebrow}</p>}
-            {slide.title && <p className="h-special__title">{slide.title}</p>}
+            {slide.title && (
+                <p className="h-special__title">
+                    {Array.isArray(slide.title)
+                        ? slide.title.map((line, i) => (
+                            <span key={line}>
+                                {line}
+                                {i < slide.title.length - 1 && <br />}
+                            </span>
+                        ))
+                        : slide.title}
+                </p>
+            )}
             {slide.intro && <p className="h-special__intro">{slide.intro}</p>}
         </div>
     );
@@ -130,7 +147,7 @@ function SlideBody({ slide }) {
                                 <div className="h-col__axes">
                                     <span className="h-col__axis">{col.artist}</span>
                                     <span className={`h-col__axis h-col__axis--${col.alive ? 'alive' : 'fixed'}`}>
-                                        Musique {col.music}
+                                        {col.music}
                                     </span>
                                 </div>
                                 {col.badge && <span className="h-col__badge">{col.badge}</span>}
@@ -194,6 +211,16 @@ function SlideBody({ slide }) {
                             </article>
                         ))}
                     </div>
+                    {slide.partners && (
+                        <div className="h-partners">
+                            {slide.partners.map((p) => (
+                                <span key={p.name} className="h-partner">
+                                    <span className="h-partner__name">{p.name}</span>
+                                    {p.note && <span className="h-partner__note">{p.note}</span>}
+                                </span>
+                            ))}
+                        </div>
+                    )}
                 </div>
             );
 
@@ -221,7 +248,13 @@ function SlideBody({ slide }) {
     }
 }
 
-export default function HotelsPage() {
+export default function HotelsPage({ slides = FR_SLIDES, entry = FR_ENTRY, meta = FR_META, ui = FR_UI } = {}) {
+    // FR by default; the EN route (main.jsx) passes the English content + chrome.
+    const SLIDES = slides;
+    const ENTRY = entry;
+    const META = meta;
+    const UI = ui;
+
     const [index, setIndex] = useState(0);
     const [started, setStarted] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
@@ -332,7 +365,7 @@ export default function HotelsPage() {
                 {SLIDES.map((slide, i) => (
                     <section
                         key={slide.key}
-                        className={`leaflet-slide${slide.type ? ` leaflet-slide--${slide.type}` : ''}${slide.dark ? ' leaflet-slide--dark-mood' : ''}${slide.heavy ? ' leaflet-slide--heavy-scrim' : ''}${i === index ? ' is-active' : ''}`}
+                        className={`leaflet-slide${slide.type ? ` leaflet-slide--${slide.type}` : ''}${slide.dark ? ' leaflet-slide--dark-mood' : ''}${slide.heavy ? ' leaflet-slide--heavy-scrim' : ''}${slide.mod ? ` ${slide.mod}` : ''}${i === index ? ' is-active' : ''}`}
                         aria-hidden={i !== index}
                     >
                         <div className="leaflet-slide__img" style={{ backgroundImage: `url(${slide.src})` }} />
@@ -365,7 +398,7 @@ export default function HotelsPage() {
                 <button
                     onClick={toggleMute}
                     className={`leaflet-chrome leaflet-mute${isMuted ? ' is-muted' : ''}`}
-                    aria-label={isMuted ? 'Activer le son' : 'Couper le son'}
+                    aria-label={isMuted ? UI.unmute : UI.mute}
                 >
                     <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                         <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
@@ -375,12 +408,12 @@ export default function HotelsPage() {
             )}
 
             {/* Progress dots */}
-            <nav className="leaflet-chrome leaflet-dots" aria-label="Diapositives">
+            <nav className="leaflet-chrome leaflet-dots" aria-label={UI.slidesNav}>
                 {SLIDES.map((slide, i) => (
                     <button
                         key={slide.key}
                         className={`leaflet-dot${i === index ? ' is-active' : ''}`}
-                        aria-label={`Diapositive ${i + 1} : ${slide.label || slide.eyebrow}`}
+                        aria-label={UI.slideLabel(i + 1, slide.label || slide.eyebrow)}
                         aria-current={i === index}
                         onClick={() => goTo(i)}
                     />
@@ -397,7 +430,7 @@ export default function HotelsPage() {
             {/* Scroll hint (first slide only) */}
             {started && index === 0 && (
                 <div className="leaflet-chrome leaflet-hint" aria-hidden="true">
-                    <span className="leaflet-hint__text">Défiler</span>
+                    <span className="leaflet-hint__text">{UI.scroll}</span>
                     <svg width="18" height="11" viewBox="0 0 20 12" fill="none" className="animate-chevron-top">
                         <path d="M2 2L10 10L18 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -418,7 +451,9 @@ export default function HotelsPage() {
                         </span>
                     ))}
                 </h1>
-                <p className="leaflet-enter__sub">{ENTRY.sub}</p>
+                {Array.isArray(ENTRY.sub)
+                    ? ENTRY.sub.map((line) => <p key={line} className="leaflet-enter__sub">{line}</p>)
+                    : <p className="leaflet-enter__sub">{ENTRY.sub}</p>}
                 <button className="leaflet-enter__btn" onClick={handleEnter}>{ENTRY.button}</button>
             </div>
 
