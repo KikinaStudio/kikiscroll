@@ -312,7 +312,7 @@ export const SLIDES = [
         src: IMG('09-presence.jpg'),
         eyebrow: 'Let’s talk about your spaces',
         display: ['Listen for yourself.'],
-        cta: { label: 'Contact us', href: 'mailto:jeremie@kikinastudio.com' },
+        cta: { label: 'Enter the sound experience', href: `${BASE}wellness/en` },
         logos: CLIENTS,
         label: 'Let’s talk about your spaces',
     },
