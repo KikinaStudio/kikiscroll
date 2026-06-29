@@ -17,9 +17,9 @@ import '../leaflet/leaflet.css';
 //
 // Backgrounds live in public/IMAGES/events/. The client photos sit on their
 // own case slides (05-cocreation = Kering, 04-coupe = L'Amphi, 07-signature =
-// PiLeJe, 09-bourdelle = UNICEF). Images not in yet (10-ecoute, 11-vivant,
-// 13-pernod, 14-equipe) render on a dark canvas; "Le sas" and "Un seul fil" are
-// dark by design. A dark base sits behind every slide. Videos: 06-ancrage.mp4
+// PiLeJe, 09-bourdelle = UNICEF). Images not in yet (10-ecoute = ear, 12-sas =
+// ribbed glass, 15-fil = light panel, 11-vivant, 13-pernod, 14-equipe) render on
+// a dark canvas until dropped in. A dark base sits behind every slide. Videos: 06-ancrage.mp4
 // (on "La bascule") and 08-paris-podcast.mp4 (Paris Podcast panel). Slide
 // shapes: `stat`/`body` (statement), `pull` (right-side figure, "La bascule"),
 // `cards` (the sas), `cases` (full-bleed panels, 1 or 2, each with its own image
@@ -94,6 +94,7 @@ const SLIDES = [
     },
     {
         key: 'sas',
+        src: IMG('12-sas.jpg'),
         cards: {
             title: 'Le sas, en trois mouvements.',
             subtitle: 'Trois leviers physiologiques, validés par les neurosciences.',
@@ -109,6 +110,7 @@ const SLIDES = [
     },
     {
         key: 'fil',
+        src: IMG('15-fil.jpg'),
         stat: 'Un seul fil',
         statSub: 'Une signature, du premier au dernier instant.',
         body: [
