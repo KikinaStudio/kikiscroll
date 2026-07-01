@@ -9,22 +9,22 @@ import '../leaflet/leaflet.css';
 // gesture → one slide, GSAP track, entry overlay, drone, cursor canvas. Only
 // the content differs.
 //
-// Storytelling (v2 — Notion "Deck événementiel v2"): cover (entry overlay) →
-// L'écart (le problème) → Ailleurs → Écouter vraiment → Le moment → La bascule
-// (+37%) → Le sas en 3 mouvements (CARDS) → Un seul fil → Vivant → 4 cas clients
-// (PiLeJe · UNICEF · Kering+Paris Podcast · Pernod Ricard+L'Amphi) → équipe →
+// Storytelling (v3 — Notion "Deck événementiel v3"): cover (entry overlay) →
+// Le problème (70% stat) → Ailleurs (+37% stat) → Écouter vraiment → Kikina ·
+// architectes sonores (studio intro + client logos band) → Le sas en 3
+// mouvements (CARDS) → Une signature → Vivant → 6 cas clients, un par slide
+// (Kering · PiLeJe · UNICEF · L'Amphi · Paris Podcast · Pernod Ricard) → équipe →
 // contact.
 //
 // Backgrounds live in public/IMAGES/events/. The client photos sit on their
 // own case slides (05-cocreation = Kering, 04-coupe = L'Amphi, 07-signature =
-// PiLeJe, 09-bourdelle = UNICEF). Images not in yet (10-ecoute = ear, 12-sas =
-// ribbed glass, 15-fil = light panel, 11-vivant, 13-pernod, 14-equipe) render on
-// a dark canvas until dropped in. A dark base sits behind every slide. Videos: 06-ancrage.mp4
-// (on "La bascule") and 08-paris-podcast.mp4 (Paris Podcast panel). Slide
-// shapes: `stat`/`body` (statement), `pull` (right-side figure, "La bascule"),
-// `cards` (the sas), `cases` (full-bleed panels, 1 or 2, each with its own image
-// + optional caseHeader and citations), `members` (team), `display`/`logos`
-// (contact).
+// PiLeJe, 09-bourdelle = UNICEF). Images not in yet (13-pernod, 14-equipe) render
+// on a dark canvas until dropped in. A dark base sits behind every slide. Videos:
+// 06-ancrage.mp4 (on "Ailleurs" / +37%) and 08-paris-podcast.mp4 (Paris Podcast
+// case). Slide shapes: `stat`/`body` (statement), `statLogos` (client logos band
+// under a stat, used on the studio slide), `cards` (the sas), `cases` (full-bleed
+// panels, 1 or 2, each with its own image + optional caseHeader and citations),
+// `members` (team), `display`/`logos` (contact).
 const BASE = import.meta.env.BASE_URL;
 const IMG = (name) => `${BASE}IMAGES/events/${name}`;
 // The finale reuses the leaflet's partner logos and warm-glow backdrop — the
@@ -36,25 +36,24 @@ const HTEAM = (file) => `${BASE}IMAGES/hotels/team/${file}`;
 
 const SLIDES = [
     {
-        key: 'ecart',
-        src: IMG('01-cinema.jpg'),
-        heavyScrim: true, // bright, busy B&W photo — needs a deeper veil for legibility
-        stat: "L'écart",
-        statSub: "Entre ce que vous donnez et ce qu'ils peuvent recevoir.",
+        key: 'probleme',
+        src: IMG('01-oubli.jpg'),
+        stat: '70 %',
+        statSub: "de ce qu'on entend à un événement s'efface en 24 h.",
         body: [
-            "Vous mesurez le ROI d'un événement à ce qui en reste : un message retenu, une équipe alignée, une marque qui a marqué.",
-            "Mais ce qui en reste ne dépend pas de ce que vous avez dit. Ça dépend de l'état dans lequel votre audience l'a entendu. C'est la variable que personne ne pilote.",
+            "La courbe d'Ebbinghaus, validée par plus d'un siècle de psychologie expérimentale. Vous mesurez le ROI d'un événement à ce qui en reste : un message retenu, une équipe alignée, une marque qui a marqué.",
+            "Ce qui en reste ne dépend pas de ce que vous avez dit, mais de l'état dans lequel votre audience l'a entendu.",
         ],
-        label: "L'écart",
+        label: 'Le problème',
     },
     {
         key: 'ailleurs',
-        src: IMG('02-habituation.jpg'),
-        stat: 'Ailleurs',
-        statSub: "Présents dans la salle, absents à l'instant.",
+        video: IMG('06-ancrage.mp4'),
+        stat: '+37 %',
+        statSub: 'de mémorisation quand le public a les yeux fermés.',
         body: [
-            "Vos invités arrivent saturés : la réunion d'avant, 200 mails, les notifications, les transports. Ils sont dans la salle, mais la tête est ailleurs.",
-            "Et un message, même excellent, ricoche sur un public absent. 70 % s'efface en 24 h.",
+            "Les yeux fermés, le cerveau alloue plus de ressources à l'écoute et au traitement émotionnel. C'est précisément ce que produit une expérience sonore composée, salle dans le noir : l'audience décroche du visuel et retient ce qui suit.",
+            "Vredeveldt et al., Memory, 2014.",
         ],
         label: 'Ailleurs',
     },
@@ -64,33 +63,32 @@ const SLIDES = [
         stat: 'Écouter, vraiment',
         statSub: "Dans un monde saturé, l'attention est devenue rare.",
         body: [
-            "Partout, une tendance émerge. Listening bars à Tokyo, sound meditations à New York, écoute collective dans les espaces culturels. Des moments où l'on s'assoit, où l'on éteint le téléphone, où l'on écoute vraiment.",
-            "C'est devenu un rituel premium, une réponse culturelle à l'épuisement attentionnel. Nous l'apportons aux événements corporate : quelques minutes pour rendre votre audience à l'écoute, avant qu'elle ne reçoive votre message.",
+            "Partout, une tendance émerge. Tokyo, New York, Berlin. Les listening venues, sound meditations et écoutes collectives ne sont plus une niche underground : elles sont devenues des codes premium adoptés par l'hospitality, le retail et la culture.",
+            "Kikina amène cette grammaire à votre événement, avec une rigueur scientifique en plus.",
         ],
         label: 'Écouter, vraiment',
     },
     {
-        key: 'moment',
+        key: 'studio',
         src: IMG('03-contraste.jpg'),
-        stat: 'Le moment',
-        statSub: 'Quelques minutes qui décident du reste.',
-        body: [
-            "Dans un événement, il y a un moment qui change tout ce qui suit. Une rupture nette qui détache l'audience de son état d'arrivée et la fait basculer dans celui où votre message peut être reçu.",
-            "C'est ce moment-là que nous composons.",
+        stat: 'Kikina',
+        statSub: 'Architectes sonores fondés sur les neurosciences.',
+        statLogos: [
+            ['kering', 'Kering'],
+            ['pernod-ricard', 'Pernod Ricard'],
+            ['loreal', "L'Oréal"],
+            ['guerlain', 'Guerlain'],
+            ['pierre-fabre', 'Pierre Fabre'],
+            ['unicef', 'Unicef'],
+            ['jcdecaux', 'JCDecaux'],
+            ['harmonie-mutuelle', 'Harmonie Mutuelle'],
+            ['hopital-ambroise-pare', 'AP-HP'],
         ],
-        label: 'Le moment',
-    },
-    {
-        key: 'bascule',
-        video: IMG('06-ancrage.mp4'),
-        stat: 'La bascule',
-        statSub: 'Le son qui rend la salle disponible.',
         body: [
-            "Quelques minutes, salle plongée dans le noir, une expérience sonore composée pour votre soirée. Pendant des années, on a cherché à parler plus fort : plus d'écrans, plus d'effets, plus de scénographie.",
-            "Nous faisons l'inverse : nous suspendons le bruit, le temps que l'audience redevienne disponible. La tête revient dans le présent, le corps se cale au groupe, l'émotion s'installe. C'est là que vos messages atteignent, et qu'ils restent.",
+            "Studio de création sonore et laboratoire de recherche appliquée. Nous composons des expériences sonores pour des événements, des espaces et des marques.",
+            "Toutes nos compositions sont conçues avec des neuroscientifiques et leurs effets mesurés cliniquement, notamment dans le cadre d'un pilote en cours à l'hôpital Ambroise Paré (AP-HP).",
         ],
-        pull: { figure: '+37 %', legend: 'Les yeux fermés, le cerveau retient mieux (Vredeveldt et al., 2014).' },
-        label: 'La bascule',
+        label: 'Kikina · architectes sonores',
     },
     {
         key: 'sas',
@@ -111,13 +109,13 @@ const SLIDES = [
     {
         key: 'fil',
         src: IMG('15-fil.jpg'),
-        stat: 'Un seul fil',
-        statSub: 'Une signature, du premier au dernier instant.',
+        stat: 'Une signature',
+        statSub: 'Du premier au dernier instant, une seule composition originale.',
         body: [
             "La plupart des événements collent de la musique par-dessus, morceau par morceau. Nous composons l'inverse : une signature sonore unique qui traverse toute la soirée.",
             "L'accueil, les montées sur scène, les transitions, le final : chaque moment avec sa propre intensité. Un fil continu, calé sur le rythme et l'histoire de votre événement.",
         ],
-        label: 'Un seul fil',
+        label: 'Une signature',
     },
     {
         key: 'vivant',
@@ -131,6 +129,20 @@ const SLIDES = [
         label: 'Vivant',
     },
     {
+        key: 'cas-kering',
+        cases: [
+            {
+                img: IMG('05-cocreation.jpg'),
+                soustitre: 'Kering · sommet international · New York',
+                titre: "Aligner des leaders de la mode et du luxe autour d'un sujet commun, la sustainability.",
+                contexte: "Dirigeants, scientifiques, journalistes et influenceurs réunis autour de la sustainability. Chacun avec son agenda, son angle, son audience à reconquérir.",
+                role: "60e étage, vue sur Manhattan. Le son fait basculer la salle du chaos urbain vers le rythme des saisons, et les rythmes cardiaques des participants avec lui. Le sujet rendu sensible avant d'être discuté.",
+                effet: "Un moment d'alignement silencieux. Les influenceurs présents repartent ambassadeurs, pas spectateurs.",
+            },
+        ],
+        label: 'Cas · Kering',
+    },
+    {
         key: 'cas-pileje',
         cases: [
             {
@@ -141,6 +153,10 @@ const SLIDES = [
                 role: "L'expérience sonore en ouverture. La science PiLeJe vécue par le corps avant d'être expliquée.",
                 effet: "Une journée qui démarre dans l'écoute, pas dans la résistance.",
             },
+        ],
+        citations: [
+            "« Complètement immersif. J'ai adoré avec immodération. »",
+            "« Une expérience incroyable. Ça m'a fait monter les larmes. »",
         ],
         label: 'Cas · PiLeJe',
     },
@@ -159,40 +175,8 @@ const SLIDES = [
         label: 'Cas · UNICEF',
     },
     {
-        key: 'cas-kering',
-        caseHeader: 'La même bascule, à toutes les échelles.',
+        key: 'cas-amphi',
         cases: [
-            {
-                img: IMG('05-cocreation.jpg'),
-                soustitre: 'Kering · sommet international · New York',
-                titre: "Aligner des leaders de la mode et du luxe autour d'un sujet commun, la sustainability.",
-                contexte: "Dirigeants, scientifiques, journalistes et influenceurs réunis autour de la sustainability. Chacun avec son agenda, son angle, son audience à reconquérir.",
-                role: "60e étage, vue sur Manhattan. Le son fait basculer la salle du chaos urbain vers le rythme des saisons, et les rythmes cardiaques des participants avec lui. Le sujet rendu sensible avant d'être discuté.",
-                effet: "Un moment d'alignement silencieux. Les influenceurs présents repartent ambassadeurs, pas spectateurs.",
-            },
-            {
-                video: IMG('08-paris-podcast.mp4'),
-                soustitre: 'Paris Podcast Festival · Gaîté Lyrique · 400 personnes',
-                titre: "Faire vivre une expérience sonore à 400 personnes, dans un lieu culturel ouvert.",
-                contexte: "Festival culturel ouvert, audience large et exigeante.",
-                role: "400 personnes plongées dans le noir, une expérience sonore collective. Suivie d'une table ronde que nous animons avec la direction sustainability et communication de Kering : l'audio peut-il être un accélérateur de conscience ?",
-                effet: "La preuve par l'échelle. Une expérience qui tient dans une salle de 400, et qui ouvre une vraie conversation publique sur le pouvoir du son.",
-            },
-        ],
-        label: 'Cas · Kering + Paris Podcast',
-    },
-    {
-        key: 'cas-pernod',
-        caseHeader: 'Chaque format, un objectif précis.',
-        cases: [
-            {
-                img: IMG('13-pernod.jpg'),
-                soustitre: 'Pernod Ricard · séminaire international · présidents de marques',
-                titre: "Recentrer des dirigeants en compétition autour de l'identité du groupe.",
-                contexte: "Un rassemblement des présidents de toutes les marques du groupe, au niveau monde. Des dirigeants par nature en compétition interne, qu'il faut fédérer autour de ce qu'ils incarnent ensemble.",
-                role: "Une composition originale par un joueur de cristal Baschet, l'un des cinquante au monde à maîtriser cet instrument. Un temps de mise en présence au milieu du séminaire, feuilles et crayons sur les tables.",
-                effet: "Les dirigeants reposent leur fonction le temps de l'expérience. Ce qui en sort, idées et réflexions, revient au groupe.",
-            },
             {
                 img: IMG('04-coupe.jpg'),
                 soustitre: "L'Amphi · Club des Leaders en Santé · 200 dirigeants",
@@ -206,7 +190,35 @@ const SLIDES = [
             "« C'est quand la dernière fois que vous avez vu une salle de 200 personnes sans aucun bruit ? »",
             "« Au-delà de l'impact émotionnel, je crois à son impact diagnostique et son intérêt dans la formation professionnelle. »",
         ],
-        label: "Cas · Pernod Ricard + L'Amphi",
+        label: "Cas · L'Amphi",
+    },
+    {
+        key: 'cas-paris-podcast',
+        cases: [
+            {
+                video: IMG('08-paris-podcast.mp4'),
+                soustitre: 'Paris Podcast Festival · Gaîté Lyrique · 400 personnes',
+                titre: "Faire vivre une expérience sonore à 400 personnes, dans un lieu culturel ouvert.",
+                contexte: "Festival culturel ouvert, audience large et exigeante.",
+                role: "400 personnes plongées dans le noir, une expérience sonore collective. Suivie d'une table ronde que nous animons avec la direction sustainability et communication de Kering : l'audio peut-il être un accélérateur de conscience ?",
+                effet: "La preuve par l'échelle. Une expérience qui tient dans une salle de 400, et qui ouvre une vraie conversation publique sur le pouvoir du son.",
+            },
+        ],
+        label: 'Cas · Paris Podcast',
+    },
+    {
+        key: 'cas-pernod',
+        cases: [
+            {
+                img: IMG('13-pernod.jpg'),
+                soustitre: 'Pernod Ricard · séminaire international · présidents de marques',
+                titre: "Recentrer des dirigeants en compétition autour de l'identité du groupe.",
+                contexte: "Un rassemblement des présidents de toutes les marques du groupe, au niveau monde. Des dirigeants par nature en compétition interne, qu'il faut fédérer autour de ce qu'ils incarnent ensemble.",
+                role: "Une composition originale par un joueur de cristal Baschet, l'un des cinquante au monde à maîtriser cet instrument. Un temps de mise en présence au milieu du séminaire, feuilles et crayons sur les tables.",
+                effet: "Les dirigeants reposent leur fonction le temps de l'expérience. Ce qui en sort, idées et réflexions, revient au groupe.",
+            },
+        ],
+        label: 'Cas · Pernod Ricard',
     },
     {
         key: 'equipe',
@@ -448,6 +460,7 @@ export default function EventsPage() {
                             <div className="leaflet-stat">
                                 <span className="leaflet-stat__figure">{slide.stat}</span>
                                 {slide.statSub && <span className="leaflet-stat__sub">{slide.statSub}</span>}
+                                {slide.statLogos && <LogoRow logos={slide.statLogos} position="bottom" />}
                             </div>
                         )}
                         {slide.display && (
@@ -658,7 +671,7 @@ export default function EventsPage() {
                     <br />
                     Il décide ce qu'on en retiendra.
                 </h1>
-                <p className="leaflet-enter__sub">Kikina compose le son de votre événement : une signature continue, et les moments qui font basculer.</p>
+                <p className="leaflet-enter__sub">Kikina compose le son de votre événement. Une signature continue, et les moments qui font basculer.</p>
                 <button className="leaflet-enter__btn" onClick={handleEnter}>
                     Entrer
                 </button>
