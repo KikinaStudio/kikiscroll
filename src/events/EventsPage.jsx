@@ -137,9 +137,14 @@ const SLIDES = [
         cases: [
             {
                 img: IMG('05-cocreation.jpg'),
+                logo: LOGO('kering'),
                 soustitre: 'Kering · sommet international · New York',
                 titre: "Aligner des leaders mondiaux autour d'un sujet commun : la sustainability.",
-                texte: "60e étage à Manhattan. Dirigeants, scientifiques, journalistes, influenceurs réunis autour d'un sujet compliqué et galvaudé. Le son fait passer la salle du chaos urbain au rythme plus lent des saisons. Effet documenté en neurosciences : le rythme cardiaque ralentit, la disponibilité mentale augmente. Sensibiliser, rendre mémorable, et faire repartir les influenceurs comme premiers ambassadeurs.",
+                textes: [
+                    "**60e étage à Manhattan.** Dirigeants, scientifiques, journalistes, influenceurs réunis autour d'un sujet compliqué et galvaudé.",
+                    "Le son fait passer la salle du chaos urbain au **rythme plus lent des saisons**. Effet documenté en neurosciences : le **rythme cardiaque ralentit**, la **disponibilité mentale augmente**.",
+                    "Sensibiliser, rendre mémorable, et faire repartir les influenceurs comme **premiers ambassadeurs**.",
+                ],
             },
         ],
         label: 'Cas · Kering',
@@ -149,9 +154,14 @@ const SLIDES = [
         cases: [
             {
                 img: IMG('07-signature.jpg'),
+                logo: LOGO('pileje'),
                 soustitre: 'PiLeJe · Journée Innovation · Le Lido, Paris',
                 titre: "Faire ressentir l'innovation avant de la présenter.",
-                texte: "Journée innovation, 250 commerciaux, six heures de pitchs produits à enchaîner. Il fallait ouvrir autrement, par le corps, pour que la science PiLeJe soit vécue avant d'être expliquée. Expérience sonore en ouverture, suivie des talks. Une journée qui démarre dans l'écoute, pas dans la résistance.",
+                textes: [
+                    "Journée innovation, **250 commerciaux**, six heures de pitchs produits à enchaîner.",
+                    "Il fallait ouvrir autrement, **par le corps**, pour que la science PiLeJe soit **vécue avant d'être expliquée**. Expérience sonore en ouverture, suivie des talks.",
+                    "Une journée qui démarre **dans l'écoute, pas dans la résistance**.",
+                ],
             },
         ],
         // Testimonial names are fictional placeholders (per retours) — swap for
@@ -167,9 +177,14 @@ const SLIDES = [
         cases: [
             {
                 img: IMG('09-bourdelle.jpg'),
+                logo: LOGO('unicef'),
                 soustitre: 'UNICEF · Musée Bourdelle · dîner philanthropes',
                 titre: "Porter un sujet grave dans un dîner de gala, sans tomber dans le pathos : la malnutrition.",
-                texte: "Une cause humanitaire dans un dîner de gala, équilibre fragile. Casques servis sur un plateau au moment où les invités s'assoient à table. Un sas d'écoute intérieure qui bascule les invités dans le sujet avant les discours, sans les écraser. Ice-breaker collectif, mémorable, qui sert le propos de la soirée.",
+                textes: [
+                    "Une cause humanitaire dans un dîner de gala, **équilibre fragile**.",
+                    "**Casques servis sur un plateau** au moment où les invités s'assoient à table. Un sas d'écoute intérieure qui bascule les invités dans le sujet **avant les discours**, sans les écraser.",
+                    "**Ice-breaker collectif, mémorable**, qui sert le propos de la soirée.",
+                ],
             },
         ],
         label: 'Cas · UNICEF',
@@ -179,9 +194,15 @@ const SLIDES = [
         cases: [
             {
                 img: IMG('04-coupe.jpg'),
+                // No L'Amphi logo asset yet — drop one in public/IMAGES/leaflet/logos/
+                // and reference it here to complete the set.
                 soustitre: "L'Amphi · Club des Leaders en Santé · dirigeants",
                 titre: "Faire vivre la santé mentale au lieu d'en parler.",
-                texte: "Ramener à l'humain des dirigeants qui passent leur vie dans les chiffres et les comités. Dans un secteur où on parle santé toute la journée, leur faire vivre une vraie expérience de présence à soi, pour incarner ce qu'ils défendent professionnellement. Sept minutes au casque, plongée simultanée dans l'esprit de personnes qui souffrent de problèmes psychiques. Puissant et propre à chacun, mobilise souvenirs et vécus. Expérience collective et individuelle.",
+                textes: [
+                    "Ramener à l'humain des dirigeants qui passent leur vie dans les chiffres et les comités. Dans un secteur où on parle santé toute la journée, leur faire vivre une **vraie expérience de présence à soi**, pour incarner ce qu'ils défendent professionnellement.",
+                    "**Sept minutes au casque**, plongée simultanée dans l'esprit de personnes qui souffrent de problèmes psychiques.",
+                    "**Expérience collective et individuelle** puissante et propre à chacun, qui mobilise imaginaires, souvenirs et vécus.",
+                ],
             },
         ],
         citations: [
@@ -195,9 +216,14 @@ const SLIDES = [
         cases: [
             {
                 video: IMG('08-paris-podcast.mp4'),
+                // No Paris Podcast Festival logo asset yet (see L'Amphi note).
                 soustitre: 'Paris Podcast Festival · Gaîté Lyrique',
                 titre: "La preuve par l'échelle : 400 personnes dans le noir.",
-                texte: "400 personnes plongées dans le noir, une expérience sonore collective. Suivie d'une table ronde que nous animons avec la direction sustainability et communication de Kering, autour de la question : l'audio peut-il être un accélérateur de conscience ? Une expérience qui tient dans une salle de 400, et qui ouvre une vraie conversation publique sur le pouvoir du son.",
+                textes: [
+                    "**400 personnes plongées dans le noir**, une expérience sonore collective.",
+                    "Suivie d'une table ronde que nous animons avec la direction sustainability et communication de Kering, autour de la question : **l'audio peut-il être un accélérateur de conscience ?**",
+                    "Une expérience qui **tient dans une salle de 400**, et qui ouvre une vraie conversation publique sur le pouvoir du son.",
+                ],
             },
         ],
         label: 'Cas · Paris Podcast',
@@ -207,9 +233,14 @@ const SLIDES = [
         cases: [
             {
                 img: IMG('13-pernod.jpg'),
+                logo: LOGO('pernod-ricard'),
                 soustitre: 'Pernod Ricard · séminaire international · présidents de marques',
                 titre: "Recentrer des dirigeants en compétition autour de ce qu'ils incarnent ensemble.",
-                texte: "Rassemblement des présidents de toutes les marques du groupe au niveau monde. Un moment où ils ne sont plus la marque qu'ils dirigent, mais le groupe qu'ils incarnent ensemble. Composition au cristal Baschet avec l'un des cinquante joueurs au monde. Feuilles et crayons sur les tables, un temps pour poser idées et réflexions. Se recentrer et renforcer l'imaginaire, donc la créativité.",
+                textes: [
+                    "Rassemblement des **présidents de toutes les marques du groupe** au niveau monde. Un moment où ils ne sont plus la marque qu'ils dirigent, mais **le groupe qu'ils incarnent ensemble**.",
+                    "Composition au **cristal Baschet** avec l'un des **cinquante joueurs au monde**. Feuilles et crayons sur les tables, un temps pour poser idées et réflexions.",
+                    "Se recentrer et renforcer l'imaginaire, **donc la créativité**.",
+                ],
             },
         ],
         label: 'Cas · Pernod Ricard',
@@ -271,17 +302,20 @@ const SLIDES = [
             ['maisons-du-monde', 'Maisons du Monde'],
             ['furterer', 'René Furterer'],
         ],
-        // Two explicit rows so flex-wrap can never strand a lone logo (FFPAPF
-        // used to wrap alone under the group).
+        // Three explicit non-wrapping rows so a lone logo can never be
+        // stranded (FFPAPF used to wrap alone under the group), balanced so
+        // each row also fits a phone viewport.
         logosBottom: [
             ['pileje', 'PiLeJe'],
             ['publicis', 'Publicis Groupe'],
             ['marie-claire', 'Marie Claire'],
-            ['hopital-ambroise-pare', 'Hôpital Ambroise-Paré AP-HP'],
-            ['jcdecaux', 'JCDecaux'],
         ],
         logosBottom2: [
+            ['hopital-ambroise-pare', 'Hôpital Ambroise-Paré AP-HP'],
+            ['jcdecaux', 'JCDecaux'],
             ['bpifrance', 'bpifrance'],
+        ],
+        logosBottom3: [
             ['escp', 'ESCP Business School'],
             ['institut-du-monde-arabe', 'Institut du Monde Arabe'],
             ['ffpapf', 'Fédération Française du Prêt à Porter Féminin'],
@@ -299,6 +333,12 @@ function LogoRow({ logos, position }) {
             ))}
         </div>
     );
+}
+
+// Case paragraphs carry **key info** markers — split on ** and wrap the odd
+// chunks in <strong> so the copy stays plain strings in SLIDES.
+function renderBold(text) {
+    return text.split('**').map((chunk, ci) => (ci % 2 ? <strong key={ci}>{chunk}</strong> : chunk));
 }
 
 const MUSIC_SRC = `${BASE}MUSIC/wellness/01 Drone Wellness.mp3`;
@@ -436,6 +476,11 @@ export default function EventsPage() {
                     >
                         {/* Dark base shows through if an image/clip is ever missing */}
                         <div className="leaflet-slide__img leaflet-slide__img--dark" />
+                        {/* Cursor trail lives INSIDE the active slide (z-index 4): above
+                            the photo/scrim layers but under every text layer (z 5+). As a
+                            sibling of the GSAP track it could only sit above everything —
+                            the transformed track seals its own stacking context. */}
+                        {i === index && <CursorCanvas />}
                         {slide.video ? (
                             <video
                                 className="leaflet-slide__video"
@@ -489,6 +534,7 @@ export default function EventsPage() {
                                 )}
                                 {slide.logosBottom && <LogoRow logos={slide.logosBottom} position="bottom" />}
                                 {slide.logosBottom2 && <LogoRow logos={slide.logosBottom2} position="bottom2" />}
+                                {slide.logosBottom3 && <LogoRow logos={slide.logosBottom3} position="bottom3" />}
                             </div>
                         )}
 
@@ -516,6 +562,7 @@ export default function EventsPage() {
                         {/* Case-study slides — full-bleed panels (1 or 2), one image each */}
                         {slide.cases && (
                             <div className="leaflet-study-wrap">
+                                <p className="leaflet-study__corner">Créations</p>
                                 {slide.caseHeader && <p className="leaflet-study__head">{slide.caseHeader}</p>}
                                 <div className={`leaflet-study leaflet-study--${slide.cases.length}`}>
                                     {slide.cases.map((c) => (
@@ -527,9 +574,12 @@ export default function EventsPage() {
                                             )}
                                             <div className="leaflet-study-panel__veil" aria-hidden="true" />
                                             <div className="leaflet-study-panel__content">
+                                                {c.logo && <img className="leaflet-study__logo" src={c.logo} alt="" />}
                                                 <p className="leaflet-study__sub">{c.soustitre}</p>
                                                 <h3 className="leaflet-study__title">{c.titre}</h3>
-                                                <p className="leaflet-study__text">{c.texte}</p>
+                                                {c.textes.map((para) => (
+                                                    <p key={para} className="leaflet-study__text">{renderBold(para)}</p>
+                                                ))}
                                             </div>
                                         </article>
                                     ))}
@@ -690,8 +740,6 @@ export default function EventsPage() {
 
             {/* Grain (same treatment as the main site, softer over photography) */}
             <div className="grain-overlay" aria-hidden="true" style={{ opacity: 0.06 }} />
-
-            <CursorCanvas />
         </div>
     );
 }
