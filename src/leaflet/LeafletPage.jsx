@@ -53,7 +53,7 @@ const SLIDES = [
         src: IMG('06-state.jpg'),
         eyebrow: 'Staff hear it all day',
         stat: '62%',
-        statSub: 'of retail employees rank repetition as their top complaint about in-store music.',
+        statSub: 'of service staff rank repetition as their top complaint about the music at their workplace.',
         body: [
             'Your clients spend an hour. Your team hears the same playlist from morning to night. The same tracks, on repeat.',
             "What relaxes a visitor wears out those who run the place. A care brand shouldn't wear down its own people.",
