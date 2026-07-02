@@ -785,6 +785,85 @@ html[data-mode="events"] .leaflet-slide .leaflet-cursor-canvas {
     }
 }
 
+/* Small phones: the intro + three stacked cards + note must fit ~660px of
+   viewport, so everything tightens up. */
+@media (max-width: 620px) {
+    .leaflet-voyages-wrap {
+        gap: 12px;
+        padding: 72px clamp(18px, 5vw, 32px) 56px;
+        justify-content: flex-start;
+    }
+    .leaflet-voyages__title {
+        font-size: 24px;
+    }
+    .leaflet-voyages__subtitle {
+        font-size: 10px;
+    }
+    .leaflet-voyages__intro {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 4px;
+    }
+    .leaflet-voyages {
+        gap: 8px;
+    }
+    .leaflet-voyage {
+        padding: 12px 16px;
+    }
+    .leaflet-voyage__index {
+        font-size: 17px;
+        margin-bottom: 4px;
+    }
+    .leaflet-voyage__title {
+        font-size: 18px;
+        margin-bottom: 5px;
+    }
+    .leaflet-voyage__body {
+        font-size: 12px;
+        line-height: 1.5;
+    }
+    .leaflet-voyages__note {
+        font-size: 10px;
+    }
+}
+
+/* Very short phones (small iPhones, Safari with its bars): squeeze the sas
+   slide the rest of the way. */
+@media (max-width: 620px) and (max-height: 700px) {
+    .leaflet-voyages-wrap {
+        gap: 8px;
+        padding: 58px clamp(18px, 5vw, 32px) 34px;
+    }
+    .leaflet-voyages__title {
+        font-size: 21px;
+    }
+    .leaflet-voyages__intro {
+        font-size: 11.5px;
+        line-height: 1.42;
+    }
+    .leaflet-voyages {
+        gap: 6px;
+    }
+    .leaflet-voyage {
+        padding: 9px 14px;
+    }
+    .leaflet-voyage__index {
+        font-size: 14px;
+        margin-bottom: 3px;
+    }
+    .leaflet-voyage__title {
+        font-size: 16px;
+        margin-bottom: 4px;
+    }
+    .leaflet-voyage__body {
+        font-size: 11.5px;
+        line-height: 1.42;
+    }
+    .leaflet-voyages__note {
+        font-size: 9.5px;
+    }
+}
+
 /* Heavy scrim (events slide 1) — bright/busy B&W photo. Darkens the frame and
    adds a centre vignette so the figure + bottom-left caption stay legible. */
 html[data-mode="events"] .leaflet-slide--heavy-scrim .leaflet-slide__scrim {
@@ -922,15 +1001,55 @@ html[data-mode="events"] .h-member__bio {
     color: rgba(246, 238, 217, 0.8);
 }
 
+/* Tablets & phones: the five 4:5 portrait cards can never fit a portrait
+   viewport — switch to a compact vertical list (small square photo, texts on
+   the right), top-anchored under the chrome. */
 @media (max-width: 900px) {
-    html[data-mode="events"] .h-team {
-        grid-template-columns: repeat(2, 1fr);
+    html[data-mode="events"] .h-special {
+        justify-content: flex-start;
+        padding: 84px clamp(20px, 6vw, 48px) 64px;
+        gap: 18px;
+    }
+    html[data-mode="events"] .h-team,
+    html[data-mode="events"] .h-team--5 {
+        grid-template-columns: 1fr;
+        width: min(92vw, 520px);
+        gap: 10px;
+    }
+    html[data-mode="events"] .h-member {
+        display: grid;
+        grid-template-columns: 64px 1fr;
+        column-gap: 14px;
+        align-items: center;
+        text-align: left;
+    }
+    html[data-mode="events"] .h-member__photo {
+        grid-row: 1 / 4;
+        width: 64px;
+        aspect-ratio: 1 / 1;
+        margin: 0;
+        border-radius: 10px;
+    }
+    html[data-mode="events"] .h-member__name {
+        font-size: 17px;
+        margin: 0 0 2px;
+    }
+    html[data-mode="events"] .h-member__role {
+        font-size: 10px;
+        margin: 0;
+    }
+    html[data-mode="events"] .h-member__bio {
+        grid-column: 2;
+        font-size: 11.5px;
+        line-height: 1.45;
+        margin-top: 4px;
     }
 }
 
-@media (max-width: 560px) {
-    html[data-mode="events"] .h-team {
-        grid-template-columns: 1fr;
+/* Small phones: names and roles carry the slide; bios don't fit ~660px. */
+@media (max-width: 620px) {
+    html[data-mode="events"] .h-member__bio {
+        display: none;
     }
 }
 
@@ -1056,11 +1175,11 @@ html[data-mode="events"] .h-member__bio {
     left: clamp(26px, 3.6vw, 68px);
     z-index: 5;
     margin: 0;
-    font-size: 11px;
+    font-size: 12.5px;
     font-weight: 600;
     letter-spacing: 0.32em;
     text-transform: uppercase;
-    color: rgba(245, 239, 231, 0.78);
+    color: rgba(245, 239, 231, 0.88);
     text-shadow: 0 1px 12px rgba(8, 5, 3, 0.6);
     opacity: 0;
     transition: opacity 0.5s ease;
@@ -1071,7 +1190,7 @@ html[data-mode="events"] .h-member__bio {
         top: clamp(36px, 5.2vh, 50px);
         left: 50%;
         transform: translateX(-50%);
-        font-size: 12px;
+        font-size: 14px;
         letter-spacing: 0.42em;
         /* optical centering: the tracking adds a trailing gap after the S */
         margin-left: 0.21em;
@@ -1320,12 +1439,20 @@ html[data-mode="events"] .h-member__bio {
         display: block;
         overflow-y: auto;
     }
+    /* Phones: the copy is TOP-anchored (under the chrome + "Nos créations"
+       label) instead of bottom-anchored — the scroll area shows its top, so a
+       bottom-anchored block was cut and sat on the page counter. The
+       padding-bottom keeps a long tail clear of the counter. */
     .leaflet-study-panel {
         min-height: 58vh;
-        /* When the copy is tall enough to fill the panel (short viewports),
-           this keeps its top — and the in-flow client logo — clear of the
-           Kikina wordmark and the "Créations" label. */
-        padding-top: 104px;
+        justify-content: flex-start;
+        padding-top: 118px;
+        padding-bottom: 84px;
+    }
+    /* Text now sits over the middle of the photo — even it out with a
+       stronger, more uniform veil. */
+    .leaflet-study-panel__veil {
+        background: linear-gradient(to top, rgba(8, 5, 3, 0.92) 0%, rgba(8, 5, 3, 0.62) 45%, rgba(8, 5, 3, 0.42) 100%);
     }
     /* Single-case slides: the lone panel fills the whole study area so no
        dark gap opens between the photo and the testimonial band below. */
@@ -1338,6 +1465,53 @@ html[data-mode="events"] .h-member__bio {
     }
     .leaflet-study__head {
         padding-top: 60px;
+    }
+    /* Compact type so the whole story fits a phone viewport */
+    .leaflet-study__logo {
+        height: 28px;
+        margin-bottom: 10px;
+    }
+    .leaflet-study__title {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+    .leaflet-study__text {
+        font-size: 12.5px;
+        line-height: 1.55;
+    }
+    .leaflet-study__text + .leaflet-study__text {
+        margin-top: 7px;
+    }
+    .leaflet-testimonials {
+        gap: 10px;
+        padding: 10px clamp(14px, 4vw, 28px) 18px;
+    }
+    .leaflet-testimonial {
+        padding: 13px 16px;
+    }
+    .leaflet-testimonial__mark {
+        font-size: 40px;
+        line-height: 0.5;
+        margin-bottom: 2px;
+    }
+    .leaflet-testimonial__quote {
+        font-size: 14px;
+        line-height: 1.35;
+    }
+    .leaflet-testimonial__author {
+        margin-top: 8px;
+    }
+}
+
+/* Small phones: one testimonial is enough — two stacked cards plus the case
+   copy cannot fit a ~660px viewport without cutting one of them. The right
+   padding keeps the card clear of the fixed page counter. */
+@media (max-width: 620px) {
+    .leaflet-testimonial:nth-child(n + 2) {
+        display: none;
+    }
+    .leaflet-testimonials {
+        padding-right: 124px;
     }
 }
 

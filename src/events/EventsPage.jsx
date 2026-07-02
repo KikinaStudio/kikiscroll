@@ -562,7 +562,7 @@ export default function EventsPage() {
                         {/* Case-study slides — full-bleed panels (1 or 2), one image each */}
                         {slide.cases && (
                             <div className="leaflet-study-wrap">
-                                <p className="leaflet-study__corner">Créations</p>
+                                <p className="leaflet-study__corner">Nos créations</p>
                                 {slide.caseHeader && <p className="leaflet-study__head">{slide.caseHeader}</p>}
                                 <div className={`leaflet-study leaflet-study--${slide.cases.length}`}>
                                     {slide.cases.map((c) => (
