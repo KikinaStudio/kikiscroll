@@ -192,6 +192,81 @@ html[data-mode="events"] .leaflet-logo-img {
     margin-top: clamp(12px, 2.4vh, 26px);
 }
 
+/* Second explicit bottom row (events contact) — tighter to the row above it */
+.leaflet-stat__logos--bottom2 {
+    margin-top: clamp(8px, 1.6vh, 16px);
+}
+
+/* Events contact: the stat is absolutely positioned at left 50%, so its
+   shrink-to-fit width caps at HALF the viewport — rows were wrapping long
+   before their max-width and stranding a lone logo. Give the finale stat its
+   real width, and keep each explicit bottom row on one line on desktop (the
+   imgs shrink slightly if tight; object-fit keeps their proportions). */
+html[data-mode="events"] .leaflet-slide:last-child .leaflet-stat {
+    width: min(46rem, 90vw);
+}
+
+@media (min-width: 881px) {
+    html[data-mode="events"] .leaflet-stat__logos--bottom,
+    html[data-mode="events"] .leaflet-stat__logos--bottom2 {
+        flex-wrap: nowrap;
+    }
+
+    html[data-mode="events"] .leaflet-stat__logos--bottom .leaflet-logo-img,
+    html[data-mode="events"] .leaflet-stat__logos--bottom2 .leaflet-logo-img {
+        min-width: 0;
+        flex: 0 1 auto;
+    }
+}
+
+/* Events studio slide: client logos on an auto-scrolling band under the stat.
+   Lives inside .leaflet-stat but spans the full viewport width; edges fade out
+   with a mask so logos slide in/out of nothing. */
+.leaflet-marquee {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-top: clamp(24px, 4.5vh, 48px);
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 16%, #000 84%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 16%, #000 84%, transparent);
+}
+
+.leaflet-marquee__track {
+    display: flex;
+    width: max-content;
+    animation: leaflet-marquee-scroll 36s linear infinite;
+}
+
+.leaflet-marquee__group {
+    display: flex;
+    align-items: center;
+    gap: clamp(30px, 4.5vw, 72px);
+    padding-right: clamp(30px, 4.5vw, 72px);
+}
+
+@keyframes leaflet-marquee-scroll {
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .leaflet-marquee__track {
+        animation: none;
+        flex-wrap: wrap;
+        width: auto;
+        justify-content: center;
+    }
+}
+
+/* Events studio slide: the source photo is low-res — a heavy blur turns it
+   into a colour wash instead of a visibly soft image. Scaled up so the blurred
+   edges never show. */
+.leaflet-slide--blur .leaflet-slide__img:not(.leaflet-slide__img--dark) {
+    filter: blur(22px) brightness(0.85);
+    transform: scale(1.14);
+}
+
 .leaflet-stat__btn {
     display: inline-block;
     margin-top: clamp(16px, 3vh, 28px);
@@ -250,6 +325,16 @@ html[data-mode="events"] .leaflet-logo-img {
 
 .leaflet-caption__body + .leaflet-caption__body {
     margin-top: 10px;
+}
+
+/* Small footnote-style source line (events) — same register as the sas note */
+.leaflet-caption__source {
+    margin-top: 12px;
+    font-size: clamp(10.5px, 0.8vw, 12.5px);
+    font-weight: 300;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: rgba(245, 239, 231, 0.52);
 }
 
 /* --- Credit (experience photo/video caption, bottom-right) --------------- */
@@ -1039,47 +1124,84 @@ html[data-mode="events"] .h-member__bio {
     color: #f6eed9;
 }
 
-.leaflet-study-field {
-    margin-top: clamp(9px, 1vw, 15px);
-}
-
-.leaflet-study-field__label {
-    display: block;
-    margin-bottom: 3px;
-    font-size: clamp(9.5px, 0.72vw, 11px);
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: rgba(201, 164, 95, 0.85);
-}
-
-.leaflet-study-field__text {
+.leaflet-study__text {
     margin: 0;
-    font-size: clamp(12px, 0.92vw, 14px);
-    line-height: 1.5;
+    font-size: clamp(12.5px, 0.98vw, 15px);
+    font-weight: 300;
+    line-height: 1.6;
     color: rgba(246, 238, 217, 0.9);
 }
 
-.leaflet-study__cites {
-    flex: 0 0 auto;
+/* Testimonial cards (events cases) — stacked on the right half of the panel,
+   vertically centered, with the classic quote-mark + attribution grammar so
+   they read as testimonials at a glance. */
+.leaflet-testimonials {
+    position: absolute;
+    right: clamp(24px, 5vw, 96px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 6;
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: clamp(10px, 2vw, 44px);
-    padding: clamp(14px, 2.2vh, 28px) clamp(24px, 6vw, 90px) clamp(18px, 3vh, 38px);
-    background: rgba(8, 5, 3, 0.82);
+    flex-direction: column;
+    gap: clamp(14px, 2.4vh, 26px);
+    width: min(430px, 38vw);
+    opacity: 0;
+    transition: opacity 0.5s ease;
 }
 
-.leaflet-study__cite {
+.leaflet-slide.is-active .leaflet-testimonials {
+    opacity: 1;
+    transition: opacity 1s ease 0.6s;
+}
+
+.leaflet-testimonial {
     margin: 0;
-    flex: 1 1 340px;
-    max-width: 520px;
-    text-align: center;
+    padding: clamp(18px, 2.2vw, 28px) clamp(20px, 2.4vw, 32px);
+    background: rgba(12, 8, 5, 0.6);
+    border: 1px solid rgba(246, 238, 217, 0.16);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.leaflet-testimonial__mark {
+    display: block;
+    font-family: 'Instrument Serif', var(--font-heading), serif;
+    font-size: 46px;
+    line-height: 0.55;
+    color: #c9a45f;
+    margin-bottom: 12px;
+}
+
+.leaflet-testimonial__quote {
+    margin: 0;
     font-family: 'Instrument Serif', var(--font-heading), serif;
     font-style: italic;
-    font-size: clamp(13px, 1.05vw, 17px);
-    line-height: 1.42;
-    color: rgba(246, 238, 217, 0.9);
+    font-size: clamp(16px, 1.35vw, 21px);
+    line-height: 1.4;
+    color: #f6eed9;
+}
+
+.leaflet-testimonial__author {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.leaflet-testimonial__name {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(246, 238, 217, 0.92);
+}
+
+.leaflet-testimonial__role {
+    font-size: 11px;
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    color: rgba(246, 238, 217, 0.62);
 }
 
 @media (max-width: 880px) {
@@ -1096,6 +1218,14 @@ html[data-mode="events"] .h-member__bio {
     }
     .leaflet-study__head {
         padding-top: 60px;
+    }
+    /* Testimonials fall back under the panel as a full-width band */
+    .leaflet-testimonials {
+        position: static;
+        transform: none;
+        width: auto;
+        padding: 16px clamp(16px, 5vw, 32px) 26px;
+        background: rgba(8, 5, 3, 0.88);
     }
 }
 
