@@ -358,7 +358,7 @@ export default function EventsPage() {
     // deltas for ~1s after a flick. Only a GROWING delta is a new gesture; a
     // shrinking one is the tail of the previous flick and must not re-trigger.
     const lastWheelRef = useRef({ delta: 0, at: 0 });
-    const touchStartYRef = useRef(null);
+    const touchStartRef = useRef(null);
 
     useEffect(() => {
         document.title = 'Kikina · Le son qui marque les esprits';
@@ -400,12 +400,16 @@ export default function EventsPage() {
             step(e.deltaY > 0 ? 1 : -1);
         };
         const onTouchStart = (e) => {
-            touchStartYRef.current = e.touches[0].clientY;
+            touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         };
         const onTouchEnd = (e) => {
-            if (!startedRef.current || touchStartYRef.current == null) return;
-            const dy = touchStartYRef.current - e.changedTouches[0].clientY;
-            touchStartYRef.current = null;
+            if (!startedRef.current || touchStartRef.current == null) return;
+            const dx = touchStartRef.current.x - e.changedTouches[0].clientX;
+            const dy = touchStartRef.current.y - e.changedTouches[0].clientY;
+            touchStartRef.current = null;
+            // A mostly-horizontal swipe is an in-slide gesture (the mobile team
+            // carousel scrolls sideways) — never a slide change.
+            if (Math.abs(dx) > Math.abs(dy)) return;
             if (Math.abs(dy) < 50) return;
             step(dy > 0 ? 1 : -1);
         };
