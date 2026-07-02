@@ -1048,7 +1048,8 @@ html[data-mode="events"] .h-member__bio {
     flex-direction: column;
 }
 
-/* "Créations" corner label — top-left of every case slide */
+/* "Créations" chapter label — top-left under the wordmark on mobile,
+   centered running head on desktop (mirrors the Kikina chrome line). */
 .leaflet-study__corner {
     position: absolute;
     top: clamp(78px, 11vh, 112px);
@@ -1063,6 +1064,18 @@ html[data-mode="events"] .h-member__bio {
     text-shadow: 0 1px 12px rgba(8, 5, 3, 0.6);
     opacity: 0;
     transition: opacity 0.5s ease;
+}
+
+@media (min-width: 881px) {
+    .leaflet-study__corner {
+        top: clamp(36px, 5.2vh, 50px);
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 12px;
+        letter-spacing: 0.42em;
+        /* optical centering: the tracking adds a trailing gap after the S */
+        margin-left: 0.21em;
+    }
 }
 
 .leaflet-slide.is-active .leaflet-study__corner {
@@ -1148,14 +1161,36 @@ html[data-mode="events"] .h-member__bio {
     text-align: left;
 }
 
-/* Client logo above the case eyebrow */
+/* Client logo — in-flow above the copy on mobile, big top-right stamp on
+   desktop (Kikina wordmark left · chapter label center · client right). */
 .leaflet-study__logo {
+    position: relative;
+    z-index: 5; /* above the in-slide cursor canvas (z 4) */
     display: block;
-    height: clamp(30px, 4.2vh, 42px);
+    align-self: flex-start;
+    height: clamp(32px, 4.6vh, 44px);
     width: auto;
     margin-bottom: clamp(10px, 1.4vh, 16px);
     object-fit: contain;
     filter: drop-shadow(0 1px 8px rgba(8, 5, 3, 0.55));
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.leaflet-slide.is-active .leaflet-study__logo {
+    opacity: 1;
+    transition: opacity 1s ease 0.45s;
+}
+
+@media (min-width: 881px) {
+    .leaflet-study__logo {
+        position: absolute;
+        top: clamp(30px, 4.8vh, 48px);
+        right: clamp(26px, 3.6vw, 68px);
+        height: clamp(52px, 8.2vh, 78px);
+        margin: 0;
+        filter: drop-shadow(0 2px 14px rgba(8, 5, 3, 0.65));
+    }
 }
 
 .leaflet-study__sub {
@@ -1287,6 +1322,10 @@ html[data-mode="events"] .h-member__bio {
     }
     .leaflet-study-panel {
         min-height: 58vh;
+        /* When the copy is tall enough to fill the panel (short viewports),
+           this keeps its top — and the in-flow client logo — clear of the
+           Kikina wordmark and the "Créations" label. */
+        padding-top: 104px;
     }
     /* Single-case slides: the lone panel fills the whole study area so no
        dark gap opens between the photo and the testimonial band below. */

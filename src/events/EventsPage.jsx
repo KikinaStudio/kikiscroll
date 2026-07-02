@@ -573,8 +573,10 @@ export default function EventsPage() {
                                                 <div className="leaflet-study-panel__media" style={{ backgroundImage: `url(${c.img})` }} />
                                             )}
                                             <div className="leaflet-study-panel__veil" aria-hidden="true" />
+                                            {/* Client logo — big top-right stamp on desktop, in-flow
+                                                above the copy on mobile */}
+                                            {c.logo && <img className="leaflet-study__logo" src={c.logo} alt="" />}
                                             <div className="leaflet-study-panel__content">
-                                                {c.logo && <img className="leaflet-study__logo" src={c.logo} alt="" />}
                                                 <p className="leaflet-study__sub">{c.soustitre}</p>
                                                 <h3 className="leaflet-study__title">{c.titre}</h3>
                                                 {c.textes.map((para) => (
