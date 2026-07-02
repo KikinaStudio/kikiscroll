@@ -831,8 +831,8 @@ html[data-mode="events"] .leaflet-slide .leaflet-cursor-canvas {
    slide the rest of the way. */
 @media (max-width: 620px) and (max-height: 700px) {
     .leaflet-voyages-wrap {
-        gap: 8px;
-        padding: 58px clamp(18px, 5vw, 32px) 34px;
+        gap: 6px;
+        padding: 50px clamp(18px, 5vw, 32px) 26px;
     }
     .leaflet-voyages__title {
         font-size: 21px;
@@ -1070,6 +1070,9 @@ html[data-mode="events"] .h-member__bio {
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 3;
         overflow: hidden;
+    }
+    .leaflet-voyage {
+        padding: 7px 14px;
     }
 }
 
