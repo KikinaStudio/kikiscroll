@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../LanguageContext';
+import { useAudioStore } from '../store/useAudioStore';
 
 // Full-screen black intro shown before the scroll experience. Three lines fade in
 // sequentially, a slow-pulsing arrow invites the visitor to scroll. The FIRST user
@@ -11,6 +12,8 @@ export default function IntroScreen({ onBegin }) {
     const [leaving, setLeaving] = useState(false);
     const [hidden, setHidden] = useState(false);
     const startedRef = useRef(false);
+    // Don't invite the scroll before the drone is decoded (slow network = silent start).
+    const isReady = useAudioStore((state) => state.isReady);
 
     useEffect(() => {
         if (hidden) return undefined;
@@ -43,7 +46,7 @@ export default function IntroScreen({ onBegin }) {
                 <p className="intro-line intro-line--2">{t.intro_line_2}</p>
                 <p className="intro-line intro-line--3">{t.intro_line_3}</p>
             </div>
-            {!leaving && (
+            {!leaving && isReady && (
                 <div className="intro-arrow" aria-hidden="true">
                     <svg width="22" height="34" viewBox="0 0 22 34" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M11 2v26" />

@@ -51,17 +51,26 @@ const RETAIL_TRACKS = {
 // stem per-frame, and `motionPad` (Fender) plays underneath at a low constant
 // volume as a warm ambient bed so movement layers onto an atmosphere instead of
 // switching sound on/off against silence. The drone keeps playing below both.
+// Wellness plays 48 s crossfaded loops (public/MUSIC/wellness/loops, cut from
+// the full tracks with ffmpeg: [3s..51s] crossfaded into [0..3s]). Every track is
+// decoded to PCM in memory by Howler (~17 MB per 48 s vs ~50 MB per full track),
+// so with 14 tracks this is the difference between ~240 MB and ~700 MB on mobile.
+const LOOPS = `${BASE}MUSIC/wellness/loops/`;
 const WELLNESS_TRACKS = {
     ...RETAIL_TRACKS,
-    drone: { src: `${BASE}MUSIC/wellness/01 Drone Wellness.mp3`, initialVolume: 0.5 },
-    jungle: { src: `${BASE}MUSIC/wellness/flute guerlain.mp3`, initialVolume: 0 },
-    pulsatingWave: { src: `${BASE}MUSIC/wellness/ceremonial fusion voices.mp3`, initialVolume: 0 },
-    focusCognitif: { src: `${BASE}MUSIC/wellness/roulements de piano.mp3`, initialVolume: 0 },
-    entrance: { src: `${BASE}MUSIC/wellness/keysy.mp3`, initialVolume: 0 },
-    rayon: { src: `${BASE}MUSIC/wellness/deep.mp3`, initialVolume: 0 },
-    cabine: { src: `${BASE}MUSIC/wellness/less deep.mp3`, initialVolume: 0 },
-    recuperation: { src: `${BASE}MUSIC/wellness/Instrumental (2).mp3`, initialVolume: 0 },
-    motionPad: { src: `${BASE}MUSIC/wellness/Fender.mp3`, initialVolume: 0 },
+    drone: { src: `${LOOPS}01 Drone Wellness.mp3`, initialVolume: 0.5 },
+    strings: { src: `${LOOPS}1 Strings.mp3`, initialVolume: 0 },
+    bass: { src: `${LOOPS}2 Bass.mp3`, initialVolume: 0 },
+    drums: { src: `${LOOPS}3 Drums.mp3`, initialVolume: 0 },
+    keyboard: { src: `${LOOPS}4 Keyboard.mp3`, initialVolume: 0 },
+    jungle: { src: `${LOOPS}flute guerlain.mp3`, initialVolume: 0 },
+    pulsatingWave: { src: `${LOOPS}ceremonial fusion voices.mp3`, initialVolume: 0 },
+    focusCognitif: { src: `${LOOPS}roulements de piano.mp3`, initialVolume: 0 },
+    entrance: { src: `${LOOPS}keysy.mp3`, initialVolume: 0 },
+    rayon: { src: `${LOOPS}deep.mp3`, initialVolume: 0 },
+    cabine: { src: `${LOOPS}less deep.mp3`, initialVolume: 0 },
+    recuperation: { src: `${LOOPS}Instrumental (2).mp3`, initialVolume: 0 },
+    motionPad: { src: `${LOOPS}Fender.mp3`, initialVolume: 0 },
 };
 
 // Per-track loudness compensation.
@@ -175,6 +184,17 @@ function applyGain(howlInstance, trackName, requestedVolume) {
 // then bends monotonically toward the ceiling — no kink. 4x oversampling keeps the
 // curve from aliasing. Wired once; harmless to retail (it sits at unity there).
 let masterSoftClipInstalled = false;
+// Analyser tapped on the master bus so the 3D blob can breathe with the mix.
+let masterAnalyser = null;
+const freqBuf = new Uint8Array(64);
+// Low-band energy (0..1) of what is actually playing. Read per frame by Scene.
+export function getAudioLevel() {
+    if (!masterAnalyser) return 0;
+    masterAnalyser.getByteFrequencyData(freqBuf);
+    let sum = 0;
+    for (let i = 1; i < 8; i++) sum += freqBuf[i]; // ~170 Hz .. 1.2 kHz
+    return sum / (7 * 255);
+}
 function makeSoftClipCurve() {
     const N = 2048;
     const curve = new Float32Array(N);
@@ -207,6 +227,10 @@ function installMasterSoftClip() {
         master.disconnect();
         master.connect(shaper);
         shaper.connect(ctx.destination);
+        masterAnalyser = ctx.createAnalyser();
+        masterAnalyser.fftSize = 128;
+        masterAnalyser.smoothingTimeConstant = 0.85;
+        shaper.connect(masterAnalyser); // tap only, nothing downstream
         masterSoftClipInstalled = true;
         // Read-only handle for live inspection/debugging.
         Howler.__kikiMasterSoftClip = shaper;
@@ -277,8 +301,17 @@ export const useAudioStore = create((set, get) => {
     // master soft-clip can be spliced in right away (re-armed in startAllTracks too).
     installMasterSoftClip();
 
+    // The intro gates its "scroll" arrow on the drone being decoded, so a slow
+    // network can't start the experience silent.
+    if (instances.drone.state() === 'loaded') {
+        setTimeout(() => set({ isReady: true }), 0);
+    } else {
+        instances.drone.once('load', () => set({ isReady: true }));
+    }
+
     return {
         tracks: instances,
+        isReady: false,
         isPlaying: false,
         isMuted: false,
 

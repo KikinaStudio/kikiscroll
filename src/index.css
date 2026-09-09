@@ -39,12 +39,22 @@ html[data-mode="wellness"] {
   html[data-mode="wellness"] body {
     background-color: transparent;
     color: var(--text-deep);
+  }
+
+  /* The warm gradient lives on a fixed pseudo-element, not on body with
+     background-attachment: fixed (which disables compositor scrolling and
+     repaints the full-page gradient on every scroll frame). */
+  html[data-mode="wellness"] body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
     background-image:
       radial-gradient(ellipse 90% 60% at 50% 0%, var(--spa-sand) 0%, transparent 60%),
       radial-gradient(ellipse 110% 80% at 50% 50%, var(--spa-peach) 0%, transparent 70%),
       radial-gradient(ellipse 120% 80% at 50% 100%, var(--spa-rose) 0%, transparent 70%);
     background-size: 140% 140%;
-    background-attachment: fixed;
     animation: spa-breath 75s ease-in-out infinite;
   }
 }
@@ -67,9 +77,10 @@ html[data-mode="wellness"] {
   background-image: url('https://grainy-gradients.vercel.app/noise.svg');
 }
 
-/* Wellness: grain is much more subtle over warm tones */
+/* Wellness: the shader pass already grains the frame; the CSS overlay (a
+   third-party SVG, full-screen at z 9999) was a second layer for nothing. */
 html[data-mode="wellness"] .grain-overlay {
-  opacity: 0.05;
+  display: none;
 }
 
 /* Wellness: Tailwind text-white forces dark deep-brown to keep WCAG contrast on warm bg.
@@ -212,7 +223,6 @@ html[data-mode="wellness"] .scroll-prompt-text {
   inset: 0;
   background-size: cover;
   background-position: center;
-  filter: saturate(0.9) sepia(0.05);
   transition: transform 800ms cubic-bezier(0.32, 0.72, 0, 1);
   transform: scale(1.05);
 }
@@ -319,7 +329,7 @@ html[data-mode="wellness"] .scroll-prompt-text {
   text-align: center;
   padding: 8vw;
   opacity: 1;
-  transition: opacity 850ms ease-in-out;
+  transition: opacity 1400ms ease-in-out;
   /* sits above everything until the experience begins */
   cursor: default;
 }
@@ -350,6 +360,15 @@ html[data-mode="wellness"] .scroll-prompt-text {
 .intro-line--1 { animation-delay: 0.35s; }
 .intro-line--2 { animation-delay: 1.3s; }
 .intro-line--3 { animation-delay: 2.25s; color: rgba(255, 255, 255, 0.7); }
+
+/* Wellness: same palette as the page and slightly translucent, so the blob
+   is already breathing behind the lines and "begin" just lifts a veil. */
+html[data-mode="wellness"] .intro-screen {
+  background: rgba(244, 230, 214, 0.9);
+  color: var(--text-deep);
+}
+html[data-mode="wellness"] .intro-line--3 { color: rgba(58, 40, 32, 0.6); }
+html[data-mode="wellness"] .intro-arrow { color: rgba(58, 40, 32, 0.6); }
 
 @keyframes intro-line-in {
   to {

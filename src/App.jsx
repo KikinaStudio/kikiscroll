@@ -392,9 +392,11 @@ function useMotionDetection(isActive, videoRef, onMotion) {
 
 function App() {
     const { t, mode } = useTranslation();
-    const [scrollProgress, setScrollProgress] = useState(0);
     const [activeSection, setActiveSection] = useState(0);
     const [sectionProgress, setSectionProgress] = useState(0);
+    // Continuous scroll values for the 3D scene. Refs, not state: the scene reads
+    // them in useFrame, so the R3F tree never re-renders on scroll.
+    const progressRef = useRef({ scroll: 0, section: 0 });
     const [hasStarted, setHasStarted] = useState(false);
     const [showMentions, setShowMentions] = useState(false);
     // Live viewport width — the zones panorama pan geometry depends on the real
@@ -403,6 +405,10 @@ function App() {
     // center at its movingProgress fraction. Tracked in state so a resize recomputes.
     const [viewportW, setViewportW] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1440));
     const sectionsData = useMemo(() => getSectionsData(t, mode), [t, mode]);
+    // Mid-reveal text colour/glow. Wellness used to force pure white here, which
+    // is invisible on the cream page until the reveal snapped to brown.
+    const revealColor = mode === 'wellness' ? '#3a2820' : '#ffffff';
+    const revealGlow = (a) => (mode === 'wellness' ? `rgba(196,123,110,${a})` : `rgba(255,255,255,${a})`);
 
     // Map the currently-pinned section position (DOM order) to its stable behavior id.
     // In retail, position === id. In wellness, the array is reordered (zones first, then neuro,
@@ -617,7 +623,7 @@ function App() {
         lenis.on('scroll', (e) => {
             const maxScroll = document.body.scrollHeight - window.innerHeight;
             const progress = maxScroll > 0 ? e.animatedScroll / maxScroll : 0;
-            setScrollProgress(progress);
+            progressRef.current.scroll = progress;
             // Hide the bottom scroll prompt once the footer region enters the viewport.
             // (A scroll-driven check rather than IntersectionObserver so it tracks the
             // live position alongside the rest of the scroll-driven UI.)
@@ -671,6 +677,7 @@ function App() {
                 pin: true,
                 pinSpacing: true,
                 onUpdate: (self) => {
+                    progressRef.current.section = self.progress;
                     setActiveSection(i);
                     setSectionProgress(self.progress);
                 },
@@ -859,10 +866,9 @@ function App() {
                 movement in the webcam section. */}
             <div className="fixed top-0 left-0 w-full h-full z-[5] pointer-events-none">
                 <Scene
-                    scrollProgress={scrollProgress}
+                    progressRef={progressRef}
                     activeSection={activeSection}
                     activeSectionId={activeSectionId}
-                    sectionProgress={sectionProgress}
                     densityBlobCount={densityBlobCount}
                     isIsolationActive={isIsolationActive}
                     motionRef={motionRef}
@@ -930,11 +936,11 @@ function App() {
             <main className="relative z-10 w-full flex flex-col items-start px-8 md:px-[8vw]">
                 {sectionsData.map((section, index) => (
                     <section key={section.id} className="pin-section min-h-screen w-full flex flex-col justify-center pointer-events-none relative py-32">
-                        <div className="max-w-2xl w-full pointer-events-auto filter drop-shadow-2xl z-10">
+                        <div className={`max-w-2xl w-full pointer-events-auto z-10${mode === 'wellness' ? '' : ' filter drop-shadow-2xl'}`}>
                             {/* Intro section */}
                             {section.isIntro ? (
                                 <div 
-                                    className="flex flex-col items-start transition-transform duration-700 ease-out"
+                                    className="flex flex-col items-start"
                                     style={{
                                         transform: `translateY(${Math.max(0, (1 - sectionProgress * 5)) * 15}vh)`,
                                     }}
@@ -972,12 +978,12 @@ function App() {
                                             return (
                                                 <span
                                                     key={pi}
-                                                    className={`transition-opacity duration-500${breakClasses}`}
+                                                    className={`${breakClasses}`}
                                                     style={{
                                                         opacity: partProgress,
-                                                        color: partProgress > 0 && partProgress < 1 ? '#ffffff' : undefined,
+                                                        color: partProgress > 0 && partProgress < 1 ? revealColor : undefined,
                                                         textShadow: partProgress > 0 && partProgress < 1
-                                                            ? `0 0 ${14 * partProgress}px rgba(255,255,255,${0.42 * partProgress})`
+                                                            ? `0 0 ${14 * partProgress}px ${revealGlow(0.42 * partProgress)}`
                                                             : 'none',
                                                     }}
                                                 >
@@ -1026,12 +1032,12 @@ function App() {
                                                 return (
                                                     <span
                                                         key={pi}
-                                                        className={`transition-opacity duration-500${breakClasses}`}
+                                                        className={`${breakClasses}`}
                                                         style={{
                                                             opacity: partProgress,
-                                                            color: partProgress > 0 && partProgress < 1 ? '#ffffff' : undefined,
+                                                            color: partProgress > 0 && partProgress < 1 ? revealColor : undefined,
                                                             textShadow: partProgress > 0 && partProgress < 1
-                                                                ? `0 0 ${14 * partProgress}px rgba(255,255,255,${0.42 * partProgress})`
+                                                                ? `0 0 ${14 * partProgress}px ${revealGlow(0.42 * partProgress)}`
                                                                 : 'none',
                                                         }}
                                                     >

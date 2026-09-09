@@ -1,6 +1,7 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, memo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Environment, Points, PointMaterial } from '@react-three/drei';
+import { Environment, Lightformer, Points, PointMaterial } from '@react-three/drei';
+import { getAudioLevel } from '../store/useAudioStore';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import GrainVignette from './GrainVignette';
 import { parseUrlMode } from '../urlMode';
@@ -173,6 +174,25 @@ const vertexShader = `
   }
 `;
 
+// Wellness: warm fresnel rim so the silhouette glows against the cream page
+// instead of reading as a flat matte disc. vNormal / vViewPosition come from
+// the MeshPhysicalMaterial shader CSM injects into.
+const wellnessFragmentShader = `
+  uniform float uRim;
+  void main() {
+    vec3 n = normalize(vNormal);
+    vec3 v = normalize(vViewPosition);
+    float fres = pow(1.0 - max(dot(n, v), 0.0), 2.6);
+    csm_Emissive = vec3(1.0, 0.86, 0.74) * fres * uRim;
+  }
+`;
+
+// Per-frame scratch objects (no allocation inside useFrame).
+const _color = new THREE.Color();
+const _vec = new THREE.Vector3();
+const _mat = new THREE.Matrix4();
+const _quat = new THREE.Quaternion();
+
 // Section 2 (Zones) - 3 zones: Entrée, Rayon, Cabine
 const ZONES_ENVS = [
     { scale: 1.2, roughness: 0.8, transmission: 0.0, color: new THREE.Color('#a0b8c8'), rotSpeed: 0.02 },
@@ -222,32 +242,28 @@ const DENSITY_SCALES = [0.65, 0.5, 0.45, 0.4, 0.38];
  * CameraController - smoothly transitions camera based on active section.
  * Section 4 (Density): moves to a high, almost top-down orbit to see the 5 blobs in pentagon.
  */
-function CameraController({ isDensitySection, sectionProgress }) {
+function CameraController({ isDensitySection, progressRef }) {
+    const target = useMemo(() => new THREE.Vector3(), []);
     useFrame((state, delta) => {
         const cam = state.camera;
         const lerpSpeed = 1 - Math.pow(0.01, delta);
-
-        let targetPos, targetLookAt;
+        const pointer = state.pointer; // -1..1, desktop parallax
 
         if (isDensitySection) {
             // Density: almost top-down view on the circle
-            const t = Math.min(sectionProgress, 1);
-            const height = THREE.MathUtils.lerp(6, 9, t);
-            targetPos = new THREE.Vector3(0, height, 0.01);
-            targetLookAt = new THREE.Vector3(0, 0, 0);
+            const t = Math.min(progressRef.current.section, 1);
+            target.set(0, THREE.MathUtils.lerp(6, 9, t), 0.01);
         } else {
-            // Default camera - far enough to see the whole blob
-            targetPos = new THREE.Vector3(0, 0, 12);
-            targetLookAt = new THREE.Vector3(0, 0, 0);
+            // Default camera - far enough to see the whole blob, nudged by the cursor
+            target.set(pointer.x * 0.35, pointer.y * 0.25, 12);
         }
 
-        cam.position.lerp(targetPos, lerpSpeed);
+        cam.position.lerp(target, lerpSpeed);
 
-        // Smooth lookAt via quaternion slerp
-        const dummyCam = cam.clone();
-        dummyCam.position.copy(cam.position);
-        dummyCam.lookAt(targetLookAt);
-        cam.quaternion.slerp(dummyCam.quaternion, lerpSpeed);
+        // Smooth lookAt via quaternion slerp (scratch matrix, no camera clone)
+        _mat.lookAt(cam.position, _vec.set(0, 0, 0), cam.up);
+        _quat.setFromRotationMatrix(_mat);
+        cam.quaternion.slerp(_quat, lerpSpeed);
     });
 
     return null;
@@ -256,7 +272,7 @@ function CameraController({ isDensitySection, sectionProgress }) {
 /**
  * OrganicBlob - single blob instance.
  */
-function OrganicBlob({ scrollProgress, activeSection, sectionId, sectionProgress, isIsolationActive, position: pos, scale, blobIndex = 0, isDensityClone = false, motionRef }) {
+function OrganicBlob({ progressRef, activeSection, sectionId, isIsolationActive, position: pos, scale, blobIndex = 0, isDensityClone = false, motionRef }) {
     const meshRef = useRef();
     const matRef = useRef();
     const isWellness = IS_WELLNESS;
@@ -284,9 +300,19 @@ function OrganicBlob({ scrollProgress, activeSection, sectionId, sectionProgress
         uDropTilt: { value: 0 },
         uDropStretch: { value: 0 },
         uExcite: { value: 1 },
+        uRim: { value: 0 },
     }), []);
+    // Smoothed low-band audio energy: the blob breathes with what is playing.
+    const audioPulse = useRef(0);
+    const dockLerp = useRef(0);
 
     useFrame((state, delta) => {
+        const scrollProgress = progressRef.current.scroll;
+        const sectionProgress = progressRef.current.section;
+        if (isWellness && blobIndex === 0) {
+            audioPulse.current += (getAudioLevel() - audioPulse.current) * 0.08;
+        }
+        const audioScale = 1 + audioPulse.current * 0.16;
         if (meshRef.current) {
             const rotOffset = blobIndex * 0.7;
             meshRef.current.rotation.y += lerpedRotSpeed.current * delta + rotOffset * 0.001;
@@ -297,12 +323,23 @@ function OrganicBlob({ scrollProgress, activeSection, sectionId, sectionProgress
             // The blob breathes outward as the visitor moves, eases back when
             // they're still. Modest amplitude (+18%) so it acknowledges the
             // gesture without becoming the focus.
-            if (motionRef && meshRef.current.scale) {
-                const target = 1 + Math.min(1, motionRef.current?.intensity ?? 0) * 0.18;
-                motionPulse.current += (target - motionPulse.current) * 0.1;
-                const base = typeof scale === 'number' ? scale : 1;
-                meshRef.current.scale.setScalar(base * motionPulse.current);
-            }
+            const motionTarget = motionRef ? 1 + Math.min(1, motionRef.current?.intensity ?? 0) * 0.18 : 1;
+            motionPulse.current += (motionTarget - motionPulse.current) * 0.1;
+            // Main blob: zones section steps the size down per third; density shrinks it.
+            // Wellness zones: once the room cards fade in (sectionProgress ~0.18-0.28) the
+            // blob docks small in the top-right corner so it never covers the photos.
+            const dock = isWellness && sectionId === 2 && !isDensityClone
+                ? Math.max(0, Math.min(1, (sectionProgress - 0.18) / 0.1))
+                : 0;
+            const base = typeof scale === 'number'
+                ? scale
+                : sectionId === 2
+                    ? THREE.MathUtils.lerp(sectionProgress < 0.33 ? 1.2 : sectionProgress < 0.66 ? 1.0 : 0.8, 0.3, dock)
+                    : (sectionId === 5 ? DENSITY_SCALES[0] : 1.0);
+            meshRef.current.scale.setScalar(base * motionPulse.current * audioScale);
+            dockLerp.current += (dock - dockLerp.current) * (1 - Math.pow(0.02, delta));
+            meshRef.current.position.x = THREE.MathUtils.lerp(pos ? pos[0] : 0, 5.4, dockLerp.current);
+            meshRef.current.position.y += 2.7 * dockLerp.current;
         }
         uniforms.uTime.value = state.clock.elapsedTime + blobIndex * 3;
 
@@ -313,7 +350,7 @@ function OrganicBlob({ scrollProgress, activeSection, sectionId, sectionProgress
         }
         uniforms.uScroll.value = THREE.MathUtils.lerp(uniforms.uScroll.value, shaderScroll, 0.1);
 
-        let targetColor = new THREE.Color('#0a0a0a');
+        let targetColor = _color.set('#0a0a0a');
         let targetRoughness = 0.2;
         let targetTransmission = 0.0;
         let targetDeform = 0.0;
@@ -337,21 +374,21 @@ function OrganicBlob({ scrollProgress, activeSection, sectionId, sectionProgress
                 // Zones: 3 zones with interpolated env
                 if (sectionProgress < 0.33) {
                     const t = sectionProgress / 0.33;
-                    targetColor = ZONES_ENVS[0].color.clone();
+                    targetColor = _color.copy(ZONES_ENVS[0].color);
                     targetRoughness = ZONES_ENVS[0].roughness;
                     targetTransmission = ZONES_ENVS[0].transmission;
                     targetRotSpeed = ZONES_ENVS[0].rotSpeed;
                     targetDeform = 0.2;
                 } else if (sectionProgress < 0.66) {
                     const t = (sectionProgress - 0.33) / 0.33;
-                    targetColor = ZONES_ENVS[0].color.clone().lerp(ZONES_ENVS[1].color, t);
+                    targetColor = _color.copy(ZONES_ENVS[0].color).lerp(ZONES_ENVS[1].color, t);
                     targetRoughness = THREE.MathUtils.lerp(ZONES_ENVS[0].roughness, ZONES_ENVS[1].roughness, t);
                     targetTransmission = THREE.MathUtils.lerp(ZONES_ENVS[0].transmission, ZONES_ENVS[1].transmission, t);
                     targetRotSpeed = THREE.MathUtils.lerp(ZONES_ENVS[0].rotSpeed, ZONES_ENVS[1].rotSpeed, t);
                     targetDeform = 0.2 + t * 0.2;
                 } else {
                     const t = (sectionProgress - 0.66) / 0.34;
-                    targetColor = ZONES_ENVS[1].color.clone().lerp(ZONES_ENVS[2].color, t);
+                    targetColor = _color.copy(ZONES_ENVS[1].color).lerp(ZONES_ENVS[2].color, t);
                     targetRoughness = THREE.MathUtils.lerp(ZONES_ENVS[1].roughness, ZONES_ENVS[2].roughness, t);
                     targetTransmission = THREE.MathUtils.lerp(ZONES_ENVS[1].transmission, ZONES_ENVS[2].transmission, t);
                     targetRotSpeed = THREE.MathUtils.lerp(ZONES_ENVS[1].rotSpeed, ZONES_ENVS[2].rotSpeed, t);
@@ -374,19 +411,19 @@ function OrganicBlob({ scrollProgress, activeSection, sectionId, sectionProgress
             } else if (activeSection === 3) {
                 // Scénographie: interpolate 3 environments
                 if (sectionProgress < 0.33) {
-                    targetColor = SEC2_ENVS[0].color.clone();
+                    targetColor = _color.copy(SEC2_ENVS[0].color);
                     targetRoughness = SEC2_ENVS[0].roughness;
                     targetTransmission = SEC2_ENVS[0].transmission;
                     targetDeform = 0.3 + (sectionProgress / 0.33) * 0.5;
                 } else if (sectionProgress < 0.66) {
                     const t = (sectionProgress - 0.33) / 0.33;
-                    targetColor = SEC2_ENVS[0].color.clone().lerp(SEC2_ENVS[1].color, t);
+                    targetColor = _color.copy(SEC2_ENVS[0].color).lerp(SEC2_ENVS[1].color, t);
                     targetRoughness = THREE.MathUtils.lerp(SEC2_ENVS[0].roughness, SEC2_ENVS[1].roughness, t);
                     targetTransmission = THREE.MathUtils.lerp(SEC2_ENVS[0].transmission, SEC2_ENVS[1].transmission, t);
                     targetDeform = 0.8 + t * 0.4;
                 } else {
                     const t = (sectionProgress - 0.66) / 0.34;
-                    targetColor = SEC2_ENVS[1].color.clone().lerp(SEC2_ENVS[2].color, t);
+                    targetColor = _color.copy(SEC2_ENVS[1].color).lerp(SEC2_ENVS[2].color, t);
                     targetRoughness = THREE.MathUtils.lerp(SEC2_ENVS[1].roughness, SEC2_ENVS[2].roughness, t);
                     targetTransmission = THREE.MathUtils.lerp(SEC2_ENVS[1].transmission, SEC2_ENVS[2].transmission, t);
                     targetDeform = 1.2 + t * 0.8;
@@ -416,55 +453,55 @@ function OrganicBlob({ scrollProgress, activeSection, sectionId, sectionProgress
         // keeps its visual personality.
         if (isWellness) {
             if (isDensityClone) {
-                targetColor = WELLNESS_DENSITY_COLOR.clone();
+                targetColor = _color.copy(WELLNESS_DENSITY_COLOR);
                 targetTransmission = 0.05;
             } else if (activeSection === 0) {
-                targetColor = WELLNESS_INTRO_COLOR.clone();
+                targetColor = _color.copy(WELLNESS_INTRO_COLOR);
                 targetTransmission = 0.0;  // intro = pierre brute mate, pas de translucence
             } else if (activeSection === 1) {
-                targetColor = (isIsolationActive ? WELLNESS_ISOLATION_ON_COLOR : WELLNESS_ISOLATION_OFF_COLOR).clone();
+                targetColor = _color.copy(isIsolationActive ? WELLNESS_ISOLATION_ON_COLOR : WELLNESS_ISOLATION_OFF_COLOR);
                 targetTransmission = isIsolationActive ? 0.15 : 0.0;
             } else if (activeSection === 2) {
                 // Quarters: seuil → enveloppe → geste → empreinte
                 if (sectionProgress < 0.25) {
-                    targetColor = WELLNESS_ZONES_ENVS[0].color.clone();
+                    targetColor = _color.copy(WELLNESS_ZONES_ENVS[0].color);
                     targetRoughness = WELLNESS_ZONES_ENVS[0].roughness;
                     targetTransmission = WELLNESS_ZONES_ENVS[0].transmission;
                     targetRotSpeed = WELLNESS_ZONES_ENVS[0].rotSpeed;
                     targetDeform = 0.2;
                 } else if (sectionProgress < 0.5) {
                     const t = (sectionProgress - 0.25) / 0.25;
-                    targetColor = WELLNESS_ZONES_ENVS[0].color.clone().lerp(WELLNESS_ZONES_ENVS[1].color, t);
+                    targetColor = _color.copy(WELLNESS_ZONES_ENVS[0].color).lerp(WELLNESS_ZONES_ENVS[1].color, t);
                     targetRoughness = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[0].roughness, WELLNESS_ZONES_ENVS[1].roughness, t);
                     targetTransmission = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[0].transmission, WELLNESS_ZONES_ENVS[1].transmission, t);
                     targetRotSpeed = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[0].rotSpeed, WELLNESS_ZONES_ENVS[1].rotSpeed, t);
                     targetDeform = 0.2 + t * 0.15;
                 } else if (sectionProgress < 0.75) {
                     const t = (sectionProgress - 0.5) / 0.25;
-                    targetColor = WELLNESS_ZONES_ENVS[1].color.clone().lerp(WELLNESS_ZONES_ENVS[2].color, t);
+                    targetColor = _color.copy(WELLNESS_ZONES_ENVS[1].color).lerp(WELLNESS_ZONES_ENVS[2].color, t);
                     targetRoughness = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[1].roughness, WELLNESS_ZONES_ENVS[2].roughness, t);
                     targetTransmission = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[1].transmission, WELLNESS_ZONES_ENVS[2].transmission, t);
                     targetRotSpeed = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[1].rotSpeed, WELLNESS_ZONES_ENVS[2].rotSpeed, t);
                     targetDeform = 0.35 + t * 0.15;
                 } else {
                     const t = (sectionProgress - 0.75) / 0.25;
-                    targetColor = WELLNESS_ZONES_ENVS[2].color.clone().lerp(WELLNESS_ZONES_ENVS[3].color, t);
+                    targetColor = _color.copy(WELLNESS_ZONES_ENVS[2].color).lerp(WELLNESS_ZONES_ENVS[3].color, t);
                     targetRoughness = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[2].roughness, WELLNESS_ZONES_ENVS[3].roughness, t);
                     targetTransmission = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[2].transmission, WELLNESS_ZONES_ENVS[3].transmission, t);
                     targetRotSpeed = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[2].rotSpeed, WELLNESS_ZONES_ENVS[3].rotSpeed, t);
                     targetDeform = 0.5 + t * 0.2;
                 }
             } else if (activeSection === 3) {
-                targetColor = WELLNESS_NEUTRAL_COLOR.clone();
+                targetColor = _color.copy(WELLNESS_NEUTRAL_COLOR);
                 targetTransmission = 0.10;
             } else if (activeSection === 4) {
-                targetColor = WELLNESS_NEURO_COLOR.clone();
+                targetColor = _color.copy(WELLNESS_NEURO_COLOR);
                 targetTransmission = 0.15;
             } else if (activeSection === 5) {
-                targetColor = WELLNESS_DENSITY_COLOR.clone();
+                targetColor = _color.copy(WELLNESS_DENSITY_COLOR);
                 targetTransmission = 0.05;
             } else {
-                targetColor = WELLNESS_INTRO_COLOR.clone();
+                targetColor = _color.copy(WELLNESS_INTRO_COLOR);
                 targetTransmission = 0.05;
             }
         }
@@ -525,7 +562,8 @@ function OrganicBlob({ scrollProgress, activeSection, sectionId, sectionProgress
             targetExcite = 0.22 + 0.78 * ramp; // plancher calme → vif
         }
         lerpedExcite.current = THREE.MathUtils.lerp(lerpedExcite.current, targetExcite, lerpSpeed);
-        uniforms.uExcite.value = lerpedExcite.current;
+        uniforms.uExcite.value = lerpedExcite.current + audioPulse.current * 0.5;
+        uniforms.uRim.value = isWellness ? 0.35 + audioPulse.current * 0.4 : 0;
 
         if (matRef.current) {
             matRef.current.color.copy(lerpedColor.current);
@@ -541,24 +579,28 @@ function OrganicBlob({ scrollProgress, activeSection, sectionId, sectionProgress
                 ref={matRef}
                 baseMaterial={THREE.MeshPhysicalMaterial}
                 vertexShader={vertexShader}
+                fragmentShader={isWellness ? wellnessFragmentShader : undefined}
                 uniforms={uniforms}
                 color={isWellness ? '#c89484' : '#0d0d0d'}
                 emissive={isWellness ? '#2a1410' : '#000000'}
                 emissiveIntensity={isWellness ? 0.05 : 0}
-                metalness={isWellness ? 0.08 : 0.85}
-                roughness={isWellness ? 0.78 : 0.25}
-                clearcoat={isWellness ? 0.10 : 0.6}
-                clearcoatRoughness={isWellness ? 0.7 : 0.25}
-                specularIntensity={isWellness ? 0.25 : 1}
+                metalness={isWellness ? 0.05 : 0.85}
+                roughness={isWellness ? 0.45 : 0.25}
+                clearcoat={isWellness ? 0.35 : 0.6}
+                clearcoatRoughness={isWellness ? 0.45 : 0.25}
+                sheen={isWellness ? 0.6 : 0}
+                sheenRoughness={0.6}
+                sheenColor={isWellness ? '#ffd9c2' : '#000000'}
+                specularIntensity={isWellness ? 0.5 : 1}
                 transmission={0.0}
                 wireframe={false}
-                envMapIntensity={isWellness ? 0.22 : 0.8}
+                envMapIntensity={isWellness ? 0.5 : 0.8}
             />
         </mesh>
     );
 }
 
-function SpaceDust({ scrollProgress }) {
+function SpaceDust({ progressRef }) {
     const pointsRef = useRef();
 
     const [positions, scales] = useMemo(() => {
@@ -579,7 +621,7 @@ function SpaceDust({ scrollProgress }) {
 
     useFrame((state, delta) => {
         if (pointsRef.current) {
-            pointsRef.current.rotation.y += delta * 0.05 + ((scrollProgress || 0) * 0.01);
+            pointsRef.current.rotation.y += delta * 0.05 + (progressRef.current.scroll * 0.01);
             pointsRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.1) * 0.5;
         }
     });
@@ -650,7 +692,9 @@ function WellnessSteam() {
     );
 }
 
-export default function Scene({ scrollProgress, activeSection, activeSectionId, sectionProgress, densityBlobCount = 1, isIsolationActive = false, motionRef }) {
+// Memoised: continuous scroll values arrive through `progressRef` and are read
+// inside useFrame, so the whole R3F tree only re-renders on discrete changes.
+export default memo(function Scene({ progressRef, activeSection, activeSectionId, densityBlobCount = 1, isIsolationActive = false, motionRef }) {
     // The density visual + top-down camera are tied to the score *behavior* (id 5),
     // not its DOM position — wellness reorders the array so position 5 there is
     // the webcam, not the score.
@@ -664,16 +708,18 @@ export default function Scene({ scrollProgress, activeSection, activeSectionId, 
                 style={{ background: 'transparent' }}
             >
             {/* Dynamic Camera */}
-            <CameraController isDensitySection={isDensitySection} sectionProgress={sectionProgress} />
+            <CameraController isDensitySection={isDensitySection} progressRef={progressRef} />
 
             {/* Lighting — wellness uses warm diffuse fills for a calm/spa feel,
                 retail keeps the cool monochrome key+rim. */}
             {IS_WELLNESS ? (
                 <>
                     {/* Wellness : éclairage diffus quasi-uniforme, blob doit lire comme craie/pierre brute */}
-                    <ambientLight intensity={2.4} color="#fcebda" />
-                    <hemisphereLight args={["#ffe8d4", "#d8a890", 0.8]} />
-                    <directionalLight position={[6, 10, 8]} intensity={0.35} color="#fff4e4" />
+                    <ambientLight intensity={1.1} color="#fcebda" />
+                    <hemisphereLight args={["#ffe8d4", "#d8a890", 0.9]} />
+                    <directionalLight position={[6, 10, 8]} intensity={1.4} color="#fff4e4" />
+                    {/* warm rim from behind: separates the silhouette from the cream page */}
+                    <directionalLight position={[-6, 4, -8]} intensity={2.2} color="#ffc9a8" />
                 </>
             ) : (
                 <>
@@ -688,17 +734,11 @@ export default function Scene({ scrollProgress, activeSection, activeSectionId, 
                 it the motion ref so it can breathe a little with the visitor's
                 movement, but the look stays the regular OrganicBlob. */}
             <OrganicBlob
-                scrollProgress={scrollProgress}
+                progressRef={progressRef}
                 activeSection={activeSection}
                 sectionId={effectiveSectionId}
-                sectionProgress={sectionProgress}
                 isIsolationActive={isIsolationActive}
                 position={DENSITY_POSITIONS[0]}
-                scale={
-                    activeSection === 2
-                        ? (sectionProgress < 0.33 ? 1.2 : sectionProgress < 0.66 ? 1.0 : 0.8)
-                        : (isDensitySection ? DENSITY_SCALES[0] : 1.0)
-                }
                 blobIndex={0}
                 motionRef={activeSectionId === 4 ? motionRef : undefined}
             />
@@ -706,10 +746,9 @@ export default function Scene({ scrollProgress, activeSection, activeSectionId, 
             {/* Density Clones — tied to the score *behavior* (id 5). */}
             {isDensitySection && densityBlobCount >= 2 && (
                 <OrganicBlob
-                    scrollProgress={scrollProgress}
+                    progressRef={progressRef}
                     activeSection={activeSection}
                     sectionId={effectiveSectionId}
-                    sectionProgress={sectionProgress}
                     isIsolationActive={isIsolationActive}
                     position={DENSITY_POSITIONS[1]}
                     scale={DENSITY_SCALES[1]}
@@ -719,10 +758,9 @@ export default function Scene({ scrollProgress, activeSection, activeSectionId, 
             )}
             {isDensitySection && densityBlobCount >= 3 && (
                 <OrganicBlob
-                    scrollProgress={scrollProgress}
+                    progressRef={progressRef}
                     activeSection={activeSection}
                     sectionId={effectiveSectionId}
-                    sectionProgress={sectionProgress}
                     isIsolationActive={isIsolationActive}
                     position={DENSITY_POSITIONS[2]}
                     scale={DENSITY_SCALES[2]}
@@ -732,10 +770,9 @@ export default function Scene({ scrollProgress, activeSection, activeSectionId, 
             )}
             {isDensitySection && densityBlobCount >= 4 && (
                 <OrganicBlob
-                    scrollProgress={scrollProgress}
+                    progressRef={progressRef}
                     activeSection={activeSection}
                     sectionId={effectiveSectionId}
-                    sectionProgress={sectionProgress}
                     isIsolationActive={isIsolationActive}
                     position={DENSITY_POSITIONS[3]}
                     scale={DENSITY_SCALES[3]}
@@ -745,10 +782,9 @@ export default function Scene({ scrollProgress, activeSection, activeSectionId, 
             )}
             {isDensitySection && densityBlobCount >= 5 && (
                 <OrganicBlob
-                    scrollProgress={scrollProgress}
+                    progressRef={progressRef}
                     activeSection={activeSection}
                     sectionId={effectiveSectionId}
-                    sectionProgress={sectionProgress}
                     isIsolationActive={isIsolationActive}
                     position={DENSITY_POSITIONS[4]}
                     scale={DENSITY_SCALES[4]}
@@ -758,20 +794,29 @@ export default function Scene({ scrollProgress, activeSection, activeSectionId, 
             )}
 
             {/* Background particles: stars (retail) or vapor (wellness) */}
-            {IS_WELLNESS ? <WellnessSteam /> : <SpaceDust scrollProgress={scrollProgress} />}
+            {IS_WELLNESS ? <WellnessSteam /> : <SpaceDust progressRef={progressRef} />}
 
-            {/* Environment reflections — diffuse studio in wellness (uniform soft light),
-                neutral night in retail (dark contrast). */}
-            <Environment preset={IS_WELLNESS ? 'apartment' : 'night'} />
+            {/* Environment reflections — wellness: two soft warm panels built in-scene
+                (no runtime HDR download); retail: neutral night preset. */}
+            {IS_WELLNESS ? (
+                <Environment resolution={64}>
+                    <Lightformer intensity={1.6} color="#fff1e2" position={[0, 6, -4]} scale={[14, 6, 1]} />
+                    <Lightformer intensity={0.9} color="#e8b8a0" position={[-6, -2, 3]} rotation-y={Math.PI / 2} scale={[8, 4, 1]} />
+                </Environment>
+            ) : (
+                <Environment preset="night" />
+            )}
 
-            {/* Post-Processing - safe: no Noise effect, custom grain+vignette instead */}
+            {/* Post-Processing - custom grain+vignette. Bloom is retail-only: on the
+                pastel wellness palette nothing crosses its threshold, so it was a
+                full-screen mip chain for no visible gain. */}
             <EffectComposer multisampling={0}>
-                <Bloom
+                {!IS_WELLNESS && <Bloom
                     luminanceThreshold={0.9}
                     luminanceSmoothing={0.4}
                     intensity={0.35}
                     mipmapBlur
-                />
+                />}
                 <GrainVignette
                     grainAmount={0.05}
                     grainSpeed={50}
@@ -781,4 +826,4 @@ export default function Scene({ scrollProgress, activeSection, activeSectionId, 
             </EffectComposer>
         </Canvas>
     );
-}
+});
