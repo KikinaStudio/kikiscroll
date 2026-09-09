@@ -66,11 +66,11 @@ const WELLNESS_TRACKS = {
     jungle: { src: `${LOOPS}flute guerlain.mp3`, initialVolume: 0 },
     pulsatingWave: { src: `${LOOPS}ceremonial fusion voices.mp3`, initialVolume: 0 },
     focusCognitif: { src: `${LOOPS}roulements de piano.mp3`, initialVolume: 0 },
-    entrance: { src: `${LOOPS}keysy.mp3`, initialVolume: 0 },
+    entrance: { src: `${LOOPS}zone1 accueil.mp3`, initialVolume: 0 },
     rayon: { src: `${LOOPS}deep.mp3`, initialVolume: 0 },
-    // cabine / recuperation swapped: "Instrumental (2)" read as too bare on the
-    // last room, "less deep" carries the recovery space better.
-    cabine: { src: `${LOOPS}Instrumental (2).mp3`, initialVolume: 0 },
+    // Zones 1 (accueil) and 3 (chaleur) are new tracks; "less deep" moved to
+    // the recovery space after "Instrumental (2)" read as too bare there.
+    cabine: { src: `${LOOPS}zone3 chaleur.mp3`, initialVolume: 0 },
     recuperation: { src: `${LOOPS}less deep.mp3`, initialVolume: 0 },
     motionPad: { src: `${LOOPS}Fender.mp3`, initialVolume: 0 },
 };
@@ -102,7 +102,7 @@ const LOUDNESS_GAIN = {
     pulsatingWave: 1.0,
     focusCognitif: 1.0,
     rayon: 1.0,
-    cabine: 1.0,
+    cabine: 1.17, // zone3 chaleur loop measures -19.4 LUFS, trim to -18
     entrance: 1.0,
     recuperation: 1.0,
     motionPad: 1.0,
