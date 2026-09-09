@@ -563,7 +563,11 @@ function OrganicBlob({ progressRef, activeSection, sectionId, isIsolationActive,
         // d'intro et ne s'excite qu'à l'arrivée des cards + musique (sectionProgress
         // ~0.20→0.28, cf. ZONE_AUDIO_RAMP dans App.jsx). Ailleurs, excitation pleine.
         let targetExcite = 1;
-        if (sectionId === 2 && !isDensityClone) {
+        if (sectionId === 1 && !isDensityClone) {
+            // Sculpting: the crowd noise is audible first, then attenuated. The
+            // blob mirrors it: agitated with the noise, near-still once it drops.
+            targetExcite = isIsolationActive ? 0.12 : 1.6;
+        } else if (sectionId === 2 && !isDensityClone) {
             const ramp = Math.max(0, Math.min(1, ((sectionProgress || 0) - 0.18) / (0.30 - 0.18)));
             targetExcite = 0.22 + 0.78 * ramp; // plancher calme → vif
         }
