@@ -361,6 +361,12 @@ html[data-mode="wellness"] .scroll-prompt-text {
 .intro-line--2 { animation-delay: 1.3s; }
 .intro-line--3 { animation-delay: 2.25s; color: rgba(255, 255, 255, 0.7); }
 
+/* No native scrolling while the intro veil is up (the scrollbar and trackpad
+   could move the page before ScrollTrigger pins exist). */
+html:has(.intro-screen:not(.intro-screen--leaving)) {
+  overflow: hidden;
+}
+
 /* Wellness: same palette as the page and slightly translucent, so the blob
    is already breathing behind the lines and "begin" just lifts a veil. */
 html[data-mode="wellness"] .intro-screen {

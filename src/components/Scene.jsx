@@ -345,7 +345,7 @@ function OrganicBlob({ progressRef, activeSection, sectionId, isIsolationActive,
 
         // Make Density section calmer by removing global scroll influence on the shader
         let shaderScroll = scrollProgress || 0;
-        if (activeSection === 5) {
+        if (sectionId === 5) {
             shaderScroll = 0;
         }
         uniforms.uScroll.value = THREE.MathUtils.lerp(uniforms.uScroll.value, shaderScroll, 0.1);
@@ -364,13 +364,13 @@ function OrganicBlob({ progressRef, activeSection, sectionId, isIsolationActive,
             targetRotSpeed = 0.04 + blobIndex * 0.015;
         } else {
             // SECTION INDICES: 0=Intro, 1=Isolation, 2=Zones, 3=Scénographie, 4=Neuro, 5=Density
-            if (activeSection === 0) {
+            if (sectionId === 0) {
                 // Intro: near-round, dark, slow rotation
                 targetColor.set('#0a0a0a');
                 targetDeform = -0.3;
                 targetRoughness = 0.15;
                 targetRotSpeed = 0.05;
-            } else if (activeSection === 2) {
+            } else if (sectionId === 2) {
                 // Zones: 3 zones with interpolated env
                 if (sectionProgress < 0.33) {
                     const t = sectionProgress / 0.33;
@@ -394,7 +394,7 @@ function OrganicBlob({ progressRef, activeSection, sectionId, isIsolationActive,
                     targetRotSpeed = THREE.MathUtils.lerp(ZONES_ENVS[1].rotSpeed, ZONES_ENVS[2].rotSpeed, t);
                     targetDeform = 0.4 + t * 0.3;
                 }
-            } else if (activeSection === 1) {
+            } else if (sectionId === 1) {
                 // Isolation: blob changes behavior when isolation activates
                 if (isIsolationActive) {
                     targetColor.set('#1a1a2a');
@@ -408,7 +408,7 @@ function OrganicBlob({ progressRef, activeSection, sectionId, isIsolationActive,
                     targetRoughness = 0.4;
                     targetRotSpeed = 0.4;
                 }
-            } else if (activeSection === 3) {
+            } else if (sectionId === 3) {
                 // Scénographie: interpolate 3 environments
                 if (sectionProgress < 0.33) {
                     targetColor = _color.copy(SEC2_ENVS[0].color);
@@ -428,14 +428,14 @@ function OrganicBlob({ progressRef, activeSection, sectionId, isIsolationActive,
                     targetTransmission = THREE.MathUtils.lerp(SEC2_ENVS[1].transmission, SEC2_ENVS[2].transmission, t);
                     targetDeform = 1.2 + t * 0.8;
                 }
-            } else if (activeSection === 4) {
+            } else if (sectionId === 4) {
                 // Neuro: calm, deep, meditative
                 targetColor.set('#0a0a1a');
                 targetDeform = 0.1;
                 targetRoughness = 0.1;
                 targetTransmission = 0.4;
                 targetRotSpeed = 0.03;
-            } else if (activeSection === 5) {
+            } else if (sectionId === 5) {
                 // Density: quasi-spherical, smooth
                 targetColor.set('#0a0a0a');
                 targetDeform = -0.25;
@@ -455,13 +455,13 @@ function OrganicBlob({ progressRef, activeSection, sectionId, isIsolationActive,
             if (isDensityClone) {
                 targetColor = _color.copy(WELLNESS_DENSITY_COLOR);
                 targetTransmission = 0.05;
-            } else if (activeSection === 0) {
+            } else if (sectionId === 0) {
                 targetColor = _color.copy(WELLNESS_INTRO_COLOR);
                 targetTransmission = 0.0;  // intro = pierre brute mate, pas de translucence
-            } else if (activeSection === 1) {
+            } else if (sectionId === 1) {
                 targetColor = _color.copy(isIsolationActive ? WELLNESS_ISOLATION_ON_COLOR : WELLNESS_ISOLATION_OFF_COLOR);
                 targetTransmission = isIsolationActive ? 0.15 : 0.0;
-            } else if (activeSection === 2) {
+            } else if (sectionId === 2) {
                 // Quarters: seuil → enveloppe → geste → empreinte
                 if (sectionProgress < 0.25) {
                     targetColor = _color.copy(WELLNESS_ZONES_ENVS[0].color);
@@ -491,13 +491,13 @@ function OrganicBlob({ progressRef, activeSection, sectionId, isIsolationActive,
                     targetRotSpeed = THREE.MathUtils.lerp(WELLNESS_ZONES_ENVS[2].rotSpeed, WELLNESS_ZONES_ENVS[3].rotSpeed, t);
                     targetDeform = 0.5 + t * 0.2;
                 }
-            } else if (activeSection === 3) {
+            } else if (sectionId === 3) {
                 targetColor = _color.copy(WELLNESS_NEUTRAL_COLOR);
                 targetTransmission = 0.10;
-            } else if (activeSection === 4) {
+            } else if (sectionId === 4) {
                 targetColor = _color.copy(WELLNESS_NEURO_COLOR);
                 targetTransmission = 0.15;
-            } else if (activeSection === 5) {
+            } else if (sectionId === 5) {
                 targetColor = _color.copy(WELLNESS_DENSITY_COLOR);
                 targetTransmission = 0.05;
             } else {
@@ -505,6 +505,12 @@ function OrganicBlob({ progressRef, activeSection, sectionId, isIsolationActive,
                 targetTransmission = 0.05;
             }
         }
+
+        // Wellness renders on a transparent canvas: MeshPhysicalMaterial's
+        // transmission pass samples an empty backbuffer there, so any
+        // transmission > 0 turns the blob into a window onto the page (it
+        // vanished in the neuro section). Translucency comes from rim + sheen.
+        if (isWellness) targetTransmission = 0;
 
         // Smooth lerp
         lerpedColor.current.lerp(targetColor, lerpSpeed);
@@ -564,7 +570,6 @@ function OrganicBlob({ progressRef, activeSection, sectionId, isIsolationActive,
         lerpedExcite.current = THREE.MathUtils.lerp(lerpedExcite.current, targetExcite, lerpSpeed);
         uniforms.uExcite.value = lerpedExcite.current + audioPulse.current * 0.5;
         uniforms.uRim.value = isWellness ? 0.35 + audioPulse.current * 0.4 : 0;
-
         if (matRef.current) {
             matRef.current.color.copy(lerpedColor.current);
             matRef.current.roughness = lerpedRoughness.current;

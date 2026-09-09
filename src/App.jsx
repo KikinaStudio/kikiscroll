@@ -951,7 +951,7 @@ function App() {
                                     <h2 className="text-4xl md:text-6xl font-heading font-medium tracking-tight text-white mb-8 leading-tight">
                                         {section.title}
                                     </h2>
-                                    {!hasStarted ? (
+                                    {!hasStarted && mode !== 'wellness' ? (
                                         <button
                                             onClick={handleStartExperience}
                                             className="px-8 py-4 border border-white bg-transparent text-white hover:bg-white hover:text-black transition-all duration-500 font-sans text-xs uppercase tracking-widest rounded-full cursor-pointer mb-8"
@@ -966,7 +966,9 @@ function App() {
                                     )}
                                     <p className="text-base md:text-lg font-sans text-tenbin-gray tracking-wide leading-relaxed font-light">
                                         {section.paragrapheParts.map((part, pi) => {
-                                            const partThreshold = pi * 0.33;
+                                            // Hold every part back at first: right after the intro screen
+                                            // the visitor should only see the title + the scroll invite.
+                                            const partThreshold = 0.12 + pi * 0.28;
                                             const partProgress = activeSection === index
                                                 ? Math.min(1, Math.max(0, (sectionProgress - partThreshold) / 0.15))
                                                 : 0;

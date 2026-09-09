@@ -68,8 +68,10 @@ const WELLNESS_TRACKS = {
     focusCognitif: { src: `${LOOPS}roulements de piano.mp3`, initialVolume: 0 },
     entrance: { src: `${LOOPS}keysy.mp3`, initialVolume: 0 },
     rayon: { src: `${LOOPS}deep.mp3`, initialVolume: 0 },
-    cabine: { src: `${LOOPS}less deep.mp3`, initialVolume: 0 },
-    recuperation: { src: `${LOOPS}Instrumental (2).mp3`, initialVolume: 0 },
+    // cabine / recuperation swapped: "Instrumental (2)" read as too bare on the
+    // last room, "less deep" carries the recovery space better.
+    cabine: { src: `${LOOPS}Instrumental (2).mp3`, initialVolume: 0 },
+    recuperation: { src: `${LOOPS}less deep.mp3`, initialVolume: 0 },
     motionPad: { src: `${LOOPS}Fender.mp3`, initialVolume: 0 },
 };
 

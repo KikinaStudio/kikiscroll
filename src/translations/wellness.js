@@ -25,7 +25,7 @@ const wellness = {
     // Section 0 paragraphs — guide le lecteur dès l'intro à prêter l'oreille, en posant la page
     // elle-même comme démonstration : le son change avec chaque section, comme il changera dans son espace.
     s0_p1: "Tendez l'oreille. Ici, la musique se transforme à mesure que vous avancez : un aperçu de ce que nous composons pour votre futur espace, un son qui dialogue avec le lieu, l'instant et le geste.",
-    s0_p2: "Chaque spa possède son climat sonore, qui agit sur le système nerveux avant même le premier soin. C'est souvent la première chose que ressent le client, et l'une des dernières qu'il emporte.",
+    s0_p2: "Chaque spa possède son ambiance sonore, qui agit sur le système nerveux avant même le premier soin. C'est souvent la première chose que ressent le client, et l'une des dernières qu'il emporte.",
     s0_p3: "Hôtels, instituts, thermes, retraites de longévité : nous composons cette signature, espace par espace, du seuil de l'accueil aux derniers instants de récupération. Une musique vivante, écrite par des compositeurs, guidée par les neurosciences.",
 
     // Section 1 paragraphs — piste nue continue + chaque espace s'accorde avec elle
@@ -34,7 +34,7 @@ const wellness = {
     s1_p3: "Le client passe d'un espace à l'autre sans jamais percevoir de rupture. La composition change de texture, jamais d'identité. Une longue évolution, et non une succession de morceaux.",
 
     // Section 2 paragraphs
-    s2_p1: "Le client oublie l'essentiel de ce qu'il entend. Mais il se souvient de la façon dont un lieu sonnait.",
+    s2_p1: "Le client oublie l'essentiel de ce qu'il entend. Mais il se souvient de ce qu'il a ressenti.",
     s2_p2: "De l'accueil à la récupération, un spa est une succession de moments, chacun avec son rôle, sa propre intensité. Nous composons une signature sonore qui traverse tous les espaces, prend une forme propre à chacun, et demeure en mémoire longtemps après le dernier soin.",
     s2_p3: "Le client ne retient jamais un morceau. Il retient le lieu.",
 
