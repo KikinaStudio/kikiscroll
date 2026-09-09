@@ -1408,14 +1408,22 @@ function App() {
                                 {t.cta_title}
                             </h2>
                             <p className="text-base md:text-lg text-[#3a3a3a] leading-relaxed font-light">
-                                {t.cta_body}{' '}<span className="font-medium text-[#1a1a1a]">{t.cta_invite}</span>{' '}
+                                {t.cta_body}
+                            </p>
+                            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
                                 <a
                                     href={`mailto:${t.cta_email}`}
-                                    className="underline decoration-1 underline-offset-4 hover:decoration-2 transition-all"
+                                    className="px-8 py-4 border border-[#1a1a1a] text-[#1a1a1a] hover:bg-[#1a1a1a] hover:text-[#f5f3f0] transition-colors rounded-full text-xs uppercase tracking-widest font-semibold"
+                                >
+                                    {t.cta_invite}
+                                </a>
+                                <a
+                                    href={`mailto:${t.cta_email}`}
+                                    className="text-sm text-[#3a3a3a] underline decoration-1 underline-offset-4 hover:decoration-2 transition-all"
                                 >
                                     {t.cta_email}
                                 </a>
-                            </p>
+                            </div>
                         </div>
                     )}
                     <div className="flex flex-col md:flex-row justify-between gap-12 mb-16">

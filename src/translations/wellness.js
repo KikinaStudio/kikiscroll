@@ -111,9 +111,9 @@ const wellness = {
     footer_mailto_body_prefix: "De : ",
 
     // Wellness CTA intro (placée juste au-dessus du formulaire de contact)
-    cta_title: "Quel est le son de votre espace ?",
-    cta_body: "Vous avez un parfum. Vous avez une architecture. Vous avez un geste. Le son de votre spa mérite la même attention.",
-    cta_invite: "Composons-le ensemble.",
+    cta_title: "Dites-nous votre intention. On la compose.",
+    cta_body: "Vous avez pensé chaque détail de l'expérience. Le son mérite le même soin. Écrivez-nous, on le crée sur mesure pour votre lieu.",
+    cta_invite: "Écrivez-nous",
     cta_email: "bianca@kikinastudio.com",
 
     // Legal modal
@@ -241,9 +241,9 @@ const wellness = {
     footer_mailto_body_prefix: "From: ",
 
     // Wellness CTA intro (sits right above the contact form)
-    cta_title: "What does your space sound like?",
-    cta_body: "You have a fragrance. You have an architecture. You have a gesture. The sound of your spa should not be left to chance.",
-    cta_invite: "Let's compose it together.",
+    cta_title: "Tell us your intention. We compose it.",
+    cta_body: "You have thought through every detail of the experience. The sound deserves the same care. Write to us and we will create it, tailored to your space.",
+    cta_invite: "Write to us",
     cta_email: "bianca@kikinastudio.com",
 
     // Legal modal
